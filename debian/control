@@ -1,0 +1,17 @@
+Source: bearmail
+Section: unknown
+Priority: extra
+Maintainer: Benjamin Linet <blinet@bearstech.com>
+Build-Depends: debhelper (>= 6)
+Standards-Version: 3.7.3
+Homepage: http://forge.bearstech.com/trac/wiki/BearMail
+
+Package: bearmail
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: A glue and management tool for a complete mail platform
+ Bearmail will help you centralize configuration for the following services:
+  - Postfix (SMTP)
+  - Dovecot (IMAP, POP)
+  - Clam-AV anti-virus
+  - Dspam anti-spam

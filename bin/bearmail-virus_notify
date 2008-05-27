@@ -1,0 +1,9 @@
+#!/bin/sh
+# Email address to send alerts to
+MAILTO=$RECIPIENTS
+
+# formail should be in PATH
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+
+LINE="-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
+swaks -d "Date: %D\nTo: %T\nFrom: %F\nSubject: test %D\nContent-Type: text/plain; charset=UTF-8\nX-Mailer: Bearstech antivirus system\n%B" -f mailadmin@bearstech.com -t $MAILTO --h-Subject "Un virus a =?UTF-8?B?w6l0w6kgZMOpdGVjdMOp?= : $VIRUS" --body "Un message vous étant destiné a été bloqué par notre service\nanti-viral.\n\nCe message provenait de $SENDER\n\nLe virus reconnu est nommé : $VIRUS\n\nPour des questions de de sécurité, nous vous conseillons de ne pas\nrécuperer l'email en question et de demander à votre correspondant de\nvous reformuler le mail sans virus.\n\nToutefois, durant un délais de 15 jours à partir d'aujourd'hui, vous\npourrez récupérer le message contaminé en envoyant un mail à\nvirus@bearstech.com et possédant comme sujet $(echo "$EMAIL"|sed -e "s#/var/spool/clamsmtp/##g")\n\n\nVoici les en-têtes du message en question :\n$LINE\n$(formail -X "" < $EMAIL)\n$LINE\n"

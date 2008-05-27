@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<title>Configuration du client email : Outlook</title>
+</head>
+<body BGCOLOR="#7271b2">
+<center>
+<table width="790" bgcolor="#ffffff" border="0" cellspacing="5">
+ <tr>
+  <td>
+<center><H1>Configuration du client email Outlook.</H1></center>
+<br><br>
+<p><b>Information de base de notre compte d'exemple :</b></p>
+<p>
+Adresse email : "<b>mon.adresse@mondomaine.com</b>"<br>
+Mot de passe&nbsp; : "<b>a1b2c</b>"<br>
+Serveur IMAP&nbsp; : "<b>mail.mondomaine.com</b>"<br>
+Serveur SMTP&nbsp; : "<b>mail.mondomaine.com</b>"<br>
+</p>
+<br>
+<p><b>Configuration d'Outlook :</b></p>
+<p>Executez Outlook.<br>
+Si vous utilisiez d&eacute;j&agrave; Outlook, cliquez sur l'onglet "<b><u>O</u>utils</b>" puis sur "<b><u>C</u>omptes de messagerie...</b>" dans le menu de l'onglet.<br>
+Si vous n'avez jamais utilis&eacute; Outlook, nous vous recommandons vivement d'utiliser Thunderbird.</p>
+<br>
+<p>Une nouvelle fen&ecirc;tre appara&icirc;t :</p>
+<p><img src="img/outlook.1.png" alt=""></p>
+<p>S&eacute;lectionnez "<b>Ajouter un nouveau compte de messagerie</b>", puis cliquez sur le bouton "<b>Suivant &gt;</b>" situ&eacute; en bas &agrave; droite.</p>
+<br>
+<p>Une nouvelle fen&ecirc;tre appara&icirc;t :</p>
+<p><img src="img/outlook.2.png" alt=""></p>
+<p>S&eacute;lectionnez "<b>IMAP</b>", puis cliquez sur le bouton "<b>Suivant &gt;</b>" situ&eacute; en bas &agrave; droite.</p>
+<br>
+<p>Une nouvelle fen&ecirc;tre appara&icirc;t :</p>
+<p><img src="img/outlook.3.png" alt=""></p>
+<p>Lorsque l'on compose un email, l'adresse d'envoie se fait sous la forme : "<i>Nom &lt;adresse@email&gt;</i>".</p>
+<p>Ici la configuration de la partie "<i>Votre nom :</i>" correspond &agrave; la valeur "<i>Nom</i>" pour l'adresse d'exp&eacute;diteur "<i>Nom &lt;adresse@email&gt;</i>".<br>
+Dans notre exemple, le destinataire recevra les emails avec pour provenance "<i>Mon nom &lt;mon.adresse@mondomaine.com&gt;</i>".<br>
+On d&eacute;finira donc pour le champ "<b>Votre nom :</b>" la valeur "<b>Mon nom</b>". Le contenu de ce champ n'a pas d'importance, mais Outlook a besoin d'une configuration pour pouvoir continuer.</p>
+<p>Pour le champ "<b>Adresse de messagerie :</b>" on mettra "<b>mon.adresse@mondomaine.com</b>".</p>
+<p>Pour le champ "<b>Serveur de courrier entrant (IMAP) :</b>" on mettra "<b>mail.mondomaine.com</b>".</p>
+<p>Pour le champ "<b>Serveur de courrier sortant (SMTP) :</b>" on mettra "<b>mail.mondomaine.com</b>".</p>
+<p>Lorsque l'on se connecte sur le serveur de r&eacute;ception pour relever nos emails, ou quand on se connecte sur le serveur d'envoi pour envoyer un email, le serveur en question fait une demande d'authentification. Elle est bas&eacute;e sur le nom de l'adresse email ainsi qu'un mot de passe.</p>
+<p>Pour d&eacute;finir l'authentification, il faut remplir les champs "<b>Nom d'utilisateur</b>" avec pour valeur l'adresse email, soit dans notre cas "<b>mon.adresse@mondomaine.com</b>", puis d&eacute;finir le mot de passe pour le champ "<b>Mot de passe :</b>" avec la valeur "<b>a1b2c</b>" qui sera masqu&eacute;e lors de la saisie.<br>
+Afin de ne pas avoir &agrave; d&eacute;finir le mot de passe lors de chaque connexion, cochez la case "<b>M&eacute;moriser le mot de passe</b>".</p>
+<p>Pour passer &agrave; l'&eacute;tape suivante il suffit de cliquer sur le bouton "<b>Param&egrave;tres suppl&eacute;mentaires...</b>".</p>
+<br>
+<p>Une nouvelle fen&ecirc;tre appara&icirc;t :</p>
+<p><img src="img/outlook.4.png" alt=""></p>
+<p>Afin de pouvoir se rep&eacute;rer facilement dans l'arborescence, nous allons nommer le r&eacute;pertoire racine du compte avec le nom de l'adresse email.<br>
+Dans le champs d&eacute;fini pour "<b>Compte de messagerie</b>", mettre "<b>mon.adresse@mondomaine.com</b>".</p>
+<p>Pour passer &agrave; l'&eacute;tape suivante, cliquez sur l'onglet "<b>Serveur sortant</b>".</p>
+<br>
+<p>Une nouvelle fen&ecirc;tre appara&icirc;t :</p>
+<p><img src="img/outlook.5.png" alt=""></p>
+<p>Afin de s'authentifier sur le serveur d'envoi, cochez la case "<b>Mon server sortant (SMTP) requiert une autentification</b>" et s&eacute;lectionnez "<b>Utiliser les m&ecirc;mes param&egrave;tres que mon serveur de courrier entrant</b>".</p>
+<p>Pour passer &agrave; l'&eacute;tape suivante, cliquez sur l'onglet "<b>Options avanc&eacute;es</b>".</p>
+<p>Une nouvelle fen&ecirc;tre appara&icirc;t :</p>
+<p><img src="img/outlook.6.png" alt=""></p>
+<p>Pour pouvoir se connecter en mode s&eacute;curis&eacute;, cochez les deux cases "<b>Ce serveur n&eacute;cessite une connexion s&eacute;curis&eacute;e (SSL)</b>".</p>
+<p>Outlook est finalement configur&eacute; pour l'adresse email "<i>Mon nom &lt;mon.adresse@mondomaine.com&gt;</i>" et ce en connexion s&eacute;curis&eacute;e.</p>
+<p>Cliquez sur le bouton "<b>OK</b>" sit&eacute; en bas de la fen&ecirc;tre de dialogue.</p>
+<br>
+<p>Une nouvelle fen&ecirc;tre appara&icirc;t :</p>
+<p><img src="img/outlook.7.png" alt=""></p>
+<p>Pour terminer, cliquez sur le bouton "<b>Oui</b>".</p>
+<br><br><br>
+<center><a href="index.html"><b>Retour</b></a></center>
+<br><br><br>
+  </td>
+ </tr>
+</table>
+</center>
+</body>
+</html>

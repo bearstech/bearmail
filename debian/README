@@ -1,0 +1,9 @@
+Bearmail - http://forge.bearstech.com/trac/wiki/BearMail
+
+A glue and simple management tool for:
+
+ - Postfix (SMTP)
+ - Dovecot (IMAP, POP)
+ - Clam-AV anti-virus
+ - Dspam anti-spam
+

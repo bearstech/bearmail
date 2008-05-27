@@ -1,0 +1,78 @@
+#!/usr/bin/perl -w
+
+# Test me with:
+# ./bearmail-send_virus adresse@destination < mail_avec_pour_sujet_le_nom_du_fichier_du_virus
+
+use strict;
+use Mail::Sendmail;
+
+my $asker = $ARGV[0];
+my @headers = <STDIN>;
+
+# on va trier les headers pour avoir les infos du nom du fichier à envoyer
+my @virus_name = grep /Subject: /, @headers;
+my $virus_name = shift @virus_name;
+if ($virus_name) {
+  chomp $virus_name; # remove \n at end of line, if found
+  $virus_name =~ m/^Subject:(.*)virus([a-z0-9.]{7})(.*)/i;
+  $virus_name = $2;
+  }
+
+# on a les infos necessaires pour passer à la suite
+# ouverture du fichier virus et envoi à la personne qui le demande
+open(VIRUS, "< /var/spool/clamsmtp/virus$virus_name") || die "Can't read /var/spool/clamsmtp/virus$virus_name";
+  my @virus_file = <VIRUS>;
+close VIRUS;
+
+my @virus_headers;
+my @virus_body;
+
+foreach (@virus_file) {
+  push @virus_headers, $_ if /^Received/.../^\s*$/;
+}
+foreach (@virus_file) {
+  push @virus_body, $_ if /^--/.../^.*--$/;
+}
+
+# on recherche les infos sur le mail virussé
+# le sujet
+my @virus_subject = grep /^Subject: /, @virus_file;
+my $virus_subject = shift @virus_subject;
+if ($virus_subject) {
+  chomp $virus_subject;
+  $virus_subject =~ m/^Subject:(.*)/i;
+  $virus_subject = $1;
+  }
+# le Content-Type
+my @virus_boundary = grep /boundary/, @virus_file;
+my $virus_boundary = shift @virus_boundary;
+if ($virus_boundary) {
+  chomp $virus_boundary;
+  $virus_boundary =~ m/(.*)boundary=(.*)/i;
+  $virus_boundary = $2;
+  }
+# le from
+my @virus_sender = grep /From: /, @virus_file;
+my $virus_sender = shift @virus_sender;
+if ($virus_sender) {
+  chomp $virus_sender;
+  $virus_sender =~ m/^From: (.*)/i;
+  $virus_sender = $1;
+  }
+# le corps du message
+my $virus_body = join "",@virus_body;
+
+my %mail = (
+  To      => "$asker",
+  From    => "$virus_sender",
+  Subject => "/!\\ [virus] /!\\ - $virus_subject",
+  'Content-Type' => "multipart/mixed; boundary=$virus_boundary",
+  'X-Mailer' => "Bearstech quarantined viruses sender",
+  );
+
+$mail{smtp} = '127.0.0.1';
+$mail{port} = '10026';
+$mail{'message : '} = "$virus_body";
+
+if (sendmail %mail) { }
+else { print "Error sending mail: $Mail::Sendmail::error \n" }

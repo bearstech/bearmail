@@ -1,0 +1,54 @@
+BearMailPlatform
+
+= Outils "BearMail" =
+
+ * source:/mail-platform/bearmail/
+ * Tiket #34 (configuration)
+
+== Validation de la configuration ==
+
+Nous décrivons actuellement la configuration de notre plateforme à l'aide d'un fichier contenant de simples enregistrements, avec 3 champs chacuns. Nous pouvons encore faire le tour de notre système et vérifier tous les cas de figures, sachant que chaque champ à des classes de valeurs distinctes:
+ * '''Address''': adresse ("normale") ou catchall
+ * '''Password''': mot de passe (oui) ou rien (non)
+ * '''Target''': local, aliases, domain_alias ou pipe
+
+|| '''Address''' || '''Password''' || '''Target''' || '''Situation''' || '''Exemple''' ||
+|| normale  || oui || local || '''regular_account''' || {{{bob@company.com:9a8ad92c50cae39aa2c5604fd0ab6d8c:local}}} ||
+|| normale  || oui || aliases || - || ||
+|| normale  || oui || domain_alias || - || ||
+|| normale  || oui || pipe || - || ||
+|| normale  || non || local || - || ||
+|| normale  || non || aliases || '''alias''' || {{{info@company.com::bob@company.com,alice@people.net}}} ||
+|| normale  || non || domain_alias || - || ||
+|| normale  || non || pipe || '''external_program''' || {{{fortune@company.com::|/bin/fortune}}} ||
+|| catchall || oui || local || - || ||
+|| catchall || oui || aliases || - || ||
+|| catchall || oui || domain_alias || - || ||
+|| catchall || oui || pipe || - || ||
+|| catchall || non || local || - ||
+|| catchall || non || aliases || '''catchall''' || {{{*@company.com::info@company.com,alice@helpdesk.net}}} ||
+|| catchall || non || domain_alias || '''domain_alias''' || {{{*@company.com::*@spam.com}}} ||
+|| catchall || non || pipe || - || ||
+
+Nous voulons uniquement recenser les situations qui nous intéressent et que nous pouvons parfaitement définir et écarter les autres configurations.
+
+=== regular_account ===
+
+Un "compte utilisateur" lié à un espace de stockage local, et l'accès aux facilités d'envoi/réception (IMAP+SMTP auth). L'adresse (complète) est assimilée à un identifiant. Un mot de passe est toujours défini pour ce type de compte, même s'il peut être la chaine vide. L'emplacement du stockage dépend directement de cette adresse (pas d'indirection via un numéro type "UID").
+
+=== alias ===
+
+Désigne une adresse qui renvoie vers une ou plusieurs autres adresses. Les adresses cibles peuvent être n'importe quelle adresse valide gérée par la plateforme (les configurations récursives avec des alias d'alias sont donc autorisées par ex.), ou une adresse externe. Aucun espace de stockage n'est associé à cette adresse, ni notion d'authentification.
+
+=== catch_all ===
+
+Entrée acceptant tout courier dont l'adresse n'est pas définie dans un domaine donné (en tant que ''alias'' ou ''regular_account''). Le courrier peut être redistribué vers une ou plusieurs adresses prédéfinies, comme avec une entrée de type ''alias''.
+
+=== domain_alias ===
+
+Entrée acceptant tout courier dont l'adresse n'est pas définie dans un domaine donné (en tant que ''alias'' ou ''regular_account''). Le courrier est redistribué vers un autre domaine en conservant la partie locale de l'adresse du destinataire original.
+
+=== external_program ===
+
+Le courrier reçu est envoyé vers un programme (automate, répondeur, etc). Il n'y a pas de notion de stockage et pas de mot de passe associé.
+
