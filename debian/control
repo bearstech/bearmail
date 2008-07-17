@@ -2,7 +2,7 @@ Source: bearmail
 Section: unknown
 Priority: extra
 Maintainer: Benjamin Linet <blinet@bearstech.com>
-Build-Depends: debhelper (>= 6)
+Build-Depends: debhelper (>= 5)
 Standards-Version: 3.7.3
 Homepage: http://forge.bearstech.com/trac/wiki/BearMail
 
