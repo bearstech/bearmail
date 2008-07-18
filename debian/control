@@ -1,5 +1,5 @@
 Source: bearmail
-Section: unknown
+Section: mail
 Priority: extra
 Maintainer: Benjamin Linet <blinet@bearstech.com>
 Build-Depends: debhelper (>= 5)
@@ -8,7 +8,7 @@ Homepage: http://forge.bearstech.com/trac/wiki/BearMail
 
 Package: bearmail
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, procmail, openssl, postfix-pcre, dovecot-imapd, dovecot-pop3d, dspam, clamsmtp, swaks, libmail-sendmail-perl
 Description: A glue and management tool for a complete mail platform
  Bearmail will help you centralize configuration for the following services:
   - Postfix (SMTP)
