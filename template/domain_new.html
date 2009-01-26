@@ -1,0 +1,30 @@
+<TMPL_INCLUDE NAME="header.html">
+<TMPL_INCLUDE NAME="menu.html">
+
+    <div class="main form">
+      <h1>Nouveau domaine</h1>
+
+      <form method="post" action="#/domain_list">
+
+        <fieldset>
+          <div>
+            <label for="domain">Domaine</label> <input name="domain" id="domain" value="" />
+          </div>
+          <div>
+            <label for="password">Mot de passe</label> <input name="password" id="password" value="" /> <a href="javascript:pwgen('password', 6)">&laquo;Choisir pour moi</a>
+          </div>
+          <p>La création d'un domaine déclare automatiquement le compte <em>postmaster@domaine</em>, qui associé au mot de passe sais ci-dessus vous permettra de l'administrer.</p>
+        </fieldset>
+
+        <div class="yesno">
+          <input type="submit" name="save" id="save" value="Créer" class="apply" />
+          <input type="submit" name="cancel" id="cancel" value="Annuler" />
+        </div>
+      </form>
+    </div>
+    <script type="text/javascript"><!--
+    try { document.getElementById('domain').focus(); } catch (e) {}
+    --></script>
+    <script type="text/javascript" src="#/../pwgen.js"></script>
+
+<TMPL_INCLUDE NAME="footer.html">

@@ -1,0 +1,27 @@
+<TMPL_INCLUDE NAME="header.html">
+<TMPL_INCLUDE NAME="menu.html">
+
+    <div class="main">
+      <h1>Compte &rarr; blinet@bearstech.com</h1>
+
+      <form method="post" action="#/address_list">
+        <div class="dialog warning">
+          <h1>Attention !</h1>
+          <p>
+            Cette opération supprimera le compte ainsi que tous les courriers présents sur le serveur.
+          </p>
+          <p>
+            Etes-vous sûr ?
+          </p>
+          <p class="yesno">
+            <input type="submit" id="delete" value="Supprimer" class="apply"/>
+            <input type="submit" id="cancel" value="Annuler"/>
+          </p>
+        </div>
+      </form>
+    </div>
+    <script type="text/javascript"><!--
+    try { document.getElementById('cancel').focus(); } catch (e) {}
+    --></script>
+
+<TMPL_INCLUDE NAME="footer.html">

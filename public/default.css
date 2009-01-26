@@ -1,0 +1,310 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  margin: 0;
+  padding: 0;
+  color: #000;
+  background-color: #fff;
+  font-size: 76%; /* Ugly universal hack, sigh */
+/*  font-family: sans-serif;*/
+}
+
+
+/* Login */
+
+#login {
+  width: 20em;
+  margin: 2em auto;
+  padding: 4em 8em;
+  background: url(/login-bg.png) no-repeat center;
+}
+#login h1 {
+  font-size: 1.75em;
+  padding-bottom: 1em;
+}
+#login p {
+  margin: 0 auto;
+  padding-bottom: 1em;
+}
+#login label {
+  font-weight: bold;
+}
+#login input {
+  font-size: 1.2em;
+  width: 100%;
+  padding: .1em;
+}
+#login #submit input {
+  width: 60%;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+#login p#submit {
+  text-align: center;
+  padding-top: 1em;
+}
+#login p#forgot {
+  padding-top: 1em;
+  padding-bottom: 0;
+  text-align: center;
+}
+#login a, #login a:visited {
+  color: #036;
+  padding: .15em 0;
+  text-decoration: none;
+  border-bottom: dotted #036 1px;
+}
+#login a:hover {
+  padding: .15em .25em;
+  color: #fff;
+  background-color: #69c;
+  border-top: solid #8ad 1px;
+  border-bottom: solid #036 1px;
+}
+
+
+/* Menu */
+
+#menu ul {
+  width: 100%;
+  list-style-type: none;
+  margin: 1em 0;
+  padding: .25em 0;
+  background-color: #369;
+  color: #fff;
+  border-top: solid #8ad 1px;
+  border-bottom: solid #036 1px;
+  text-align: center;
+}
+#menu li {
+  display: inline;
+}
+#menu li a {
+  text-decoration: none;
+  background-color: #369;
+  color: #fff;
+  padding: .25em 1em;
+  border-right: 1px solid #fff;
+}
+#menu li a#current, #menu li a:hover {
+  background-color: #69c;
+  color: #fff;
+}
+#menu img#logo {
+  float: left;
+  margin: -.6em 1.5em;
+}
+
+
+/* Main */
+
+div.main {
+  clear: both;
+}
+.main h1 {
+  font-size: 1.5em;
+  text-align: center;
+}
+
+
+/* Dialogs */
+
+div.dialog {
+  margin: 1em auto;
+  width: 50%;
+}
+.dialog h1 {
+  font-size: 1em;
+  text-align: center;
+  padding: .25em .5em;
+}
+.dialog p {
+  text-align: center;
+  margin: 1em;
+}
+
+div.info {
+  border: solid #8ad 1px;
+}
+.info h1 {
+  background-color: #69c;
+  color: #000;
+  border-bottom: solid #369 1px;
+}
+
+div.warning {
+  border: solid #fb0 1px;
+}
+.warning h1 {
+  background-color: #fa0;
+  color: #000;
+  border-bottom: solid #d80 1px;
+}
+
+.yesno {
+  text-align: center;
+}
+.yesno input {
+  font-size: 1em;
+  padding: .25em .5em;
+  margin: 0 .5em;
+}
+.yesno input.apply {
+  font-weight: bold;
+}
+
+
+/* Browser table */
+
+table.browser {
+  border-collapse: collapse;
+  border: solid #8ad 1px;
+  margin: 1em auto;
+}
+.browser tr.odd {
+  background-color: #eef;
+}
+.browser tr.even {
+  background-color: #dde;
+}
+.browser tr:hover {
+  background-color: #fa0;
+}
+.browser th {
+  text-align: left;
+  padding: .25em .5em;
+  background-color: #69c;
+  color: #000;
+  border-bottom: solid #369 1px;
+}
+.browser td {
+  padding: .25em .5em;
+  vertical-align: top;
+}
+.browser td.right {
+  text-align: right;
+}
+.browser td.key {
+  font-weight: bold;
+}
+.browser em {
+  font-style: normal;
+  color: #800;
+}
+.browser a, .browser a:visited {
+  padding: .25em 0;
+  text-decoration: none;
+  color: #000;
+}
+.browser a:hover {
+  color: #fff;
+  background-color: transparent;
+}
+
+
+/* Forms */
+
+.form fieldset {
+  margin: 1.5em auto;
+  width: 40em;
+  padding: .5em 2em;
+  border: none;
+  border-top: solid #000 1px;
+  background-color: #eef;
+}
+.form legend {
+  padding: 0 .25em;
+  font-size: 1.25em;
+}
+.form div {
+  margin: .5em;
+  clear: both;
+}
+.form label {
+  float: left;
+  width: 30%;
+  margin: 1px 0;
+  padding: .175em 1em;
+  text-align: right;
+}
+.form fieldset input {
+  font-size: 1em;
+  padding: .15em;
+}
+.form fieldset textarea {
+  font-family: sans-serif;
+  font-size: 1em;
+  padding: .15em;
+  width: 60%;
+}
+.form div.group {
+  margin: 1em 0;
+  border-top: solid #ccc 1px;
+}
+.form p {
+  width: 75%;
+  padding: .5em 0;
+  margin: 0 auto;
+  text-align: center;
+}
+.form a, .form a:visited {
+  color: #369;
+  background-color: inherit;
+}
+
+
+/* Help */
+
+div#help {
+  margin: 1em auto;
+  width: 80%;
+}
+#help h2 {
+  font-size: 1.25em;
+  margin: 1.5em .5em .75em .5em;
+}
+#help h3 {
+  font-size: 1em;
+  margin: .25em 1em;
+}
+#help p {
+  margin: .25em 1em 1.25em 1em;
+}
+#help ul {
+  margin: .25em 1em 1em 1em;
+  list-style-type: disc;
+}
+#help li {
+  margin-left: 2em;
+}
+#help a, #help a:visited {
+  color: #036;
+  text-decoration: none;
+  border-bottom: dotted #036 1px;
+}
+#help a:hover {
+  color: #369;
+  background-color: transparent;
+  border-bottom: solid #369 1px;
+}
+
+
+/* Footer */
+
+#footer {
+  text-align: center;
+  color: #888;
+  margin-top: 1.5em;
+}
+#footer a, #footer a:visited {
+  color: #888;
+  text-decoration: none;
+  border-bottom: dotted #888 1px;
+}
+#footer a:hover {
+  color: #444;
+  background-color: #eee;
+  border-bottom: solid #888 1px;
+}

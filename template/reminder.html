@@ -1,0 +1,29 @@
+<TMPL_INCLUDE NAME="header.html">
+
+    <div id="login">
+      <h1>Bearmail Manager</h1>
+
+      <form method="post" action="#/reminder">
+        <p>
+          Vous avez oublié votre mot de passe mais vous pouvez toujours relever votre courrier.
+          Votre mot de passe peut être renouvelé et vous être automatiquement envoyé.
+        </p>
+        <p>
+          <label>Adresse email<br />
+            <input type="text" name="email" id="email" value="" />
+          </label>
+        </p>
+        <p id="submit">
+          <input type="submit" name="login" value="Envoyer"/>
+        </p>
+      </form>
+
+      <p id="forgot">
+        <a href="#/login">Retour à l'identification</a>
+      </p>
+    </div>
+    <script type="text/javascript"><!--
+    try { document.getElementById('email').focus(); } catch (e) {}
+    --></script>
+
+<TMPL_INCLUDE NAME="footer.html">

@@ -1,0 +1,63 @@
+<TMPL_INCLUDE NAME="header.html">
+<TMPL_INCLUDE NAME="menu.html">
+
+    <div class="main" id="help">
+      <h1>Aide</h1>
+
+      <h2>A propos</h2>
+<p>Bearmail est une plateforme de réception, de filtrage, de stockage et de consultation de mails. Elle s'appuie entre autre sur des logiciels libres reconnus :</p>
+<ul>
+  <li><a href="http://www.postfix.org/">Postfix</a> pour la réception (serveur SMTP)</li>
+  <li><a href="http://www.dovecot.org/">Dovecot</a> pour la consultation (serveur POP/IMAP)</li>
+  <li><a href="http://www.clamav.net/">ClamAV</a> comme anti-virus</li>
+  <li><a href="http://dspam.nuclearelephant.com/">DSPAM</a> comme anti-spam</li>
+  <li><a href="http://roundcube.net/">RoundCube</a> pour le webmail</li>
+</ul>
+<p>Bearmail assure l'intégration de ces différents logiciels en gérant une configuration simple et centralisée. L'administration peut se faire en ligne de commande, ou bien via cette interface web.
+</p>
+<p>Bearmail est implémenté principalement en <a href="http://www.perl.org/">Perl</a>, et distribué sous la licence libre <a href="http://www.gnu.org/copyleft/gpl.html">GPL 3.0</a> par la société <a href="http://bearstech.com/">Bearstech</a>. Pour plus d'informations, télécharger, contribuer, commenter, allez sur <a href="http://forge.bearstech.com/trac/wiki/BearMail">le site de Bearmail</a>.
+</p>
+
+      <h2>Questions - Réponses</h2>
+
+<h3>Comment on crée un catch-all ?</h3>
+<p>(Je pense qu'une doc d'1/2 ligne à
+côté du champ "adresse" expliquant que *=catchall est simple et
+efficace)</p>
+
+<h3>Comment je sais si je perds mes mails quand je passe du mode IMAP au mode Redirection ?</h3>
+<p>(Petite précision d'une ligne en bas de formulaire ?)</p>
+
+<h3>Comment puis-je recevoir des mails (mode IMAP) _et_ renvoyer des copies (mode Redirection) ?</h3>
+<p>(Réponse: pas encore prévu bien que ce soit
+tout a fait réalisable en créant un simple alias qui renvoie vers un compte
+IMAP et ses destinations en copie - inversion de concept et interface différente).</p>
+
+<h3>Comment je renomme un compte ?</h3>
+<p>(Pas encore possible, prévisible en
+v2 si la demande est populaire - il faudra dissocier les noms des spools
+des noms des comptes, pas compliqué)</p>
+
+<h3>Comment prévenir rapidement une personne que son nouveau compte a été créé ou qu'il fait désormais parti d'un alias ?</h3>
+<p>(j'pense que cette
+implémentation serait une bonne chose non ?)</p>
+
+<h3>Comment créer des répertoires automatiquement, tel qe "la
+corbeille", "les brouillons", "les messages envoyés" et "les messages en
+attente d'envoi" à mon nouveaux compte IMAP ?</h3>
+<p>(pas de doc dessus pour
+le moment, de plus avec l'embrouille que j'ai vu avec un compte
+fabernovel, j'pense que si on implémente une fonction du genre ça risque
+d'entrer en conflit avec des prgs mal configurés ?)</p>
+
+<h3>Est-il possible de récupérer ultérieurement le contenu d'un
+compte supprimé ou ce dernier est automatiquement détruit ?</h3>
+<p>(actuellement les comptes sont gardé tels quel au niveau du stockage
+physique, ce genre de question a déjà été demandé un jour ?)</p>
+
+<h3>Il y a t'il un message me prévenant de temps à autre que mon répondeur est activé ?</h3>
+<p>(actuellement pas d'option du genre, seul moyen
+de le savoir est d'aller sur le manager)</p>
+    </div>
+
+<TMPL_INCLUDE NAME="footer.html">

@@ -1,0 +1,30 @@
+<TMPL_INCLUDE NAME="header.html">
+
+    <div id="login">
+      <h1>Bearmail Manager</h1>
+
+      <form method="post" action="#/login">
+        <p>
+          <label>Adresse email<br />
+            <input type="text" name="email" id="email" value="admin" />
+          </label>
+        </p>
+        <p>
+          <label>Mot de passe<br />
+            <input type="password" name="password" id="password" value="admin" />
+          </label>
+        </p>
+        <p id="submit">
+          <input type="submit" name="login" value="Connexion"/>
+        </p>
+      </form>
+
+      <p id="forgot">
+        <a href="#/reminder">Mot de passe perdu ?</a>
+      </p>
+    </div>
+    <script type="text/javascript"><!--
+    try { document.getElementById('email').focus(); } catch (e) {}
+    --></script>
+
+<TMPL_INCLUDE NAME="footer.html">

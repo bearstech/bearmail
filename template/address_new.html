@@ -1,0 +1,55 @@
+<TMPL_INCLUDE NAME="header.html">
+<TMPL_INCLUDE NAME="menu.html">
+
+    <div class="main form">
+      <h1>Nouveau compte</h1>
+
+      <form method="post" action="#/address_list">
+
+        <fieldset>
+          <legend>Identification</legend>
+          <div>
+            <label for="email">Adresse</label> <input name="email" id="email" value="" />
+          </div>
+          <div>
+            <label for="password">Mot de passe</label> <input name="password" id="password" value="" /> <a href="javascript:pwgen('password', 6)">&laquo;Choisir pour moi</a>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Utilisation</legend>
+          <div>
+            <label for="regular">Réception normale</label> <input type="radio" name="type" id="regular" value="regular" checked="checked" /> 
+          </div>
+
+          <div class="group">
+            <div>
+              <label for="alias">Redirection</label> <input type="radio" name="type" id="alias" value="alias" /> 
+            </div>
+            <div>
+              <label for="aliases">... vers</label> <textarea name="aliases" id="aliases" cols="*" rows="2">lbonnet@bearstech.com, toto@pipo.com</textarea>
+            </div>
+          </div>
+
+          <div class="group">
+            <div>
+              <label for="holiday">Vacances</label> <input type="radio" name="type" id="holiday" value="holiday" /> 
+            </div>
+            <div>
+              <label for="holiday_end">... jusqu'au</label> <input type="text" name="holiday_end" id="holiday_end" value="25/09/2008" /> (JJ/MM/AAAA)
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="yesno">
+          <input type="submit" name="save" id="save" value="Créer" class="apply" />
+          <input type="submit" name="cancel" id="cancel" value="Annuler" />
+        </div>
+      </form>
+    </div>
+    <script type="text/javascript"><!--
+    try { document.getElementById('email').focus(); } catch (e) {}
+    --></script>
+    <script type="text/javascript" src="#/../pwgen.js"></script>
+
+<TMPL_INCLUDE NAME="footer.html">
