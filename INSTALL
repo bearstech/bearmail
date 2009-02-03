@@ -1,0 +1,38 @@
+BearMail CGI - Web interface
+
+  These are really quick notes to install the BearMail web interface.
+
+
+1. Requirements
+
+  BearMail web frontend is based on Perl (at least 5.8) and the
+  CGI::Application framework. Currently only Perl and its core modules are
+  strictly required.
+
+  You will also need a web server with the CGI feature.
+
+
+2. Check out code and fetch dependencies
+
+  $ svn co svn://forge.bearstech.com/forge/bearmail
+  $ cd bearmail
+  $ make cpan_update
+
+
+3. Configure your web server
+
+  You will need to map 'bearmail.cgi' to the public/bearmail.cgi URL.
+
+  The simplest way is to use a symlink:
+  $ ln -s ../bin/bearmail.cgi public/
+
+  The other way is to use some Alias, eg. for Apache:
+  Alias /bearmail.cgi /path/to/bin/bearmail.cgi
+
+
+4. Browse
+
+  Point your browser at the URL mapping the public/ folder. If you
+  ran a checkout of BearMail in your ~/public_html folder, this
+  would be http://localhost/~mylogin/bearmail/public
+

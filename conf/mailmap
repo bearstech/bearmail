@@ -13,5 +13,5 @@ fortune@company.com::|/bin/fortune
 *@company.com::info@company.com,alice@helpdesk.net
 
 # domain_alias
-*@company2.com::*@spam.com
+*@other.com::*@spam.com
 

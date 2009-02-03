@@ -3,8 +3,9 @@
 use strict;
 use CGI::Carp qw/fatalsToBrowser/; 
 use CGI::Application::Dispatch;
+use Cwd;
 
-my $bearmail = $ENV{'BEARMAIL'};
+my $bearmail = $ENV{'BEARMAIL'} || cwd().'/..';
 
 CGI::Application::Dispatch->dispatch(
     prefix      => 'BearMail::Web',
