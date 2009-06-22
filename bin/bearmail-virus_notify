@@ -1,9 +1,95 @@
 #!/bin/sh
-# Email address to send alerts to
+
+if [ -r /etc/bearmail/conf/bearmail.conf ]; then
+        . /etc/bearmail/conf/bearmail.conf
+fi
+
+VIRUS_SENDER="virus@$MY_V_FQDN"
+ORGANIZATION="$MU_V_FQDN"
 MAILTO=$RECIPIENTS
 
 # formail should be in PATH
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
 LINE="-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
-swaks -d "Date: %D\nTo: %T\nFrom: %F\nSubject: test %D\nContent-Type: text/plain; charset=UTF-8\nX-Mailer: Bearstech antivirus system\n%B" -f mailadmin@bearstech.com -t $MAILTO --h-Subject "Un virus a =?UTF-8?B?w6l0w6kgZMOpdGVjdMOp?= : $VIRUS" --body "Un message vous étant destiné a été bloqué par notre service\nanti-viral.\n\nCe message provenait de $SENDER\n\nLe virus reconnu est nommé : $VIRUS\n\nPour des questions de de sécurité, nous vous conseillons de ne pas\nrécuperer l'email en question et de demander à votre correspondant de\nvous reformuler le mail sans virus.\n\nToutefois, durant un délais de 15 jours à partir d'aujourd'hui, vous\npourrez récupérer le message contaminé en envoyant un mail à\nvirus@bearstech.com et possédant comme sujet $(echo "$EMAIL"|sed -e "s#/var/spool/clamsmtp/##g")\n\n\nVoici les en-têtes du message en question :\n$LINE\n$(formail -X "" < $EMAIL)\n$LINE\n"
+if [ ! -z "$MY_VIRUS_TIME" ] && [ "$MY_LANGUAGE" == "fr" ] ; then
+sendmail -i $RECIPIENTS << EOF
+To: $RECIPIENTS
+From: $VIRUS_SENDER
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Subject: Un virus a =?UTF-8?B?w6l0w6kgZMOpdGVjdMOp?= : $VIRUS
+X-Mailer: Bearmail antivirus system
+Organization: $ORGANIZATION
+
+Bonjour,
+
+un message vous étant destiné a été bloqué par notre service
+anti-viral.
+
+Ce message provenait de $SENDER
+
+Le virus reconnu est nommé : $VIRUS
+
+Pour des questions de sécurité, nous vous conseillons de ne pas
+récupérer l'email en question et de demander à votre correspondant
+de vous reformuler le mail sans virus.
+
+Toutefois, durant un délais de $MY_VIRUS_TIME jours à partir d'aujourd'hui,
+vous pourrez récupérer le message contaminé en envoyant un
+mail à $VIRUS_SENDER et en mettant pour sujet :
+$(echo "$EMAIL"|sed -e "s#/var/spool/clamsmtp/##g")
+
+
+Voici les en-têtes du message en question :
+
+$LINE
+
+$(formail -X "" < $EMAIL)
+
+$LINE
+EOF
+
+fi
+
+## english version
+if [ ! -z "$MY_VIRUS_TIME" ] && [ "$MY_LANGUAGE" == "en" ] ; then
+sendmail -i $RECIPIENTS << EOF
+To: $RECIPIENTS
+From: $VIRUS_SENDER
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Subject: A virus was found : $VIRUS
+X-Mailer: Bearmail antivirus system
+Organization: $ORGANIZATION
+
+Hello,
+
+un message vous étant destiné a été bloqué par notre service
+anti-viral.
+
+Ce message provenait de $SENDER
+
+Le virus reconnu est nommé : $VIRUS
+
+Pour des questions de sécurité, nous vous conseillons de ne pas
+récupérer l'email en question et de demander à votre correspondant
+de vous reformuler le mail sans virus.
+
+Toutefois, durant un délais de $MY_VIRUS_TIME jours à partir d'aujourd'hui,
+vous pourrez récupérer le message contaminé en envoyant un
+mail à $VIRUS_SENDER et en mettant pour sujet :
+$(echo "$EMAIL"|sed -e "s#/var/spool/clamsmtp/##g")
+
+
+Voici les en-têtes du message en question :
+
+$LINE
+ 
+$(formail -X "" < $EMAIL)
+
+$LINE
+EOF
+
+fi
+

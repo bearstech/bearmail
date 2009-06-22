@@ -8,7 +8,7 @@ Homepage: http://forge.bearstech.com/trac/wiki/BearMail
 
 Package: bearmail
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, procmail, openssl, postfix-pcre, dovecot-imapd, dovecot-pop3d, dspam, clamsmtp, swaks, libmail-sendmail-perl
+Depends: ${shlibs:Depends}, ${misc:Depends}, procmail, openssl, postfix, postfix-pcre, dovecot-imapd, dovecot-pop3d, dspam, clamsmtp, clamav-daemon, libmail-sendmail-perl
 Description: A glue and management tool for a complete mail platform
  Bearmail will help you centralize configuration for the following services:
   - Postfix (SMTP)

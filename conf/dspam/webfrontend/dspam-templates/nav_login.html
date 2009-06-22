@@ -1,0 +1,58 @@
+<HTML>
+<HEAD><TITLE>Centre de contr&ocirc;le des SPAM</TITLE>
+<LINK REL="STYLESHEET" HREF="$WEB_ROOT$/base.css">
+</HEAD>
+<BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#000000 VLINK=#000000 ALINK=#000000>
+<div id="header">
+	<div id="logo">
+		<a href="$CGI$$?action=logout" title="Logout"><img src="$WEB_ROOT$/dspam-logo-small.gif" alt="DSPAM Logo" /></a>
+	</div>
+	<div id="userinfo">
+	
+	</div>
+</div>
+
+<br clear="left" />
+
+<div id="navcontainer">
+	<ul id="navlist">
+		<li id="active"><a id="current" href="$WEB_ROOT$auth.cgi">Login</a></li>
+	</ul>
+</div>
+
+<div id="panel">
+
+<H2>USER LOGIN</H2>
+<form action="$CGI$" method="post">
+<input type="hidden" id="action" name="action" value="login"/>
+<table>
+<tr>
+	<td>
+		<label for="login_user">User:</label>
+	</td><td>
+		<input id="login_user" type="text" name="login_user" value="" style="width:200px;" />
+	</td>
+</tr>
+<tr>
+	<td>
+		<label for="login_password">Password:</label>
+	</td><td>
+		<input id="login_password" type="password" name="login_password" value="" style="width:200px;"/>
+	</td>
+</tr>
+<tr><td></td><td><button type="submit">Login</button></td></tr>
+</table>
+</form>
+<br/>
+$MESSAGE$
+</div>
+
+<div id="footer">
+<p>
+<a href="http://dspam.nuclearelephant.com">DSPAM</a> is a registered trademark of <a href="http://www.nuclearelephant.com">Jonathan A. Zdziarski</a>. Copyright &copy; 2005, Jonathan A. Zdziarski
+<br/>auth.cgi for DSPAM added by <a href="http://bearstech.com">Bearstech</a>
+</p>
+</div>
+
+</BODY>
+</HTML>

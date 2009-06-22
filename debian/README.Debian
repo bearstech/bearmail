@@ -1,4 +1,12 @@
-bearmail for Debian
--------------------
+BearMail for Debian
+===================
 
- -- Benjamin Linet <blinet@bearstech.com>  Tue, 27 May 2008 18:31:57 +0200
+Configuring BearMail under Debian
+---------------------------------
+
+Juste lunch the install script in /usr/share/doc/bearmail/example after reading
+the classical documentation.
+
+Don't forget to restart services with "bearmail-status update" after installation.
+
+ -- Debian Bearmail Maintainers Maintainer: <bearmail@bearstech.com>, Thu, 25 Mai 2009 11:53:46 +0200

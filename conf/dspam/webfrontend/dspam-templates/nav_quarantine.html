@@ -1,0 +1,87 @@
+<HTML>
+<HEAD><TITLE>Centre de contr&ocirc;le des SPAM - Quarantine</TITLE>
+<LINK REL="STYLESHEET" HREF="$WEB_ROOT$/base.css">
+</HEAD>
+<BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#000000 VLINK=#000000 ALINK=#000000>
+<div id="header">
+	<div id="logo">
+		<a href="$CGI$?action=logout" title="Home"><img src="$WEB_ROOT$/dspam-logo-small.gif" alt="DSPAM Logo" /></a>
+	</div>
+	<div id="userinfo">
+                Filtre anti-SPAM de <strong>$REMOTE_USER$</strong>
+	</div>
+</div>
+
+<br clear="left" />
+
+<div id="navcontainer">
+        <ul id="navlist">
+                <li><a href="$CGI$?$USER$template=performance">Performance</a></li>
+                <li><a href="$CGI$?$USER$template=preferences">Pr&eacute;f&eacute;rences</a></li>
+                <li><a href="$CGI$?$USER$template=alerts">Alertes</a></li>
+                <li id="active"><a id="current" href="$CGI$?$USER$template=quarantine">Quarantaine ($TOTAL_QUARANTINED_MESSAGES$)</a></li>
+                <li><a href="$CGI$?$USER$template=analysis">Analyses</a></li>
+                <li><a href="$CGI$?$USER$template=history&history_page=1">Historique</a></li>
+                $NAV_ADMIN$
+        </ul>
+</div>
+
+<div id="panel">
+
+<p>
+Les messages si dessous n'ont pas &eacute;t&eacute; d&eacute;livr&eacute;s &agrave; votre bo&icirc;te aux lettres car ils ont &eacute;t&eacute; consid&eacute;r&eacute;s comme &eacute;tant du SPAM.<br>
+Cliquez sur le sujet du message afin de voir le contenu du mail. Vous pourrez alors, par la suite, envoyer le mail &agrave; votre bo&icirc;te aux lettres et ainsi dire au filtre anti-spam qu'il s'est tromp&eacute; pour ce mail.<br><br>
+N'oubliez pas de vider votre quarantaine de temps &agrave; autres.<br>
+</p>
+
+<form action="$CGI$" method="get">
+<p>
+<input type="hidden" name="command" value="processQuarantine" >
+<input type="hidden" name="template" value="quarantine" >
+<input type="hidden" name="user" value="$REMOTE_USER$" >
+<input type="hidden" name="sortby" value="$SORTBY$" >
+<input type="submit" value="Envoyer les mails coch&eacute;s" NAME="manyNotSpam" >
+&nbsp;
+<input type="submit" value="Effacer les mails coch&eacute;s" onClick="if (confirm('&Ecirc;tes vous s&ucirc;r de vouloir effacer les messages s&eacute;l&eacute;ctionn&eacute;s dans la quarantaine ?')==false) { return false; }" />
+&nbsp;
+<input type="submit" value="Vider la quarantaine" name="deleteAll" onClick="if (confirm('&Ecirc;tes vous s&ucirc;r de vouloir effacer tous les messages de la quarantaine ?')==false) { return false; }" >
+
+&nbsp;&nbsp;$SORT_SELECTOR$
+
+</p>
+<table border="0" cellspacing="0" cellpadding="2" width="100%">
+        <tr>
+                <th>&nbsp;</th>
+                <th>Probabilit&eacute;</th>
+                <th>Date</th>
+                <th>Provenance</th>
+                <th>Sujet</th>
+        </tr>
+$QUARANTINE$
+</table>
+
+<p>
+<input type="submit" value="Envoyer les mails coch&eacute;s" NAME="manyNotSpam" >
+&nbsp;
+<input type="submit" value="Effacer les mails coch&eacute;s" onClick="if (confirm('&Ecirc;tes vous s&ucirc;r de vouloir effacer les messages s&eacute;l&eacute;ctionn&eacute;s dans la quarantaine ?')==false) { return false; }" />
+&nbsp;
+<input type="submit" value="Vider la quarantaine" name="deleteAll" onClick="if (confirm('&Ecirc;tes vous s&ucirc;r de vouloir effacer tous les messages de la quarantaine ?')==false) { return false; }" />
+</p>
+
+</form>
+
+<p>
+Code couleur: <span class="low">Faible probabilit&eacute;</span>, <span class="medium">Probabilit&eacute; moyenne, <span class="high">Probabilit&eacute; &eacute;lev&eacute;e</span>
+</p>
+
+</div>
+
+<div id="footer">
+<p>
+<a href="http://dspam.nuclearelephant.com">DSPAM</a> is a registered trademark of <a href="http://www.nuclearelephant.com">Jonathan A. Zdziarski</a>. Copyright &copy; 2005, Jonathan A. Zdziarski<br>
+Powered by <a href="http://bearstech.com">Bearstech</a>
+</p>
+</div>
+
+</BODY>
+</HTML>

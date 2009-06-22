@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 # Test me with:
-# ./bearmail-send_virus adresse@destination < mail_avec_pour_sujet_le_nom_du_fichier_du_virus
+# ./bearmail-send_virus address@destination < mail_with_virus_file_in_subject
 
 use strict;
 use Mail::Sendmail;
@@ -9,7 +9,7 @@ use Mail::Sendmail;
 my $asker = $ARGV[0];
 my @headers = <STDIN>;
 
-# on va trier les headers pour avoir les infos du nom du fichier à envoyer
+# search file name in headers
 my @virus_name = grep /Subject: /, @headers;
 my $virus_name = shift @virus_name;
 if ($virus_name) {
@@ -18,8 +18,7 @@ if ($virus_name) {
   $virus_name = $2;
   }
 
-# on a les infos necessaires pour passer à la suite
-# ouverture du fichier virus et envoi à la personne qui le demande
+# open the virus file and send it
 open(VIRUS, "< /var/spool/clamsmtp/virus$virus_name") || die "Can't read /var/spool/clamsmtp/virus$virus_name";
   my @virus_file = <VIRUS>;
 close VIRUS;
@@ -34,8 +33,8 @@ foreach (@virus_file) {
   push @virus_body, $_ if /^--/.../^.*--$/;
 }
 
-# on recherche les infos sur le mail virussé
-# le sujet
+## searching infos in virus file
+# the subject
 my @virus_subject = grep /^Subject: /, @virus_file;
 my $virus_subject = shift @virus_subject;
 if ($virus_subject) {
@@ -43,7 +42,7 @@ if ($virus_subject) {
   $virus_subject =~ m/^Subject:(.*)/i;
   $virus_subject = $1;
   }
-# le Content-Type
+# the Content-Type
 my @virus_boundary = grep /boundary/, @virus_file;
 my $virus_boundary = shift @virus_boundary;
 if ($virus_boundary) {
@@ -51,7 +50,7 @@ if ($virus_boundary) {
   $virus_boundary =~ m/(.*)boundary=(.*)/i;
   $virus_boundary = $2;
   }
-# le from
+# the from
 my @virus_sender = grep /From: /, @virus_file;
 my $virus_sender = shift @virus_sender;
 if ($virus_sender) {
@@ -59,7 +58,7 @@ if ($virus_sender) {
   $virus_sender =~ m/^From: (.*)/i;
   $virus_sender = $1;
   }
-# le corps du message
+# the body
 my $virus_body = join "",@virus_body;
 
 my %mail = (
