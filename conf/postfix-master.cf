@@ -9,30 +9,6 @@
 #smtp      inet  n       -       -       -       -       smtpd
 smtp      inet  n       -       -       -       -        smtpd
 
-# clamsmtp outgoing port
-127.0.0.1:10026 inet  n -       -       -       16      smtpd
-  -o content_filter=
-  -o receive_override_options=no_unknown_recipient_checks,no_header_body_checks
-  -o smtpd_helo_restrictions=
-  -o smtpd_client_restrictions=
-  -o smtpd_sender_restrictions=
-  -o smtpd_recipient_restrictions=permit_mynetworks,reject
-  -o mynetworks_style=host
-  -o smtpd_authorized_xforward_hosts=127.0.0.0/8
-
-# dspam outgoing port
-127.0.0.1:10027 inet    n       -       -       -       -       smtpd
-  -o content_filter=
-  -o smtpd_authorized_xforward_hosts=127.0.0.0/8
-  -o smtpd_client_restrictions=
-  -o smtpd_helo_restrictions=
-  -o smtpd_sender_restrictions=
-  -o smtpd_recipient_restrictions=permit_mynetworks,reject
-  -o mynetworks=127.0.0.0/8
-  -o receive_override_options=no_unknown_recipient_checks
-#  -o smtpd_milters=unix:/var/run/dkim-filter/dkim-filter.sock,unix:/var/run/dk-filter/dk-filter.sock
-#  -o cleanup_milters=unix:/var/run/dkim-filter/dkim-filter.sock,unix:/var/run/dk-filter/dk-filter.sock
-
 # submission
 submission inet n       -       -       -       -       smtpd
   -o smtpd_enforce_tls=yes
@@ -116,23 +92,6 @@ mailman   unix  -       n       n       -       -       pipe
   flags=FR user=list argv=/usr/lib/mailman/bin/postfix-to-mailman.py
   ${nexthop} ${user}
 
-# clamsmtpd filter
-scan      unix  -       -       -       -       16      smtp
-  -o smtp_send_xforward_command=yes
-
 # dovecoy deliver
 dovecot   unix  -       n       n       -       -       pipe
   flags=DRhu user=vmail:vmail argv=/usr/lib/dovecot/deliver -f ${sender} -d ${recipient}
-
-# virus sender
-virus-sender	unix	-	n	n	-	10	pipe
-  flags= user=clamsmtp argv=/usr/sbin/bearmail-virus_send $sender
-
-# dspam filter
-dspam-retrain   unix    -       n       n       -       10      pipe
-  flags= user=dspam:dspam argv=/usr/sbin/bearmail-retrain_dspam $sender $nexthop
-
-# dspam
-dspam   unix    -       n       n       -       10      pipe
-  flags=Ru user=dspam argv=/usr/bin/dspam --deliver=innocent --user $recipient -i -f $sender -- $recipient
-

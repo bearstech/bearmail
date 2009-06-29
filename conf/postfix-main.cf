@@ -17,7 +17,6 @@ home_mailbox      = Maildir/
 mailbox_command   = /usr/lib/dovecot/deliver
 virtual_transport = dovecot
 
-
 # Misc settings
 biff                = no
 append_dot_mydomain = no
@@ -36,7 +35,6 @@ smtpd_recipient_restrictions =
   permit_sasl_authenticated
   permit_mynetworks
   reject_unauth_destination
-  check_recipient_access pcre:/etc/postfix/bearmail-dspam_incoming
 
 # SASL (as auth protocol/backend, provider: dovecot)
 smtpd_sasl_auth_enable      = yes
@@ -57,8 +55,6 @@ virtual_mailbox_base    = /var/spool/imap
 virtual_minimum_uid     = 500
 virtual_uid_maps        = static:500
 virtual_gid_maps        = static:500
-transport_maps          = hash:/etc/postfix/bearmail-transport
-
 
 # Basic SPAM checks (EHLO + envelope checks)
 smtpd_helo_required = yes
@@ -82,22 +78,3 @@ smtpd_data_restrictions = reject_unauth_pipelining
 smtpd_client_restrictions =
   permit_sasl_authenticated
   check_client_access hash:/etc/postfix/bearmail-client_access
-  reject_rbl_client psbl.surriel.com
-  reject_rbl_client sbl-xbl.spamhaus.org
-  reject_rbl_client dnsbl.sorbs.net
-
-# Spam and virus filter, enabled for all incoming and outgoing messages
-# content_filter = lmtp-amavis:[127.0.0.1]:10024
-# Virus filter, enabled for all incoming and outgoing messages
-content_filter = scan:[127.0.0.1]:10025
-dspam_destination_recipient_limit = 1
-
-# dkim milter
-#smtpd_milters = unix:/var/run/dkim-filter.sock
-#unix:/var/run/dk-filter.sock
-#smtpd_milters = unix:/var/run/dkim-filter.sock unix:/var/run/dk-filter.sock
-#cleanup_milters = unix:/var/run/dkim-filter.sock unix:/var/run/dk-filter.sock
-#cleanup_milters = unix:/var/run/dkim-filter.sock
-#unix:/var/run/dk-filter.sock
-#milter_default_action = accept
-#milter_protocol = 2
