@@ -32,14 +32,14 @@ remove_section() {
        mv $BEARMAIL_OLDCONF/dovecot/dovecot.conf_original \
           $DOVECOT_CONF_DIR/dovecot.conf
   rm -f $POSTFIX_CONF_DIR/bearmail-* \
-        $DOVECOT_CONF_DIR/bearmail-* \
+        $DOVECOT_CONF_DIR/bearmail-*
 }
 
 purge_section() {
         rm -rf /etc/ssl/certs/bearmail.pem \
                /etc/ssl/private/bearmail.pem \
                /usr/share/doc/bearmail/examples/* \
-               $VMAIL_DIR/sieve \
+               $VMAIL_DIR/sieve
         rm -rf $BEARMAIL_DIR 
 }
 
