@@ -299,7 +299,7 @@ EOF
   echo "######################################################################"
   echo "# Your password for postmaster@$MY_V_FQDN"
   echo "#    is : $MY_PASSWD"
-  echo "# Do never delete this acocunt.
+  echo "# Do never delete this acocunt."
   echo "# You still can change the password if needed."
   echo "######################################################################"
   $BEARMAIL_BIN_DIR/bearmail-update
@@ -335,5 +335,5 @@ chmod 755 $BEARMAIL_CONF/bearmail.conf
 ## That's it.
 #
 bearmail-update
-echo -e "\nBearMail system is installed !"
+echo -e "\nBearMail system is installed."
 echo "See the documentation for more information."
