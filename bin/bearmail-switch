@@ -1,0 +1,61 @@
+#!/bin/sh
+
+usage() {
+  cat >&2 << EOF
+bearmail-switch <on|off|status>
+EOF
+}
+
+switch_on() {
+  is_on && { echo "Bearmail is already on."; exit 0; }
+
+  mv /etc/postfix /etc/postfix.bearmail-orig
+  ln -s /etc/bearmail/postfix /etc/postfix
+  ln -s /etc/bearmail/mailmap /etc/mailmap
+  for conf in postfix-files postfix-script post-install; do
+    cp -au etc/postfix.bearmail-orig/$conf /etc/bearmail/postfix/$conf
+  done
+  echo "Bearmail is now On."
+}
+
+switch_off() {
+  is_on || { echo "Bearmail is already off.";  exit 0; }
+
+  for conf in postfix-files postfix-script post-install; do
+    cp -au etc/postfix.bearmail-orig/$conf /etc/bearmail/postfix/$conf
+  done
+  rm /etc/postfix
+  rm /etc/mailmap
+  mv /etc/postfix.bearmail-orig /etc/postfix
+  echo "Bearmail is now Off."
+}
+
+is_on() {
+  test -f /etc/mailmap
+}
+
+status() {
+  if is_on; then
+    echo "Bearmail is currently On."  
+  else
+    echo "Bearmail is currently Off."
+  fi
+}
+
+
+case "$1" in
+  "on")
+	switch_on
+	;;
+  "off")
+	switch_off
+	;;
+  "status")
+	status
+	;;
+  *)
+	usage
+	status
+	;;
+esac
+exit 0
