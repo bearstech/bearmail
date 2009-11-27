@@ -1,0 +1,29 @@
+#!/bin/sh -e
+
+case "$1" in
+    upgrade)
+        ;;
+
+    deconfigure)
+        ;;
+    purge)
+	if [ -L /etc/mailmap ] ; then
+	   bearmail-switch off
+	fi
+	;;
+    remove)
+        if [ -L /etc/mailmap ] ; then
+           bearmail-switch off
+        fi
+        ;;
+
+    failed-upgrade)
+        ;;
+
+    *)
+        echo "prerm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+#DEBHELPER#
+exit 0
