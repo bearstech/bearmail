@@ -6,32 +6,64 @@ bearmail-switch <on|off|status>
 EOF
 }
 
+PDIR="/etc/postfix"
+BMPDIR="/etc/bearmail/postfix"
+POSTFIX_INIT="/etc/init.d/postfix reload"
+
+DDIR="/etc/dovecot"
+BMDDIR="/etc/bearmail/dovecot"
+DOVECOT_INIT="/etc/init.d/dovecot reload"
+
+
 switch_on() {
   is_on && { echo "Bearmail is already on."; exit 0; }
 
-  mv /etc/postfix /etc/postfix.bearmail-orig
+  # update of bearmail postfix configuration
+  rsync -au --delete --exclude="*bearmail*" --exclude="main.cf" \
+        --exclude="master.cf" $PDIR/ $BMPDIR/
+  mv $PDIR $PDIR.bearmail-orig
   ln -s /etc/bearmail/postfix /etc/postfix
+  postmap $PDIR/*bearmail*
+  $POSTFIX_INIT
+
+  # update of bearmail dovecot configuration
+  rsync -au --delete --exclude="*bearmail*" --exclude="dovecot.conf" \
+        $DDIR/ $BMDDIR/
+  mv $DDIR $DDIR.bearmail-orig
+  ln -s $BMDDIR $DDIR
+  $DOVECOT_INIT
+
+  # update bearmail
   ln -s /etc/bearmail/mailmap /etc/mailmap
-  for conf in postfix-files postfix-script post-install; do
-    cp -au etc/postfix.bearmail-orig/$conf /etc/bearmail/postfix/$conf
-  done
+  bearmail-update
   echo "Bearmail is now On."
 }
 
 switch_off() {
   is_on || { echo "Bearmail is already off.";  exit 0; }
 
-  for conf in postfix-files postfix-script post-install; do
-    cp -au etc/postfix.bearmail-orig/$conf /etc/bearmail/postfix/$conf
-  done
-  rm /etc/postfix
+  # update of postfix configuration
+  rsync -au --delete --exclude="*bearmail*" --exclude="main.cf" \
+        --exclude="master.cf" $BMPDIR/ $PDIR.bearmail-orig/
+  rm $PDIR
+  mv $PDIR.bearmail-orig $PDIR
+  $POSTFIX_INIT
+
+  # update of dovecot configuration
+  rsync -au --delete --exclude="*bearmail*" --exclude="dovecot.conf" \
+        $BMDDIR/ $DDIR.bearmail-orig/
+  rm $DDIR
+  mv $DDIR.bearmail-orig $DDIR
+  $DOVECOT_INIT
+
+  # update bearmail status
   rm /etc/mailmap
-  mv /etc/postfix.bearmail-orig /etc/postfix
+
   echo "Bearmail is now Off."
 }
 
 is_on() {
-  test -f /etc/mailmap
+  test -L /etc/mailmap
 }
 
 status() {
