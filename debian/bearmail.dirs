@@ -1,4 +1,6 @@
 usr/sbin
 etc/bearmail
+etc/bearmail/dovecot
+etc/bearmail/dovecot/bearmail_sieve
 usr/share/bearmail/
 usr/share/doc/bearmail

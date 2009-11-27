@@ -8,10 +8,51 @@ Homepage: http://forge.bearstech.com/trac/wiki/BearMail
 
 Package: bearmail
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, procmail, openssl, postfix, postfix-pcre, dovecot-imapd, dovecot-pop3d, libmail-sendmail-perl
+Depends: ${shlibs:Depends}, ${misc:Depends}, procmail, openssl, postfix, postfix-pcre, dovecot-imapd, dovecot-pop3d, libmail-sendmail-perl, rsync
+Suggests: bearmail-clamav, bearmail-dspam, bearmail-web
 Description: A glue and management tool for a complete mail platform
  Bearmail will help you centralize configuration for the following services:
   - Postfix (SMTP)
   - Dovecot (IMAP, POP)
   - Clam-AV anti-virus
   - Dspam anti-spam
+
+Package: bearmail-clamav
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, bearmail (= ${binary:Version}), clamsmtp, clamav-daemon
+Description: Antivirus support for Bearmail
+ Bearmail will help you centralize configuration for the following services:
+  - Postfix (SMTP)
+  - Dovecot (IMAP, POP)
+  - Clam-AV anti-virus
+  - Dspam anti-spam
+ .
+ This provides support for clamav in Bearmail. If you plan to use an antivirus
+ with Beamrail, you need this.
+
+Package: bearmail-dspam
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, bearmail (= ${binary:Version}), dspam, dspam-webfrontend
+Description: DSPAM support for Bearmail
+ Bearmail will help you centralize configuration for the following services:
+  - Postfix (SMTP)
+  - Dovecot (IMAP, POP)
+  - Clam-AV anti-virus
+  - Dspam anti-spam
+ .
+ This provides support for DSPAM in Bearmail. If you plan to use an antispam
+ with Bearmail, you need this.
+
+Package: bearmail-web
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, bearmail (= ${binary:Version})
+Description: Web interface for Bearmail
+ Bearmail will help you centralize configuration for the following services:
+  - Postfix (SMTP)
+  - Dovecot (IMAP, POP)
+  - Clam-AV anti-virus
+  - Dspam anti-spam
+ .
+ This provides support for Web interfaces in Bearmail. If you plan to use
+ a Web interface like webmail with Bearmail, you need this.
+

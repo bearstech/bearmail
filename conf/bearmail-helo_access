@@ -1,0 +1,10 @@
+# Whitelist specific HELOs with "OK" target here
+#my.computer.home       OK
+
+# Whitelist known people with BAD relays
+
+# Blacklist awful HELOs with "REJECT <reason>" here
+#my.mailserver.com      REJECT Bad HELO, see http://my.mailserver.com/policy
+localhost.localdomain   REJECT You are not me!
+127.0.0.1               REJECT You are not me!
+

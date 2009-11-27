@@ -1,11 +1,11 @@
 #!/bin/sh
 
-if [ -r /etc/bearmail/conf/bearmail.conf ]; then
-        . /etc/bearmail/conf/bearmail.conf
+if [ -r /etc/bearmail/bearmail.conf ]; then
+        . /etc/bearmail/bearmail.conf
 fi
 
-VIRUS_SENDER="virus@$MY_V_FQDN"
-ORGANIZATION="$MU_V_FQDN"
+VIRUS_SENDER="virus@$MAIN_MAIL_DOMAIN"
+ORGANIZATION="$MAIN_MAIL_DOMAIN"
 MAILTO=$RECIPIENTS
 
 # formail should be in PATH
@@ -35,7 +35,7 @@ Pour des questions de sécurité, nous vous conseillons de ne pas
 récupérer l'email en question et de demander à votre correspondant
 de vous reformuler le mail sans virus.
 
-Toutefois, durant un délais de $MY_VIRUS_TIME jours à partir d'aujourd'hui,
+Toutefois, durant un délais de $DAYS_TO_KEEP_VIRUSES jours à partir d'aujourd'hui,
 vous pourrez récupérer le message contaminé en envoyant un
 mail à $VIRUS_SENDER et en mettant pour sujet :
 $(echo "$EMAIL"|sed -e "s#/var/spool/clamsmtp/##g")
