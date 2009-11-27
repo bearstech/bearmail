@@ -20,12 +20,6 @@ if [ -r /etc/bearmail/conf/bearmail.conf ]; then
         . /etc/bearmail/conf/bearmail.conf
 fi
 
-BEARMAIL_WAS_THERE="0"
-if [ -L /etc/mailmap ] ; then
-  bearmail-switch off
-  BEARMAIL_WAS_THERE="1"
-fi
-
 purge_section() {
         rm -rf /etc/ssl/certs/bearmail.pem \
                /etc/ssl/private/bearmail.pem \
