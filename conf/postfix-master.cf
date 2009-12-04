@@ -9,6 +9,9 @@
 #smtp      inet  n       -       -       -       -       smtpd
 smtp      inet  n       -       -       -       -        smtpd
 
+## bearmail-clamav ## Do not modify this line
+## bearmail-dspam ## Do not modify this line
+
 # submission
 submission inet n       -       -       -       -       smtpd
   -o smtpd_enforce_tls=yes

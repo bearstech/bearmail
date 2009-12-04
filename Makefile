@@ -8,6 +8,7 @@ default:
 BMMAIN=usr
 BMDSPAM=usr
 BMWEB=usr
+BMCLAMAV=usr
 
 install:
 	## bearmail
@@ -26,8 +27,16 @@ install:
 	install -D -m 644 README                                                                $(BMMAIN)/usr/share/doc/bearmail/README
 	install -D -m 644 doc/man/bearmail-update.8.gz                                          $(BMMAIN)/usr/share/man/man8/bearmail-update.8.gz
 	install -D -m 644 doc/man/bearmail-switch.8.gz                                          $(BMMAIN)/usr/share/man/man8/bearmail-switch.8.gz
-	install -D -m 644 doc/man/bearmail-virus_notify.1.gz                                    $(BMMAIN)/usr/share/man/man1/bearmail-virus_notify.1.gz
-	install -D -m 644 doc/man/bearmail-virus_send.1.gz                                      $(BMMAIN)/usr/share/man/man1/bearmail-virus_send.1.gz
+
+	## bermail-clamav
+	# postfix
+	install -D -m 755 bin/bearmail-virus_send                                               $(BMCLAMAV)/usr/bin/bearmail-virus_send
+        # clamsmtp
+	install -D -m 755 bin/bearmail-virus_notify                                             $(BMCLAMAV)/usr/bin/bearmail-virus_notify
+	install -D -m 644 conf/clamsmtpd.conf                                                   $(BMCLAMAV)/etc/bearmail/clamsmtp/clamsmtpd.conf
+	# doc
+	install -D -m 644 doc/man/bearmail-virus_send.1.gz                                      $(BMCLAMAV)/usr/share/man/man1/bearmail-virus_send.1.gz
+	install -D -m 644 doc/man/bearmail-virus_notify.1.gz                                    $(BMCLAMAV)/usr/share/man/man1/bearmail-virus_notify.1.gz
 
 	## bearmail-dspam
 	# bin

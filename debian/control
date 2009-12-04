@@ -8,7 +8,7 @@ Homepage: http://forge.bearstech.com/trac/wiki/BearMail
 
 Package: bearmail
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, procmail, openssl, postfix, postfix-pcre, dovecot-imapd, dovecot-pop3d, libmail-sendmail-perl, rsync
+Depends: procmail, openssl, postfix, postfix-pcre, dovecot-imapd, dovecot-pop3d, libmail-sendmail-perl, rsync
 Suggests: bearmail-clamav, bearmail-dspam, bearmail-web
 Description: A glue and management tool for a complete mail platform
  Bearmail will help you centralize configuration for the following services:
@@ -19,7 +19,7 @@ Description: A glue and management tool for a complete mail platform
 
 Package: bearmail-clamav
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, bearmail (= ${binary:Version}), clamsmtp, clamav-daemon
+Depends: bearmail (= ${binary:Version}), clamsmtp
 Description: Antivirus support for Bearmail
  Bearmail will help you centralize configuration for the following services:
   - Postfix (SMTP)
@@ -32,7 +32,7 @@ Description: Antivirus support for Bearmail
 
 Package: bearmail-dspam
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, bearmail (= ${binary:Version}), dspam, dspam-webfrontend
+Depends: bearmail (= ${binary:Version}), dspam, dspam-webfrontend
 Description: DSPAM support for Bearmail
  Bearmail will help you centralize configuration for the following services:
   - Postfix (SMTP)
@@ -45,7 +45,7 @@ Description: DSPAM support for Bearmail
 
 Package: bearmail-web
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, bearmail (= ${binary:Version})
+Depends: bearmail (= ${binary:Version})
 Description: Web interface for Bearmail
  Bearmail will help you centralize configuration for the following services:
   - Postfix (SMTP)

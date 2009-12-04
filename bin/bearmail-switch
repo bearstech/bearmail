@@ -2,17 +2,48 @@
 
 usage() {
   cat >&2 << EOF
-bearmail-switch <on|off|status>
+bearmail-switch <on|off|status|suspend>
 EOF
 }
 
+BMDIR="/etc/bearmail"
+
 PDIR="/etc/postfix"
-BMPDIR="/etc/bearmail/postfix"
-POSTFIX_INIT="/etc/init.d/postfix reload"
+POSTFIX_INIT="/etc/init.d/postfix"
 
 DDIR="/etc/dovecot"
-BMDDIR="/etc/bearmail/dovecot"
-DOVECOT_INIT="/etc/init.d/dovecot reload"
+DOVECOT_INIT="/etc/init.d/dovecot"
+
+CDIR="/etc"
+CLAMSMTP_INIT="/etc/init.d/clamsmtp"
+
+CVDIR="/etc/clamav/"
+CVSOCK="/var/run/clamav/clamd.ctl"
+
+# check if bearmail-clamav is there and correctly configured
+if [ "$(grep "^## bearmail-clamav EOC" $BMDIR/postfix/master.cf)" ] ; then
+  if [ ! "$(grep "^LocalSocket $CVSOCK" $CVDIR/clamd.conf)" ] ; then
+    echo "Error: clamav is not configured to use socket at $CVSOCK"
+    echo "Bearmail could not start."
+    exit 1
+  else
+    BEARMAIL_CLAMAV="1"
+  fi
+fi
+
+
+suspend() {
+  SUSPEND="1"
+  switch_off
+}
+
+suspend_status() {
+  if [ -n "$SUSPEND" ] ; then
+    $* stop
+  else
+    $* restart
+  fi
+}
 
 
 switch_on() {
@@ -20,21 +51,30 @@ switch_on() {
 
   # update of bearmail postfix configuration
   rsync -au --delete --exclude="*bearmail*" --exclude="main.cf" \
-        --exclude="master.cf" $PDIR/ $BMPDIR/
+        --exclude="master.cf" $PDIR/ $BMDIR/postfix/
   mv $PDIR $PDIR.bearmail-orig
-  ln -s /etc/bearmail/postfix /etc/postfix
-  postmap $PDIR/*bearmail*
-  $POSTFIX_INIT
+  ln -s $BMDIR/postfix $PDIR
+  for bearmap in $(ls $PDIR/bearmail* | grep -v ".db"); do
+    postmap $bearmap
+  done
+  $POSTFIX_INIT restart
 
   # update of bearmail dovecot configuration
   rsync -au --delete --exclude="*bearmail*" --exclude="dovecot.conf" \
-        $DDIR/ $BMDDIR/
+        $DDIR/ $BMDIR/dovecot/
   mv $DDIR $DDIR.bearmail-orig
-  ln -s $BMDDIR $DDIR
-  $DOVECOT_INIT
+  ln -s $BMDIR/dovecot $DDIR
+  $DOVECOT_INIT restart
+
+  # update of bearmail clamsmtpd configuration
+  if [ -n "$BEARMAIL_CLAMAV" ] ; then
+    mv $CDIR/clamsmtpd.conf $CDIR/clamsmtpd.conf.bearmail-orig
+    ln -s $BMDIR/clamsmtp/clamsmtpd.conf $CDIR/clamsmtpd.conf
+    $CLAMSMTP_INIT restart
+  fi
 
   # update bearmail
-  ln -s /etc/bearmail/mailmap /etc/mailmap
+  ln -s $BMDIR/mailmap /etc/mailmap
   bearmail-update
   echo "Bearmail is now On."
 }
@@ -44,22 +84,34 @@ switch_off() {
 
   # update of postfix configuration
   rsync -au --delete --exclude="*bearmail*" --exclude="main.cf" \
-        --exclude="master.cf" $BMPDIR/ $PDIR.bearmail-orig/
+        --exclude="master.cf" $BMDIR/postfix/ $PDIR.bearmail-orig/
   rm $PDIR
   mv $PDIR.bearmail-orig $PDIR
-  $POSTFIX_INIT
+  suspend_status $POSTFIX_INIT
 
   # update of dovecot configuration
   rsync -au --delete --exclude="*bearmail*" --exclude="dovecot.conf" \
-        $BMDDIR/ $DDIR.bearmail-orig/
+        $BMDIR/dovecot/ $DDIR.bearmail-orig/
   rm $DDIR
   mv $DDIR.bearmail-orig $DDIR
-  $DOVECOT_INIT
+  suspend_status $DOVECOT_INIT
+
+  # update of bearmail clamsmtpd configuration
+  if [ -n "$BEARMAIL_CLAMAV" ] ; then
+    rm $CDIR/clamsmtpd.conf
+    mv $CDIR/clamsmtpd.conf.bearmail-orig $CDIR/clamsmtpd.conf
+    suspend_status $CLAMSMTP_INIT
+  fi
 
   # update bearmail status
   rm /etc/mailmap
 
-  echo "Bearmail is now Off."
+  # show status
+  if [ -n "$SUSPEND" ] ; then
+    echo "Mailsystem is now desactivate."
+  else
+    echo "Bearmail is now Off."
+  fi
 }
 
 is_on() {
@@ -84,6 +136,9 @@ case "$1" in
 	;;
   "status")
 	status
+	;;
+  "suspend")
+	suspend
 	;;
   *)
 	usage
