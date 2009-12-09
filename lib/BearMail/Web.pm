@@ -7,6 +7,7 @@ use CGI::Application::Plugin::AutoRunmode;
 use CGI::Application::Plugin::Session;
 use CGI::Application::Plugin::Redirect;
 use CGI::Application::Plugin::DebugScreen;
+use BearMail::Backend;
 use Data::Dumper;
 
 
@@ -34,8 +35,6 @@ sub cgiapp_prerun {
 
     my $rm   = $self->get_current_runmode;
     my $user = $self->session->param('user');
-warn "prerun: rm='$rm'";
-print STDERR Dumper($user);
 
     if (not $rm  =~ /login|reminder/ &&
         not defined $user)
