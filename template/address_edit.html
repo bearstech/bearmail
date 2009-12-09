@@ -2,38 +2,36 @@
 <TMPL_INCLUDE NAME="menu.html">
 
     <div class="main form">
-      <h1>Compte &rarr; blinet@bearstech.com</h1>
+      <h1>Compte &rarr; <TMPL_VAR NAME=ADDRESS></h1>
 
       <form method="post" action="#/address_edit">
 
         <fieldset>
           <legend>Identification</legend>
           <div>
-            <label for="password">Mot de passe</label> <input type="password" name="password" id="password" value="" />
+            <label for="password">Mot de passe</label> <input name="password" id="password" value="" /> <a href="javascript:pwgen('password', 6)">&laquo;Choisir pour moi</a>
           </div>
-          <div>
-            <label for="password_bis">Mot de passe<br/>(confirmation)</label> <input type="password" name="password_bis" id="password_bis" value="" />
-          </div>
+          <p class="explain">Si ce champ est vide, le mot de passe actuel reste inchangé.</p>
         </fieldset>
 
         <fieldset>
           <legend>Utilisation</legend>
           <div>
-            <label for="regular">Réception normale</label> <input type="radio" name="type" id="regular" value="regular" checked="checked" /> 
+            <label for="regular">Réception normale</label> <input type="radio" name="type" id="regular" value="regular"<TMPL_IF NAME=TYPE_REGULAR> checked="on"</TMPL_IF> /> 
           </div>
 
           <div class="group">
             <div>
-              <label for="alias">Redirection</label> <input type="radio" name="type" id="alias" value="alias" /> 
+              <label for="alias">Redirection</label> <input type="radio" name="type" id="alias" value="alias"<TMPL_IF NAME=TYPE_ALIAS> checked="on"</TMPL_IF> />
             </div>
             <div>
-              <label for="aliases">... vers</label> <textarea name="aliases" id="aliases" cols="*" rows="2">lbonnet@bearstech.com, toto@pipo.com</textarea>
+              <label for="aliases">... vers</label> <textarea name="aliases" id="aliases" cols="*" rows="2"><TMPL_VAR NAME=ALIASES></textarea>
             </div>
           </div>
 
           <div class="group">
             <div>
-              <label for="holiday">Vacances</label> <input type="radio" name="type" id="holiday" value="holiday" /> 
+              <label for="holiday">Vacances</label> <input type="radio" name="type" id="holiday" value="holiday"<TMPL_IF NAME=TYPE_HOLIDAY> checked="on"</TMPL_IF> /> 
             </div>
             <div>
               <label for="holiday_end">... jusqu'au</label> <input type="text" name="holiday_end" id="holiday_end" value="25/09/2008" /> (JJ/MM/AAAA)
@@ -50,5 +48,6 @@
     <script type="text/javascript"><!--
     try { document.getElementById('cancel').focus(); } catch (e) {}
     --></script>
+    <script type="text/javascript" src="#/../pwgen.js"></script>
 
 <TMPL_INCLUDE NAME="footer.html">

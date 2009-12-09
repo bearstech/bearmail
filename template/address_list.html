@@ -10,46 +10,13 @@
           <th>Configuration</th>
           <th>Action</th>
         </tr>
-        <tr class="odd">
-          <td class="key">blinet</td>
-          <td><em>Vacances &rarr; 25 Sept.</em></td>
-          <td><a href="#/address_edit">Modifier</a> | <a href="#/address_delete">Supprimer</a></td>
+<TMPL_LOOP NAME=ADDRESSES>
+        <tr class="<TMPL_VAR NAME=STRIPE>">
+          <td class="key"><TMPL_VAR NAME=ADDRESS_LOCAL></td>
+          <td><TMPL_VAR NAME=INFO></td>
+          <td><a href="#/address_edit?address=<TMPL_VAR NAME=ADDRESS ESCAPE=URL>">Modifier</a> | <a href="#/address_delete?address=<TMPL_VAR NAME=ADDRESS ESCAPE=URL>">Supprimer</a></td>
         </tr>
-        <tr class="even">
-          <td class="key">jcharpentier</td>
-          <td>Normal</td>
-          <td><a href="#/address_edit">Modifier</a> | <a href="#/address_delete">Supprimer</a></td>
-        </tr>
-        <tr class="odd">
-          <td class="key">lbonnet</td>
-          <td>Normal</td>
-          <td><a href="#/address_edit">Modifier</a> | <a href="#/address_delete">Supprimer</a></td>
-        </tr>
-        <tr class="even">
-          <td class="key">lhaond</td>
-          <td>Redirection &rarr; x@u-nix.com</td>
-          <td><a href="#/address_edit">Modifier</a> | <a href="#/address_delete">Supprimer</a></td>
-        </tr>
-        <tr class="odd">
-          <td class="key">lmontagne</td>
-          <td>Normal</td>
-          <td><a href="#/address_edit">Modifier</a> | <a href="#/address_delete">Supprimer</a></td>
-        </tr>
-        <tr class="even">
-          <td class="key">postmaster</td>
-          <td>Redirection &rarr; blinet@bearstech.com</td>
-          <td><a href="#/address_edit">Modifier</a></td>
-        </tr>
-        <tr class="odd">
-          <td class="key">saguiton</td>
-          <td>Normal</td>
-          <td><a href="#/address_edit">Modifier</a> | <a href="#/address_delete">Supprimer</a></td>
-        </tr>
-        <tr class="even">
-          <td class="key">vcaron</td>
-          <td>Redirection &rarr; admin@zerodeux.net, [...]</td>
-          <td><a href="#/address_edit">Modifier</a> | <a href="#/address_delete">Supprimer</a></td>
-        </tr>
+</TMPL_LOOP>
       </table>
     </div>
 

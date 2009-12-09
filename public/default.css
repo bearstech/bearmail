@@ -249,6 +249,9 @@ table.browser {
   margin: 0 auto;
   text-align: center;
 }
+.form p.explain {
+  font-style: italic;
+}
 .form a, .form a:visited {
   color: #369;
   background-color: inherit;

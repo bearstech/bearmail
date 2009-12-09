@@ -10,46 +10,13 @@
           <th>Informations</th>
           <th>Action</th>
         </tr>
-        <tr class="odd">
-          <td class="key">bearstech.com</td>
-          <td>48 adresses</td>
-          <td><a href="#/address_list">Modifier</a></td>
+<TMPL_LOOP NAME=DOMAINS>
+        <tr class="<TMPL_VAR NAME=STRIPE>">
+          <td class="key"><TMPL_VAR NAME=NAME></td>
+          <td><TMPL_VAR NAME=INFO></td>
+          <td><a href="#/address_list?domain=<TMPL_VAR NAME=NAME>">Modifier</a> | <a href="#/domain_delete?domain=<TMPL_VAR NAME=NAME>">Supprimer</a></td>
         </tr>
-        <tr class="even">
-          <td class="key">bearstech.net</td>
-          <td>&rarr; bearstech.com</td>
-          <td><a href="#/address_list">Modifier</a> | <a href="#/domain_delete">Supprimer</a></td>
-        </tr>
-        <tr class="odd">
-          <td class="key">bearstech.org</td>
-          <td>&rarr; bearstech.com</td>
-          <td><a href="#/address_list">Modifier</a> | <a href="#/domain_delete">Supprimer</a></td>
-        </tr>
-        <tr class="even">
-          <td class="key">btux.org</td>
-          <td>7 adresses</td>
-          <td><a href="#/address_list">Modifier</a> | <a href="#/domain_delete">Supprimer</a></td>
-        </tr>
-        <tr class="odd">
-          <td class="key">af83.com</td>
-          <td>75 adresses</td>
-          <td><a href="#/address_list">Modifier</a> | <a href="#/domain_delete">Supprimer</a></td>
-        </tr>
-        <tr class="even">
-          <td class="key">fabernovel.com</td>
-          <td>32 adresses</td>
-          <td><a href="#/address_list">Modifier</a> | <a href="#/domain_delete">Supprimer</a></td>
-        </tr>
-        <tr class="odd">
-          <td class="key">silicon-sentier.org</td>
-          <td>21 adresses</td>
-          <td><a href="#/address_list">Modifier</a> | <a href="#/domain_delete">Supprimer</a></td>
-        </tr>
-        <tr class="even">
-        <td class="key">lacantine.org</td>
-          <td>1 adresse</td>
-          <td><a href="#/address_list">Modifier</a> | <a href="#/domain_delete">Supprimer</a></td>
-        </tr>
+</TMPL_LOOP>
       </table>
     </div>
 
