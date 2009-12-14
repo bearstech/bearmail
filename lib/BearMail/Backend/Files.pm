@@ -1,4 +1,7 @@
 package BearMail::Backend::Files;
+use Carp;
+use Exporter 'import';
+@EXPORT_OK = qw(new commit apply get_domains get_users get_user set_domain set_address add_domain add_address del_domain del_address); 
 
 # Implement mail-platform configuration via a plain file storage schema.
 #
@@ -17,17 +20,20 @@ package BearMail::Backend::Files;
 # from 'bearmail-update' which has been stashed in the 'Implementation' part
 # of this package.
 
-use Carp;
 
 my %records;
 my %by_domain;
 my @domains;
-
+my $mailmap = "/etc/bearmail/mailmap";
+my $debug = 0;
 
 sub new() {
   my ($class, %args) = @_;
 
   bless \%args, $class;
+
+  $mailmap = $args{'mailmap'} if $args{'mailmap'};
+  $debug = 1 if ($args{'debug'} eq 1);
 
   _read_mailmap();
   return \%args;
@@ -87,8 +93,6 @@ sub del_address() {
 # Implementation
 #
 
-my $mailmap = "/etc/bearmail/mailmap";
-my $debug = 0;
 
 my %files;
 my %allowed = (
@@ -112,14 +116,14 @@ my %allowed = (
 sub _read_mailmap {
   return if %records; # Parse mailmap only once
 
-  open(MAILMAP, "<$mailmap") or die "$mailmap: $!";
+  open(MAILMAP, "<$mailmap") or croak "$mailmap: $!";
 
   while(<MAILMAP>) {
     chomp;
     next if /^$/ or /^#/;  # Ignore empty lines and comments
 
     my @fields = split /:/;
-    die "got ".scalar(@fields)." fields, expected 3" if @fields != 3;
+    croak "got ".scalar(@fields)." fields, expected 3" if @fields != 3;
 
     my %rec;
     my @types;
@@ -129,7 +133,7 @@ sub _read_mailmap {
       $rec{$_} = $field;
     }
     my $type = $allowed{"@types"};
-    die "unsupported configuration (@types)" if !defined $type;
+    croak "unsupported configuration (@types)" if !defined $type;
 
     # Users are key'ed by lowercase address (must be unique)
     $records{lc $rec{'address'}} = \%rec;
@@ -152,14 +156,14 @@ sub _check_field {
   if ($key eq 'address') {
     my $addr = $val;
     $addr =~ s/^\*@/x@/;  # Allow catch-all
-    die "malformed address: $val" if not _check_address($addr);
-    die "non-unique address: $val" if defined $records{lc $val};
+    croak "malformed address: $val" if not _check_address($addr);
+    croak "non-unique address: $val" if defined $records{lc $val};
 
     return $val =~ m/^\*@/ ? 'addr_catchall' : 'addr_normal';
   }
   elsif ($key eq 'password') {
     return 'pw_none' if $val eq '';  # Non-login account
-    die "malformed password hash: $val" if not $val =~ /^[0-9a-f]{32}$/;
+    croak "malformed password hash: $val" if not $val =~ /^[0-9a-f]{32}$/;
 
     return 'pw_md5';
   }
@@ -169,10 +173,10 @@ sub _check_field {
     my $type = ($val =~ s/^\*@/x@/) ?   # Allow domain aliases (a single *@-like address)
       'domain_alias' : 'aliases';
     my @aliases = split(/,/, $val);
-    die "can ony alias one domain at once" if @aliases > 1 && $type eq 'domain_alias';
+    croak "can ony alias one domain at once" if @aliases > 1 && $type eq 'domain_alias';
 
     foreach (@aliases) {
-      die "malformed address: $_" if not _check_address($_);
+      croak "malformed address: $_" if not _check_address($_);
     }
     return $type;
   }
@@ -279,7 +283,7 @@ sub _write_conf {
 
   foreach (sort keys %files) {
     if (!$debug) {
-      open(CONF, ">$_") or die "$_: $!";
+      open(CONF, ">$_") or croak "$_: $!";
       select CONF;
     } else {
       print "--\n-- $_\n--\n";
