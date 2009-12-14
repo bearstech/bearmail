@@ -30,6 +30,7 @@ sub new() {
   bless \%args, $class;
 
   _read_mailmap();
+  return \%args;
 }
 
 sub commit() {
