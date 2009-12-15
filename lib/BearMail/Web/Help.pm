@@ -26,6 +26,7 @@ sub help : StartRunMode {
     my $self = shift;
 
     my $tmpl = $self->load_tmpl('help.html');
+    $tmpl->param(CURRENT_IS_HELP => 1);
     return $tmpl->output;
 }
 

@@ -1,11 +1,11 @@
     <div id="menu">
       <img id="logo" src="/menu-logo.png" alt="Bearmail logo" />
       <ul>
-        <li><a href="#/domain_list" id="current">Domaines</a></li><!--
-     --><li><a href="#/domain_new">Nouveau domaine</a></li><!--
-     --><li><a href="#/address_new">Nouveau compte</a></li><!--
-     --><li><a href="#/login">Déconnexion</a></li><!--
-     --><li><a href="#/help">Aide</a></li>
+        <li><a href="#/domain_list"<TMPL_IF NAME="CURRENT_IS_DOMAIN_LIST"> class="current"</TMPL_IF>>Domaines</a></li><!--
+     --><li><a href="#/domain_new"<TMPL_IF NAME="CURRENT_IS_DOMAIN_NEW"> class="current"</TMPL_IF>>Nouveau domaine</a></li><!--
+     --><li><a href="#/address_new"<TMPL_IF NAME="CURRENT_IS_ADDRESS_NEW"> class="current"</TMPL_IF>>Nouveau compte</a></li><!--
+     --><li><a href="#/login"<TMPL_IF NAME="CURRENT_IS_LOGIN"> class="current"</TMPL_IF>>Déconnexion</a></li><!--
+     --><li><a href="#/help"<TMPL_IF NAME="CURRENT_IS_HELP"> class="current"</TMPL_IF>>Aide</a></li>
       </ul>
     </div>
 

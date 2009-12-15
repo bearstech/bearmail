@@ -26,6 +26,7 @@ sub default : StartRunMode {
     my $self = shift;
 
     my $tmpl = $self->load_tmpl('domain_new.html');
+    $tmpl->param(CURRENT_IS_DOMAIN_NEW => 1);
     return $tmpl->output;
 }
 

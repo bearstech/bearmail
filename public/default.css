@@ -88,7 +88,7 @@ body {
   padding: .25em 1em;
   border-right: 1px solid #fff;
 }
-#menu li a#current, #menu li a:hover {
+#menu li a.current, #menu li a:hover {
   background-color: #69c;
   color: #fff;
 }

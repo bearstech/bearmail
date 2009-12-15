@@ -36,6 +36,7 @@ sub default : StartRunMode {
 
     my $tmpl = $self->load_tmpl('domain_list.html');
     $tmpl->param(DOMAINS => \@domains);
+    $tmpl->param(CURRENT_IS_DOMAIN_LIST => 1);
     return $tmpl->output;
 }
 
