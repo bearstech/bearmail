@@ -1,7 +1,50 @@
 #!/usr/bin/perl
+
+# bearmail-update - part of bearmail
+# # Copyright (C) 2009 Bearstech - http://bearstech.com/
+# #
+# # This program is free software: you can redistribute it and/or modify
+# # it under the terms of the GNU General Public License as published by
+# # the Free Software Foundation, either version 3 of the License, or
+# # (at your option) any later version.
+# #
+# # This program is distributed in the hope that it will be useful,
+# # but WITHOUT ANY WARRANTY; without even the implied warranty of
+# # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# # GNU General Public License for more details.
+# #
+# # You should have received a copy of the GNU General Public License
+# # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
 use lib '../lib';
 use BearMail::Backend::Files;
+use Getopt::Long qw(:config no_auto_abbrev no_ignore_case bundling);
+
+# options
+my $debug = 0;
+my $mailmap;
+my $help;
+
+GetOptions(
+	'd|debug'	=> \$debug,
+	'c|config=s'	=> \$mailmap,
+	'h|help'	=> \$help,
+);
+
+usage() if $help;
+
+my $b = BearMail::Backend::Files->new( debug => $debug, mailmap => $mailmap ); # Parse 'mailmap'
+$b->apply();                               # Generate Postfix+Dovecot conf files and reload them
 
 
-my $b = BearMail::Backend::Files->new( debug => 0, mailmap => '/etc/mailmap' ); # Parse 'mailmap'
-$b->apply();                             # Generate Postfix+Dovecot conf files and reload them
+sub usage {
+  print STDERR <<EOF;
+Usage: bearmail-update [OPTIONS]
+
+Options:
+  -c,  --config		Configuration file path (mailmap)
+  -d,  --debug		Print on screen instead of writing files
+  -h,  --help		Display usage
+EOF
+}
