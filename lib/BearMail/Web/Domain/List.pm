@@ -24,7 +24,9 @@ sub default : StartRunMode {
     my $self = shift;
 
     my $be = BearMail::Backend::backend();
-    my @domains = $be->get_domains();
+    my $user = $self->session->param('user');
+		$user = 'sbocahu@bearstech.com'; #FIXME
+    my @domains = $be->get_postmaster_domains($user);
 
     my $n = 0;
     foreach (@domains) {

@@ -19,6 +19,7 @@ package BearMail::Web::Login;
 
 use strict;
 use base 'BearMail::Web';
+use Digest::MD5 qw(md5_hex);
 
 sub login : StartRunMode {
     my $self = shift;
@@ -27,12 +28,14 @@ sub login : StartRunMode {
     my $email = $q->param('email') || '';
     my $pass  = $q->param('password') || '';
 
-    if ($email eq 'admin' &&
-        $pass eq 'admin')
-    {
-        $self->session->param('user', 'admin');
+    my $b = BearMail::Backend::backend();
+    my %postmasters = $b->get_postmasters();
+    
+
+    if(exists($postmasters{$email}) and $postmasters{$email} eq md5_hex($pass)) {
+        $self->session->param('user', $email);
         my $intent = $self->session->param('intent') || 'domain_list';
-warn "Login successful, redirecting to intent='$intent'";
+        warn "Login successful, redirecting to intent='$intent'";
         return $self->redirect($self->url($intent));
     }
 

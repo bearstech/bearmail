@@ -17,7 +17,7 @@ package BearMail::Backend::Files;
 
 use Carp;
 use Exporter 'import';
-@EXPORT_OK = qw(new commit apply get_domains get_users get_user set_domain set_address add_domain add_address del_domain del_address); 
+@EXPORT_OK = qw(new commit apply get_domains get_users get_user set_domain set_address add_domain add_address del_domain del_address get_postmasters get_postmaster_domains); 
 
 # Implement mail-platform configuration via a plain file storage schema.
 #
@@ -104,6 +104,22 @@ sub del_domain() {
 sub del_address() {
 }
 
+sub get_postmasters() {
+  my ($self) = @_;
+  my %npostmasters;
+  foreach(keys(%postmasters)) {
+    $npostmasters{$_} = $postmasters{$_}->{password};
+  }
+#my %npostmasters = map { $_ => $postmasters{$_}->{password} } %postmasters;
+  return \%npostmasters;
+}
+
+sub get_postmaster_domains() {
+  my ($self, $user) = @_;
+  my @hashed;
+  push(@hashed, { name => $_ }) foreach @{$postmasters{$user}->{domains}};
+  return @hashed;
+}
 
 #
 # Implementation
@@ -218,8 +234,27 @@ sub _sort_mailmap {
     push @{$by_domain{$domain}}, $records{$_};
   }
 
-  foreach (keys %by_domain) {
-    @{$by_domain{$_}} = sort { $a->{'address'} cmp $b->{'address'} } @{$by_domain{$_}};
+  foreach my $dom (keys %by_domain) {
+    @{$by_domain{$dom}} = sort { $a->{'address'} cmp $b->{'address'} } @{$by_domain{$dom}};
+    foreach(@{$by_domain{$dom}}) {
+      next if ($_->{address_local} ne 'postmaster');
+      if($_->{password}) {
+        if(exists($postmasters{$_->{address}})) {
+          push(@{$postmasters{$_->{address}}->{domains}}, $dom);
+        } else {
+          $postmasters{$_->{address}} = { password => $_->{password}, domains => [ $dom ] };
+        }
+      } else {
+        foreach(split(',', $_->{target})) {
+          next if (!$records{$_}->{password}); # FIXME: keep ? Security pupose: don't keep postmasters without passwords
+          if(exists($postmasters{$_})) {
+            push(@{$postmasters{$_}->{domains}}, $dom);
+          } else {
+            $postmasters{$_} = { password => $records{$_}->{password}, domains => [ $dom ] };
+          }
+        }
+      }
+    }
   }
   @domains = sort keys %by_domain;
 }

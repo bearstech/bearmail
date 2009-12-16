@@ -15,3 +15,5 @@ fortune@company.com::|/bin/fortune
 # domain_alias
 *@other.com::*@spam.com
 
+# postmaster
+postmaster@company.com::info@company.com,bob@company.com

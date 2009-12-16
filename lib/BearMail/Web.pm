@@ -40,8 +40,9 @@ sub setup {
 sub cgiapp_init {
     my $self = shift;
 
-    $self->session_config(
-      COOKIE_PARAMS => { -name => 'bearmail', -expires => '+8days' }
+    $self->session_config (
+      COOKIE_PARAMS => { -name => 'bearmail', -expires => '+8days' },
+      SEND_COOKIE         => 1,
     );
 }
 
