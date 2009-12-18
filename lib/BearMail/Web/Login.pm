@@ -29,11 +29,21 @@ sub login : StartRunMode {
     my $pass  = $q->param('password') || '';
 
     my $b = BearMail::Backend::backend();
-    my %postmasters = $b->get_postmasters();
-    
 
-    if(exists($postmasters{$email}) and $postmasters{$email} eq md5_hex($pass)) {
+    if(exists(%{$self->cfg('admins')}->{$email})
+       and %{$self->cfg('admins')}->{$email} eq md5_hex($pass)) {
+
         $self->session->param('user', $email);
+        $self->session->param('level', 'admin');
+        my $intent = $self->session->param('intent') || 'domain_list';
+        warn "Login successful, redirecting to intent='$intent'";
+        return $self->redirect($self->url($intent));
+
+    } elsif(exists(%{$b->get_postmasters()}->{$email})
+            and %{$b->get_postmasters()}->{$email} eq md5_hex($pass)) {
+
+        $self->session->param('user', $email);
+        $self->session->param('level', 'postmaster');
         my $intent = $self->session->param('intent') || 'domain_list';
         warn "Login successful, redirecting to intent='$intent'";
         return $self->redirect($self->url($intent));

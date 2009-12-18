@@ -22,6 +22,7 @@ use CGI::Application::Plugin::AutoRunmode;
 use CGI::Application::Plugin::Session;
 use CGI::Application::Plugin::Redirect;
 use CGI::Application::Plugin::DebugScreen;
+use CGI::Application::Plugin::ConfigAuto (qw/cfg_file cfg/);
 use BearMail::Backend;
 use Data::Dumper;
 
@@ -35,6 +36,9 @@ sub setup {
 
     # Give some interesting characteristics to our HTML::Template's
     $self->add_callback('load_tmpl', \&_my_load_tmpl);
+
+    # use a configuration file
+    $self->cfg_file('/home/bear/bearmail/conf/bearmail-web.pl');
 }
 
 sub cgiapp_init {
@@ -44,6 +48,7 @@ sub cgiapp_init {
       COOKIE_PARAMS => { -name => 'bearmail', -expires => '+8days' },
       SEND_COOKIE         => 1,
     );
+    CGI::Session->name('bearmail');
 }
 
 sub cgiapp_prerun {
@@ -52,11 +57,9 @@ sub cgiapp_prerun {
     my $rm   = $self->get_current_runmode;
     my $user = $self->session->param('user');
 
-    if (not $rm  =~ /login|reminder/ &&
-        not defined $user)
-    {
-      $self->session->param('intent', $rm);
-#      return $self->redirect($self->url('login'));
+    if ((not $rm  =~ /login|reminder/) and (not defined $user)) {
+      $self->session->param('intent', $ENV{PATH_INFO}."/".$rm); #FIXME: should be something like path/runmode?args i guess. or should we drop the runmode ?
+      return $self->redirect($self->url('login'));
     }
 }
 
