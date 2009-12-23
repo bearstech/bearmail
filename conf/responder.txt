@@ -1,9 +1,0 @@
-Hello,
-
-  I am currently testing the autoresponder feature so you
-  might be quite annoyed by this stupid automatic message.
-
-  Sorry for the inconvenience. Yours truthfully,
-
-  Bob Bot
-

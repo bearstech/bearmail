@@ -1,0 +1,70 @@
+#!/bin/bash
+set -e
+
+BMPMAS="/etc/bearmail/postfix/master.cf"
+BMPMAI="/etc/bearmail/postfix/main.cf"
+BMDDIR="/etc/bearmail/dspam/"
+
+if [ "$1" = "configure" ]; then
+  # check if bearmail was activate
+  if [ -L /etc/mailmap ] ; then
+    bearmail-switch suspend
+    BEARMAIL_ON="1"
+  fi
+
+  # configure master.cf :
+  if [ ! "$(grep "^## bearmail-antispam - EOC" $BMPMAS)" ]; then
+    sed -e '\!^## bearmail-antispam$!a\
+# bearmail dspam filter\
+bearmail_dspam     unix  -       -       n       -       10      lmtp\
+ -o smtp_send_xforward_command=yes\
+ -o disable_mime_output_conversion=yes\
+ -o smtp_generic_maps=\
+\
+# bearmail dspam retrainer\
+bearmail_dspam-retrain   unix    -       n       n       -       10      pipe\
+  flags= user=dspam:dspam argv=/etc/bearmail/bearmail-retrain_dspam $sender $nexthop\
+\
+# dspam outgoing port\
+127.0.0.1:10027 inet    n       -       n       -       -       smtpd\
+  -o smtpd_authorized_xforward_hosts=127.0.0.0/8\
+  -o smtpd_client_restrictions=\
+  -o smtpd_helo_restrictions=\
+  -o smtpd_sender_restrictions=\
+  -o smtpd_recipient_restrictions=permit_mynetworks,reject\
+  -o mynetworks=127.0.0.0/8\
+  -o receive_override_options=no_unknown_recipient_checks\
+\
+#\
+## bearmail-antispam - EOC
+' -i $BMPMAS
+    sed '/./,/^$/!d' -i $BMPMAS
+  fi
+
+  # configure main.cf
+  if [ ! "$(grep "^# bearmail-antispam - EOC" $BMPMAI)" ]; then
+    sed -e '\!^# bearmail-antispam$!a\
+dspam_destination_recipient_limit = 1\
+# bearmail-antispam - EOC
+' -i $BMPMAI
+  fi
+  if [ ! "$(grep "bearmail-dspam_incoming" $BMPMAI)" ] ; then
+    sed -e '\!^# RCPT TO access restrictions - EOC$!i\
+  check_policy_service inet:127.0.0.1:60000\
+  check_recipient_access pcre:/etc/postfix/bearmail-dspam_incoming
+' -i $BMPMAI
+    sed '/./,/^$/!d' -i $BMPMAI
+  fi
+
+  # conf default dspam
+  if [ "$(grep "^START=no" /etc/default/dspam)" ] ; then
+    sed -e "s/^START=no/START=yes/" -i /etc/default/dspam
+  fi
+
+  # restart bearmail if needed
+  if [ "$BEARMAIL_ON" ] ; then
+    echo "Restarting bearmail"
+    bearmail-switch on
+  fi
+fi  
+#DEBHELPER# 

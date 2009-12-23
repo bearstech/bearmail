@@ -1,4 +1,4 @@
-package BearMail::Backend::Files;
+package Backend::Files;
 
 # Copyright (C) 2009 Bearstech - http://bearstech.com/
 #
@@ -260,11 +260,11 @@ sub _sort_mailmap {
 }
 
 # Postfix conf files, expected settings in main.cf:
-#   virtual_mailbox_domains   = hash:/etc/postfix/virtual_domains
-#   virtual_mailbox_mailboxes = hash:/etc/postfix/virtual_mailboxes
-#   virtual_alias_maps        = hash:/etc/postfix/virtual_aliases
+#   virtual_mailbox_domains   = hash:/etc/postfix/bearmail-virtual_domains
+#   virtual_mailbox_mailboxes = hash:/etc/postfix/bearmail-virtual_mailboxes
+#   virtual_alias_maps        = hash:/etc/postfix/bearmail-virtual_aliases
 #   alias_maps                = hash:/etc/aliases,
-#                               hash:/etc/postfix/virtual_pipes
+#                               hash:/etc/postfix/bearmail-virtual_pipes
 sub _prepare_postfix_conf {
   my $virtual_domains   = join("\n", map { "$_ dummy" } @domains);
   my $virtual_mailboxes = '';
@@ -298,10 +298,10 @@ sub _prepare_postfix_conf {
     }
   }
 
-  $files{'/etc/postfix/virtual_domains'}   = $virtual_domains;
-  $files{'/etc/postfix/virtual_mailboxes'} = $virtual_mailboxes;
-  $files{'/etc/postfix/virtual_aliases'}   = $virtual_aliases;
-  $files{'/etc/postfix/virtual_pipes'}     = $virtual_pipes;
+  $files{'/etc/postfix/bearmail-virtual_domains'}   = $virtual_domains;
+  $files{'/etc/postfix/bearmail-virtual_mailboxes'} = $virtual_mailboxes;
+  $files{'/etc/postfix/bearmail-virtual_aliases'}   = $virtual_aliases;
+  $files{'/etc/postfix/bearmail-virtual_pipes'}     = $virtual_pipes;
 }
 
 # Dovecot auth files, expected settings in dovecot.cf:
@@ -323,10 +323,10 @@ sub _prepare_dovecot_conf {
 
       my $address  = $_->{'address'};
       my $local    = $_->{'address_local'};
-      $passwd .= "$address:{PLAIN-MD5}$password:500:500::/var/spool/imap/$d/${local}::\n";
+      $passwd .= "$address:{PLAIN-MD5}$password:bearmail:bearmail::/var/spool/bearmail/$d/${local}::\n";
     }
   }
-  $files{"/etc/dovecot/passwd"} = $passwd;
+  $files{"/etc/dovecot/bearmail-passwd"} = $passwd;
 }
 
 sub _write_conf {

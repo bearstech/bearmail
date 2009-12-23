@@ -6,7 +6,7 @@ default:
 
 
 BMMAIN=usr
-BMDSPAM=usr
+BMASPAM=usr
 BMWEB=usr
 BMCLAMAV=usr
 
@@ -16,6 +16,9 @@ install:
 	install -D -m 755 bin/bearmail-update                                                   $(BMMAIN)/usr/sbin/bearmail-update
 	install -D -m 755 bin/bearmail-switch                                                   $(BMMAIN)/usr/sbin/bearmail-switch
 	install -D -m 644 conf/bearmail.conf                                                    $(BMMAIN)/etc/bearmail/bearmail.conf
+	# libs
+	install -D -m 644 lib/BearMail/Backend.pm                                               $(BMMAIN)/usr/share/bearmail/lib/Backend.pm
+	install -D -m 644 lib/BearMail/Backend/Files.pm                                         $(BMMAIN)/usr/share/bearmail/lib/Backend/Files.pm
 	# postfix
 	install -D -m 644 conf/postfix-main.cf                                                  $(BMMAIN)/etc/bearmail/postfix/main.cf
 	install -D -m 644 conf/postfix-master.cf                                                $(BMMAIN)/etc/bearmail/postfix/master.cf
@@ -40,17 +43,15 @@ install:
 
 	## bearmail-dspam
 	# bin
-	install -D -m 755 bin/bearmail-retrain_dspam                                            $(BMDSPAM)/usr/bin/bearmail-retrain_dspam
-	install -D -m 755 bin/bearmail-dspam_cleaner                                            $(BMDSPAM)/usr/bin/bearmail-dspam_cleaner
+	install -D -m 755 bin/bearmail-retrain_dspam                                            $(BMASPAM)/usr/bin/bearmail-retrain_dspam
+	install -D -m 755 bin/bearmail-dspam_cleaner                                            $(BMASPAM)/usr/sbin/bearmail-dspam_cleaner
 	# conf
-	install -D -m 644 conf/dspam/dspam.conf                                                 $(BMDSPAM)/etc/bearmail/dspam/dspam.conf
-	install -D -m 644 conf/dspam/default.prefs                                              $(BMDSPAM)/etc/bearmail/dspam/default.prefs
-	install -D -m 744 conf/dspam/dspam_tricks/auth.cgi                                      $(BMDSPAM)/etc/bearmail/dspam/dspam_tricks/auth.cgi
-	install -D -m 744 conf/dspam/dspam_tricks/dspam_stats_wrapper.pl                        $(BMDSPAM)/etc/bearmail/dspam/dspam_tricks/dspam_stats_wrapper.pl
-	install -D -m 644 conf/dspam/dspam_tricks/nav_login.html                                $(BMDSPAM)/etc/bearmail/dspam/dspam_tricks/nav_login.html
+	install -D -m 644 conf/dspam/dspam.conf                                                 $(BMASPAM)/etc/bearmail/dspam/dspam.conf
+	install -D -m 644 conf/dspam/default.prefs                                              $(BMASPAM)/etc/bearmail/dspam/default.prefs
+	install -D -m 644 conf/bearmail-dspam_incoming                                          $(BMASPAM)/etc/bearmail/postfix/bearmail-dspam_incoming
 	# doc
-	install -D -m 644 doc/man/bearmail-retrain_dspam.1.gz                                   $(BMDSPAM)/usr/share/man/man1/bearmail-retrain_dspam.1.gz
-	install -D -m 644 doc/man/bearmail-dspam_cleaner.1.gz                                   $(BMDSPAM)/usr/share/man/man1/bearmail-dspam_cleaner.1.gz
+	install -D -m 644 doc/man/bearmail-retrain_dspam.1.gz                                   $(BMASPAM)/usr/share/man/man1/bearmail-retrain_dspam.1.gz
+	install -D -m 644 doc/man/bearmail-dspam_cleaner.8.gz                                   $(BMASPAM)/usr/share/man/man8/bearmail-dspam_cleaner.8.gz
 
 	## bearmail-web
 	# dspam-conf
@@ -114,7 +115,7 @@ install:
 	install -D -m 644 doc/mail-clients/fr/img/thunderbird.7.png                             $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.7.png
 	install -D -m 644 doc/mail-clients/fr/img/thunderbird.8.png                             $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.8.png
 	install -D -m 644 doc/mail-clients/fr/img/thunderbird.9.png                             $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.9.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.10.png                            $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.10.png                       
+	install -D -m 644 doc/mail-clients/fr/img/thunderbird.10.png                            $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.10.png
 	install -D -m 644 doc/mail-clients/fr/img/thunderbird.11.png                            $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.11.png
 	install -D -m 644 doc/mail-clients/fr/img/thunderbird.12.png                            $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.12.png
 	install -D -m 644 doc/mail-clients/fr/img/thunderbird.13.png                            $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.13.png

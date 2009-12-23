@@ -17,41 +17,37 @@
 
 # bearmail-dspam_cleaner - part of bearmail
 #
-# This is a script for differents actions about Dspam dictionaries.
+# This is a script for different actions about Dspam dictionaries.
 # It can make a fast check or a simple check about validity of a
 # Dspam dictionary in bearmail environment. It can also clean, 
 # compress and make a backup of dictionaries.
-# Mainly created for crontab script, it can also be lunch classicaly
-# Ex: ./dspam_cleaner.sh --fast-check --verbose
+# Mainly created for crontab script, it can also be launch classicaly
 #
-# Example for cron script :
-# 1 1 1 * * root /usr/sbin/dspam_cleaner.sh --clean
-# */5 * * * * root /usr/sbin/dspam_cleaner.sh --fast-check
+# Ex: beamrail-dspam_cleaner --dictionary-check --verbose --mail mailadmin@domain.tld
 
 NAME=${0##*/}
 MAILMAP="/etc/bearmail/mailmap"
-DSPAM_HOME="/var/spool/dspam/data"
-DSPAM_BKP="/var/tmp/dspam_dictionaries_backup"
-TAIL="500"
-MAIL_LOGS="/var/log/mail/mail.log"
-
-CHECK_CSS=`tail -n $TAIL $MAIL_LOGS | grep "dspam.sock\]: Connection refused"`
-CSS_OUT=`tail -n $TAIL $MAIL_LOGS | grep "dspam.sock\] while sending end of data"|tail -n1|sed -e "s/.*<//g; s/>.*//g"`
-HOSTED_DOMAINS=`sed -n '/:local/!d; /^\#/!p' $MAILMAP | sed '/:.*/ s/:.*//g; /.*@/ s/.*@//g' | sort | uniq`
-
+HOSTED_DOMAINS=$(grep ":local" $MAILMAP | grep -v "#" | \
+                 sed "s/.*@//;s/:.*//" | sort | uniq)
+DSPAM_DATA_HOME="/var/spool/dspam/data"
+DSPAM_CSS_BKP="/var/tmp/dspam_dictionaries_backup"
+DSPAM_USER="dspam"
+RESTART_DSPAM='/etc/init.d/dspam restart'
 
 function usage() {
-cat <<EOF
+cat << EOF
 Usage: $NAME [OPTION]
-          --help       print this help and exit
-          --version    print version information and exit
- -fchk,   --fast-check find faster as possible if there is a corrupted dspam dictionary
- -chkcss, --check-css  search in all dspam css if there is a corrupted dictionary
- -clean,  --clean      cleaning dspam data, compress big dictionaries and make a backup dictionary
- -v,      --verbose    print all information
+        --help               print this help and exit
+        --version            print version information and exit
+ -dck,  --dictionary-check   check dictionary state and use a backup if a 
+                               corrupted file is found
+ -c,    --clean              cleaning dspam data, compress big dictionaries and
+                               make a backup dictionary
+ -v,    --verbose            verbose mode (mail output)
+
 
 Example:
-  $NAME -fchk -chkcss -v
+  $NAME -c -v
 EOF
 }
 
@@ -66,20 +62,12 @@ while test "$done" = "0"; do
                     usage
                     exit 0
                  ;;
-                 -chkcss | --checkcss | --check-css)
-                    checkcss="yes"
+                 -dck | --dictionay-check)
+                    dck="yes"
                     shift
                  ;;
-                 -fchk | --fast-check)
-                    fastcheck="yes"
-                    shift
-                 ;;
-		 -bkp | --backup | --backup-css)
-		    backupcss="yes"
-		    shift
-		 ;;
-		 -clean | --clean)
-		    cleaning="yes"
+		 -c | --clean)
+		    clean="yes"
 		    shift
 		 ;;
 		 -v | --verbose)
@@ -104,100 +92,118 @@ if [ $# != 0 ]; then
         exit 1
 fi
 
-#  check if there is a corrupted dictionary
-if [ -n "$checkcss" ] ; then
-  # if mode verbose, print what we do
-  if [ -n "$verbose" ] ; then
-    echo "Checking css validity .."
-  fi
-  # find css files in dspam home
-  for css in $(find $DSPAM_HOME/ -type f -name "*.css"); do
-    # find if a css file is broken
-    if [ -z "$(cssstat $css)" ] ; then
-      echo "$css is broken, please fix it."
-    fi
-  done
+if [ -z "$clean" ] && [ -z "$dck" ] ; then
+  usage
+  exit 1
 fi
 
-# fast check
-if [ -n "$fastcheck" ] ; then
-  # if there is a verbose mode, print what we do
-  if [ -n "$verbose" ] ; then
-    echo -e "\nFast health checking .."
-  fi
-  # if there is an error on logs, print it and make recommendations
-  if [ -n "$CHECK_CSS" ] ; then
-    echo -e "Error: Dspam is not working anymore, mails are waiting in queue !"
-    if [ -n "$CSS_OUT" ] ; then
-      echo "  The reason is probably because $CSS_OUT dictionary is broken."
-      echo "  Please, take a look with \"cssstat $DSPAM_HOME/$(echo $CSS_OUT|awk -F "@" '{print $2}')/$(echo $CSS_OUT|awk -F "@" '{print $1}')/$(echo $CSS_OUT|awk -F "@" '{print $1}').css\""
-      echo "  If needed, backuped dictionary for this user may be in $DSPAM_BKP/$(echo $CSS_OUT|awk -F "@" '{print $2}')/ but remember to chown it to dspam before restarting Dspam."
-    fi
-    echo "  For more information, try $0 --help"
-  fi
-
+if [ "$mail" ] && [ ! "$mail_address" ] ; then
+  usage
+  exit 1
 fi
 
-# clean dictionaries
-if [ -n "$cleaning" ] ; then
-  if [ -n "$verbose" ] ; then
-    echo -e "\nCleaning Dspam data ..."
-  fi
-  # search dspam domains directories
-  for domain in $(ls $DSPAM_HOME); do
+## Main script
+#
 
-    # if the domain is not in bearmail, drop it (more free space)
-    if [ -z "$(echo "$HOSTED_DOMAINS"|grep $domain)" ] ; then
-      if [ -n "$verbose" ] ; then
-        echo " - Deleting $DSPAM_HOME/$domain , non hosted domain."
-      fi
-      rm -rf $DSPAM_HOME/$domain
+output() {
+ if [ "$verbose" ] ; then
+   echo -e "$*" | fmt -w 75 -s
+ fi
+}
+
+DSPAM_ERROR="0"
+
+# check if dspam is running
+if [ -z "$(pgrep -x dspam)" ] ; then
+  echo -e "Error: Dspam is not running\n"
+  DSPAM_ERROR="1"
+fi
+
+# find css files in dspam home. If the domain is not in bearmail then drop it.
+output "Cleaning non hosted domains in DSPAM..\n\n"
+for domain in $(ls $DSPAM_DATA_HOME); do
+  if [ -z "$(echo "$HOSTED_DOMAINS"|grep -i $domain)" ] ; then
+    rm -rf $DSPAM_DATA_HOME/$domain
+  fi
+done
+rm -rf $DSPAM_DATA_HOME/local
+
+# Make directories for backup
+for domains in $(echo "$HOSTED_DOMAINS"); do
+  mkdir -p $DSPAM_CSS_BKP/$domains
+done
+
+# start checking css
+if [ "$clean" ] ; then
+  output "Checking dictionaries, make a backup and compress big css files..."
+else
+  output "Checking dictionaries..."
+fi
+
+for css in $(find $DSPAM_DATA_HOME/ -type f -name "*.css"); do
+  BKP="$(echo $css | sed "s^$DSPAM_DATA_HOME^$DSPAM_CSS_BKP^" | awk -F "/" \
+              '{print $1 "/" $2 "/" $3 "/" $4 "/" $5 "/" $7}')"
+  CSS_ERROR="0"
+  # check if the main dictionary is corrupted
+  if [ -z "$(cssstat $css)" ] ; then
+    echo -e " - Error: $css is corrupted. Using backuped css."
+    CSS_ERROR="1"
+    DSPAM_ERROR="1"
+    # check if the backup is corrupted or not
+    if [ -z "$(cssstat $BKP)" ] ; then
+      echo -e "\tError: backup is corrupted too, removing dictionaries."
+      rm $BKP $css
+    else
+     cp -a $BKP $css
+     cssclean $css
+     chown $DSPAM_USER: $BKP > /dev/null 2>&1
     fi
-    # for domain that is hosted ..
-    for css in $(find $DSPAM_HOME/$domain/ -type f -name "*.css" 2> /dev/null ); do
-      # make a tmp dictionary for working on it (more secure)
-      cp $css $css.tmp
-      CSS_BROKEN=0
-      # if the dictionary is broken ..
+  fi
+  # for make clean
+  if [ "$clean" ] && [ $CSS_ERROR -ne 1 ] ; then
+    # if the dictionary is bigger than 10 Mo, then compress it
+    if [ $(du -s $css | awk '{print $1}') -ge 10000 ] ; then
+      cp -a $css $css.tmp
+      cssclean $css.tmp > /dev/null 2>&1
+      csscompress $css.tmp > /dev/null 2>&1
+      chown $DSPAM_USER: $css.tmp > /dev/null 2>&1
+      # check if the new dictionary is corrupted or not
       if [ -z "$(cssstat $css.tmp)" ] ; then
-        CSS_BROKEN=1
-	# and there is a backup of it ..
-	if [ -f "$DSPAM_BKP/$domain/$(echo "$css" |sed -e "s_.*/__g")" ] ; then
-	  # use the backup and warn
-	  echo "Error: $css was broken .. using the backuped dictionary."
-	  cp $DSPAM_BKP/$domain/$(echo "$css" |sed -e "s_.*/__g") $css.tmp && chown dspam $css.tmp && mv $css.tmp $css
-          RESTART_DSPAM=1
-	# if not, remove dictionary
-	else
-	  echo "Error: $css was broken .. deleting dictionary."
-	  rm $css*
-	  RESTART_DSPAM=1
-	fi
+        echo -e "\t- Error about $css : Compressed dictionary is corrupted \
+but not the original. Please make a backup of $css and then try a cssclean && \
+csscompress on it."
+        rm $css.tmp
+      else
+        # if the compressed dictionary is clean, then use it and backup it
+	cp -a $css.tmp $css
+        cp -a $css.tmp $BKP
+	rm $css.tmp
       fi
-      if [ -n "$RESTART_DSPAM" ] ; then
-        echo "You should restart dspam and check mail activity."
-      fi
-      # if the dictionary is clean,
-      # clean the the dictionary if it is bigger than 10 Mo
-      if [ $CSS_BROKEN -eq 0 ] ; then
-        # if it is bigger than 10 Mo, compress it
-        if [ $(du -s $css.tmp | awk '{print $1}') -ge 10000 ] ; then
-	  if [ -n "$verbose" ] ; then
-            echo " - Cleaning $css ..."
-          fi
-          cssclean $css.tmp > /dev/null 2>&1
-	  csscompress $css.tmp > /dev/null 2>&1
-	  chown dspam:dspam $css.tmp > /dev/null 2>&1
-        fi
-	if [ -n "$verbose" ] ; then
-          echo " - Creating a backup of $(echo "$css" |sed -e "s_.*/__g") to $DSPAM_BKP/$domain/$(echo "$css" |sed -e "s_.*/__g")."
-        fi
-	# make a last test and backup the good dictionary
-	mkdir -p $DSPAM_BKP/$domain
-	(cssstat $css.tmp > /dev/null 2>&1 && chown dspam:dspam $css.tmp && cp $css.tmp $DSPAM_BKP/$domain/$(echo "$css" |sed -e "s_.*/__g") && mv $css.tmp $css) || echo "Error on $css.tmp , please check it."
-      fi
-    done
-  done
+    else
+      # if the main dictionary is small, then backup it
+      cp -a $css $BKP
+    fi
+  fi 
+  sleep 1
+done  
+
+# if a dictionary is corrupted, restart dspam
+if [ "$DSPAM_ERROR" -eq "1" ] ; then
+  echo -e "$OUTPUT\n\nRestarting Dspam.."
+  $RESTART_DSPAM
+  if [ -z "$(pgrep -x dspam)" ] ; then
+    echo "Error while restarting Dspam, plaese check it."
+  else
+    echo "Done"
+  fi
+  exit 1
 fi
 
-exit 0
+if [ "$DSPAM_ERROR" -eq "0" ] ; then
+  if [ "$clean" = "yes" ] ; then
+    output "\n\nNo error, all backup and file compression done."
+  fi
+  if [ -z "$clean" ] ; then
+    output "\n\nNo error, all backup done."
+  fi
+fi

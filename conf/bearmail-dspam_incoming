@@ -1,0 +1,2 @@
+/./     FILTER bearmail_dspam:unix:/var/run/dspam/dspam.sock
+#/./   FILTER bearmail_dspam:bearmail_dspam

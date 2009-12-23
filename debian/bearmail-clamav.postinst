@@ -3,12 +3,19 @@ set -e
 
 BMPMAS="/etc/bearmail/postfix/master.cf"
 BMPMAI="/etc/bearmail/postfix/main.cf"
+BMPTRA="/etc/bearmail/postfix/bearmail-transport"
 CVDIR="/etc/clamav/"
 
 if [ "$1" = "configure" ]; then
+  # check if bearmail was activate
+  if [ -L /etc/mailmap ] ; then
+    bearmail-switch suspend
+    BEARMAIL_ON="1"
+  fi
+
   # configure master.cf :
-  if [ ! "$(grep "^## bearmail-clamav EOC" $BMPMAS)" ]; then
-    sed -e '\!^## bearmail-clamav ## Do not modify this line!a\
+  if [ ! "$(grep "^## bearmail-clamav - EOC" $BMPMAS)" ]; then
+    sed -e '\!^## bearmail-clamav$!a\
 bearmail_scan      unix  -       -       n       -       16      smtp\
   -o smtp_send_xforward_command=yes\
 \
@@ -26,21 +33,31 @@ bearmail_scan      unix  -       -       n       -       16      smtp\
 # re-send viruses when asked to : \
 bearmail_virus-sender    unix    -       n       n       -       10      pipe\
   flags= user=clamsmtp argv=/usr/bin/bearmail-virus_send $sender\
-## bearmail-clamav EOC ## Do not modify this line
+## bearmail-clamav - EOC
 ' -i $BMPMAS
+    sed '/./,/^$/!d' -i $BMPMAS
   fi
 
   # configure main.cf
-  if [ ! "$(grep "^## bearmail-clamav EOC" $BMPMAI)" ]; then
-    sed -e '\!^## bearmail-clamav ## Do not modify this line!a\
+  if [ ! "$(grep "^# bearmail-clamav - EOC" $BMPMAI)" ]; then
+    sed -e '\!^# bearmail-clamav$!a\
 content_filter = bearmail_scan:[127.0.0.1]:10025\
-## bearmail-clamav EOC ## Do not modify this line\
+# bearmail-clamav - EOC\
 ' -i $BMPMAI
+    sed '/./,/^$/!d' -i $BMPMAI
   fi
 
-  # check if clamav is configured to use socket
-  if [ ! "$(grep "^LocalSocket $CVSOCK" $CVDIR/clamd.conf)" ] ; then
-    echo "Warning: clamav is not configured to use socket"
+  # configure transport
+  if [ ! "$(grep "bearmail_virus-sender" $BMPTRA)" ]; then
+    MY_DOMAIN=`cat /etc/mailname`
+    echo "virus@$MY_DOMAIN bearmail_virus-sender:" >> $BMPTRA
+    echo "Warning: using $MY_DOMAIN for bearmail_virus-sender"
   fi
-fi  
-#DEBHELPER# 
+
+  # restart bearmail if needed
+  if [ "$BEARMAIL_ON" ] ; then
+    echo "Restarting bearmail"
+    bearmail-switch on
+  fi
+fi
+#DEBHELPER#

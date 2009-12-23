@@ -16,6 +16,7 @@ Description: A glue and management tool for a complete mail platform
   - Dovecot (IMAP, POP)
   - Clam-AV anti-virus
   - Dspam anti-spam
+  - Postgrey anti-spam
 
 Package: bearmail-clamav
 Architecture: all
@@ -26,21 +27,23 @@ Description: Antivirus support for Bearmail
   - Dovecot (IMAP, POP)
   - Clam-AV anti-virus
   - Dspam anti-spam
+  - Postgrey antispam
  .
  This provides support for clamav in Bearmail. If you plan to use an antivirus
  with Beamrail, you need this.
 
-Package: bearmail-dspam
+Package: bearmail-antispam
 Architecture: all
-Depends: bearmail (= ${binary:Version}), dspam, dspam-webfrontend
+Depends: bearmail (= ${binary:Version}), dspam, dspam-webfrontend, postgrey
 Description: DSPAM support for Bearmail
  Bearmail will help you centralize configuration for the following services:
   - Postfix (SMTP)
   - Dovecot (IMAP, POP)
   - Clam-AV anti-virus
   - Dspam anti-spam
+  - Postgrey antispam
  .
- This provides support for DSPAM in Bearmail. If you plan to use an antispam
+ This provides support for antispam in Bearmail. If you plan to use an antispam
  with Bearmail, you need this.
 
 Package: bearmail-web
@@ -52,6 +55,7 @@ Description: Web interface for Bearmail
   - Dovecot (IMAP, POP)
   - Clam-AV anti-virus
   - Dspam anti-spam
+  - Postgrey antispam
  .
  This provides support for Web interfaces in Bearmail. If you plan to use
  a Web interface like webmail with Bearmail, you need this.

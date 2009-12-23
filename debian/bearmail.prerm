@@ -8,12 +8,12 @@ case "$1" in
         ;;
     purge)
 	if [ -L /etc/mailmap ] ; then
-	   bearmail-switch off
+	   bearmail-switch suspend
 	fi
 	;;
     remove)
         if [ -L /etc/mailmap ] ; then
-           bearmail-switch off
+           bearmail-switch suspend
         fi
         ;;
 

@@ -1,4 +1,4 @@
-package BearMail::Backend;
+package Backend;
 
 # Copyright (C) 2009 Bearstech - http://bearstech.com/
 #
@@ -15,11 +15,11 @@ package BearMail::Backend;
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-use BearMail::Backend::Files;
+use Backend::Files;
 
 # Should be selected by some config file
 sub backend {
-  return new BearMail::Backend::Files;
+  return new Backend::Files;
 }
 
 1;

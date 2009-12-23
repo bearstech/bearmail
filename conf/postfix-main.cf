@@ -5,18 +5,21 @@ smtpd_banner    = $myhostname ESMTP $mail_name
 myhostname      = bearmail.tld
 myorigin        = bearmail.tld
 inet_interfaces = all
+# Server identity and availability - EOC
 
 # Default relaying rules: accept local aliases (see virtual_pipes), 
 # no smarthost, accept locally generated emails
 mydestination = bearmail.tld, localhost
 relayhost     =
 mynetworks    = 127.0.0.0/8
+# Default relaying rules - EOC
 
 # Misc settings
 biff                = no
 append_dot_mydomain = no
 recipient_delimiter = +
 mailbox_size_limit  = 10485760
+# Misc settings - EOC
 
 # TLS/SSL support
 smtpd_use_tls                    = yes
@@ -24,12 +27,14 @@ smtpd_tls_cert_file              = /etc/ssl/certs/bearmail.pem
 smtpd_tls_key_file               = /etc/ssl/certs/bearmail.pem
 smtpd_tls_session_cache_database = btree:${queue_directory}/smtpd_scache
 smtp_tls_session_cache_database  = btree:${queue_directory}/smtp_scache
+# TLS/SSL support - EOC
 
-# SMTP authentication
+# RCPT TO access restrictions
 smtpd_recipient_restrictions =
   permit_sasl_authenticated
   permit_mynetworks
   reject_unauth_destination
+# RCPT TO access restrictions - EOC
 
 # SASL (as auth protocol/backend, provider: dovecot)
 smtpd_sasl_auth_enable      = yes
@@ -39,19 +44,25 @@ smtpd_sasl_application_name = smtpd
 broken_sasl_auth_clients    = yes
 smtpd_sasl_type             = dovecot
 smtpd_sasl_path             = private/auth
+# SASL - EOC
 
 # Virtual domains, mailboxes, aliases and transport
 alias_maps              = hash:/etc/aliases hash:/etc/postfix/bearmail-virtual_pipes
 alias_database          = hash:/etc/aliases
+transport_maps          = hash:/etc/postfix/bearmail-transport
 virtual_mailbox_domains = hash:/etc/postfix/bearmail-virtual_domains
 virtual_mailbox_maps    = hash:/etc/postfix/bearmail-virtual_mailboxes
 virtual_alias_maps      = hash:/etc/postfix/bearmail-virtual_aliases
-virtual_mailbox_base    = /var/spool/imap
+virtual_mailbox_base    = /var/spool/bearmail
 virtual_minimum_uid     = bearmail_uid
 virtual_uid_maps        = static:bearmail_uid
 virtual_gid_maps        = static:bearmail_gid
-virtual_transport       = dovecot
-transport_maps          = hash:/etc/postfix/bearmail-transport
+# Virtual domains, mailboxes, aliases and transport - EOC
+
+# using dovecot for delivery
+virtual_transport                    = dovecot
+dovecot_destination_recipient_limit  = 1
+# using dovecot for delivery - EOC
 
 # Basic SPAM checks (EHLO + envelope checks)
 smtpd_helo_required = yes
@@ -70,11 +81,15 @@ smtpd_sender_restrictions =
   permit
 strict_rfc821_envelopes = yes
 smtpd_data_restrictions = reject_unauth_pipelining
+# Basic SPAM checks - EOC
 
 # DNSRBL
 smtpd_client_restrictions =
   permit_sasl_authenticated
   check_client_access hash:/etc/postfix/bearmail-client_access
+#  reject_rbl_client my.rbl.server.tld
+# DNSRBL - EOC
 
-## bearmail-clamav ## Do not modify this line
-## bearmail-dspam ## Do not modify this line
+# bearmail-clamav
+
+# bearmail-antispam

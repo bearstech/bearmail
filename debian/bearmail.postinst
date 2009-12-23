@@ -1,0 +1,91 @@
+#!/bin/bash
+set -e
+
+if [ "$1" = "configure" ]; then
+  
+  # create the bearmail user
+  if [ -z "`id -u bearmail 2> /dev/null`" ]; then
+    adduser --system --shell /usr/sbin/nologin --group --home /var/spool/bearmail \
+            --gecos "Bearmail - virtual users" --disabled-password \
+            --disabled-login --quiet bearmail || true
+    chown -R bearmail:bearmail /var/spool/bearmail
+    chmod -R 770 /var/spool/bearmail
+  fi
+  
+  # Generate new SSL certs if needed
+  if [ "$1" = configure ] && [ "$2" = "" ]; then
+    # Make self-signed certificate
+    if [ ! -f /etc/ssl/private/bearmail.pem ]; then
+        make-ssl-cert /usr/share/ssl-cert/ssleay.cnf /etc/ssl/private/bearmail.pem
+	cp -a /etc/ssl/private/bearmail.pem /etc/ssl/certs/
+    fi
+  fi
+
+  # If it's a new installation of bearmail :
+  if [ ! -f /etc/bearmail/mailmap ] ; then
+    HOSTNAME=`hostname --fqdn`
+    BEARMAIL_UID=`id -u bearmail`
+    BEARMAIL_GID=`id -g bearmail`
+
+    # set global conf file for sieve
+    touch /etc/bearmail/dovecot/bearmail_sieve/global.conf
+    chown -R bearmail:bearmail /etc/bearmail/dovecot/bearmail_sieve
+
+    # set hostname in conf files
+    for conffile in postfix/main.cf postfix/master.cf dovecot/dovecot.conf ; do
+      sed -e "s/bearmail.tld/$HOSTNAME/g" -i /etc/bearmail/$conffile
+      sed -e "s/bearmail_uid/$BEARMAIL_UID/g" -i /etc/bearmail/$conffile
+      sed -e "s/bearmail_gid/$BEARMAIL_GID/g" -i /etc/bearmail/$conffile      
+    done
+
+    # set transport file
+    touch /etc/bearmail/postfix/bearmail-transport
+
+    # Create mailmap and Setting default domain
+    echo "Warning: setting $HOSTNAME to virtual domains in bearmail. \
+Please RTFM."
+    # generate random passwd foor root
+    MY_PASSWD=`perl -e '@c=("A".."Z","a".."z",0..9);\
+                        print join("",@c[map{rand @c}(1..8)])'`
+    MY_PLAIN_MD5=`echo -n "$MY_PASSWD" | md5sum | sed -e "s/  -$//"`
+
+    cat > /etc/bearmail/mailmap << EOF
+# /etc/bearmail/mailmap - Sample mail account configuration
+#
+# Examples :
+## creating a regular_account :
+#bob@company.com:9a8ad92c50cae39aa2c5604fd0ab6d8c:local
+#
+## creating an alias :
+#info@company.com::bob@company.com,alice@people.net
+#
+## use an external_program (regular)
+#fortune@company.com::|/bin/fortune
+#
+## a catchall :
+#*@company.com::info@company.com,alice@helpdesk.net
+#
+## a domain_alias :
+#*@other.com::*@spam.com
+#
+# Read the fine manual for more informations
+
+## $HOSTNAME
+#
+root@$HOSTNAME:$MY_PLAIN_MD5:local
+postmaster@$HOSTNAME::root@$HOSTNAME
+
+EOF
+    #  echo "Adding $HOSTNAME domain .. done"
+    echo "Your password for root@$HOSTNAME"
+    echo "    will be : $MY_PASSWD"
+
+    echo "$HOSTNAME" > /etc/mailname
+    echo "$HOSTNAME REJECT You are not me!" >> /etc/bearmail/postfix/bearmail-helo_access
+  fi
+fi
+
+# a mettre dans le switch off : faire des postmap de client_access helo_access etc
+
+
+#DEBHELPER# 

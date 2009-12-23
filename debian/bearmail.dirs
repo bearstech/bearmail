@@ -3,5 +3,7 @@ etc/bearmail
 etc/bearmail/dovecot
 etc/bearmail/dovecot/bearmail_sieve
 usr/share/bearmail/
+usr/share/bearmail/lib
+usr/share/bearmail/lib/Backend
 usr/share/doc/bearmail
 var/spool/bearmail

@@ -17,8 +17,8 @@
 
 # bearmail-update - part of bearmail
 
-use lib '../lib';
-use BearMail::Backend::Files;
+use lib '/usr/share/bearmail/lib';
+use Backend::Files;
 use Getopt::Long qw(:config no_auto_abbrev no_ignore_case bundling);
 
 # options
@@ -34,7 +34,7 @@ GetOptions(
 
 usage() if $help;
 
-my $b = BearMail::Backend::Files->new( debug => $debug, mailmap => $mailmap ); # Parse 'mailmap'
+my $b = Backend::Files->new( debug => $debug, mailmap => $mailmap ); # Parse 'mailmap'
 $b->apply();                               # Generate Postfix+Dovecot conf files and reload them
 
 
