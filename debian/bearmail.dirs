@@ -1,7 +1,7 @@
 usr/sbin
 etc/bearmail
 etc/bearmail/dovecot
-etc/bearmail/dovecot/bearmail_sieve
+etc/bearmail/dovecot/bearmail-sieve
 usr/share/bearmail/
 usr/share/bearmail/lib
 usr/share/bearmail/lib/Backend
