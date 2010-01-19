@@ -16,14 +16,10 @@ set -e
 #        * <disappearer's-postrm> `disappear' <r>overwrit>r> <new-version>
 # for details, see /usr/doc/packaging-manual/
 
-if [ -r /etc/bearmail/conf/bearmail.conf ]; then
-        . /etc/bearmail/conf/bearmail.conf
-fi
-
 purge_section() {
         rm -rf /etc/ssl/certs/bearmail.pem \
                /etc/ssl/private/bearmail.pem \
-               /etc/bearmail
+               /etc/bearmail /var/spool/bearmail/*/*/.dovecot*
 	deluser bearmail
 }
 

@@ -16,6 +16,9 @@ install:
 	install -D -m 755 bin/bearmail-update                                                   $(BMMAIN)/usr/sbin/bearmail-update
 	install -D -m 755 bin/bearmail-switch                                                   $(BMMAIN)/usr/sbin/bearmail-switch
 	install -D -m 644 conf/bearmail.conf                                                    $(BMMAIN)/etc/bearmail/bearmail.conf
+	install -D -m 755 bin/bearmail-sieve_responder                                          $(BMMAIN)/usr/sbin/bearmail-sieve_responder
+	install -D -m 755 bin/bearmail-sieve_forwarder                                          $(BMMAIN)/usr/sbin/bearmail-sieve_forwarder
+	install -D -m 755 bin/bearmail-sieve_userconf                                           $(BMMAIN)/usr/sbin/bearmail-sieve_userconf
 	# libs
 	install -D -m 644 lib/BearMail/Backend.pm                                               $(BMMAIN)/usr/share/bearmail/lib/Backend.pm
 	install -D -m 644 lib/BearMail/Backend/Files.pm                                         $(BMMAIN)/usr/share/bearmail/lib/Backend/Files.pm
@@ -30,6 +33,9 @@ install:
 	install -D -m 644 README                                                                $(BMMAIN)/usr/share/doc/bearmail/README
 	install -D -m 644 doc/man/bearmail-update.8.gz                                          $(BMMAIN)/usr/share/man/man8/bearmail-update.8.gz
 	install -D -m 644 doc/man/bearmail-switch.8.gz                                          $(BMMAIN)/usr/share/man/man8/bearmail-switch.8.gz
+	install -D -m 644 doc/man/bearmail-sieve_responder.8.gz                                 $(BMMAIN)/usr/share/man/man8/bearmail-sieve_responder.8.gz
+	install -D -m 644 doc/man/bearmail-sieve_forwarder.8.gz                                 $(BMMAIN)/usr/share/man/man8/bearmail-sieve_forwarder.8.gz
+	install -D -m 644 doc/man/bearmail-sieve_userconf.8.gz                                  $(BMMAIN)/usr/share/man/man8/bearmail-sieve_userconf.8.gz
 
 	## bermail-clamav
 	# postfix

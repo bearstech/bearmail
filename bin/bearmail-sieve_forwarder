@@ -1,0 +1,197 @@
+#!/bin/bash
+
+# Copyright (C) 2009 Bearstech - http://bearstech.com/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# bearmail-sieve_forwarder - part of bearmail
+#
+# This is a simple script for creating forwards with sieve on a bearmail
+# configuration.
+
+set -e
+
+NAME=${0##*/}
+SIEVE_DIR="/etc/bearmail/dovecot/bearmail-sieve"
+BMMAILMAP="/etc/bearmail/mailmap"
+BMSUC="/usr/sbin/bearmail-sieve_userconf"
+
+function usage() {
+cat << EOF
+Usage: $NAME [OPTION]
+ -h,  --help             print this help and exit
+ -u,  --user             mail account
+ -a,  --add-forward      forward to addresses
+ -r,  --remove-original  don't keep original mail into INBOX
+ -d,  --del-forward      remove forward
+ -l,  --list             list forwards
+
+
+Example:
+  $NAME -u me@domain.tld -a me@another.tld,you@domain.tld -r
+  $NAME -u me@domain.tld -d all
+  $NAME -u me@domain.tld -l
+EOF
+}
+
+done=0
+while test "$done" = "0"; do
+        case "$1" in
+                 -h | -help | --h | --help)
+                    usage
+                    exit 0 ;;
+                 -u | --user)
+                    user_mail="$2"
+                    shift ; shift ;;
+                 -a | --add-forward)
+                    add_forward="$2"
+                    shift ; shift ;;
+                 -r | --remove-original)
+                    remove_message="yes"
+                    shift ;;
+                 -d | --del-forward)
+                    del_forward="$2"
+                    shift ; shift ;;
+                 -l | --list)
+                    list_forward="yes"
+                    shift ;;
+                 --*)
+                    echo "unknown option: $1, try '$NAME -h' for help"
+                    exit 1 ;;
+                 -*)
+                    echo "unknown option: $1, try '$NAME -h' for help"
+                    exit 1 ;;
+                 *)
+                    done=1 ;;
+        esac
+done
+
+if [ $# != 0 ]; then
+  usage
+  exit 1
+fi
+
+# check if options are correctly set
+if [ -z "$user_mail" ] ; then
+  usage exit 1
+fi
+if [ -n "$add_forward" ] ; then
+  if [ -n "$del_forward" ] || [ -n "$list_forward" ] ; then
+    usage
+    exit 1
+  fi
+fi
+if [ -n "$del_forward" ] && [ -n "$remove_message" ] ; then
+  usage
+  exit 1
+fi
+if [ -n "$list_forward" ] ; then
+  if [ -n "$add_forward" ] || [ -n "$del_forward" ] || \
+     [ -n "$remove_message" ]  ; then
+    usage
+    exit 1
+  fi
+fi
+
+# check if user is a real account
+if [ ! "$(grep "^$user_mail:" $BMMAILMAP | grep ":local$")" ] ; then
+  echo "Error: $user_mail is not a main account."
+  exit 1
+fi
+
+# sieve param
+USER_DOMAIN=`echo $user_mail | sed -e "s/.*@//"`
+USER_NAME=`echo $user_mail | sed -e "s/@.*//"`
+SIEVE_FILE="$SIEVE_DIR/$USER_DOMAIN.$USER_NAME"
+
+# if add option
+if [ -n "$add_forward" ] ; then
+  MY_FORWARD=`echo "$add_forward" | sed "s/,/ /g"`
+  # check sieve conf
+  if [ "$($BMSUC -u $user_mail -s | grep "is not active")" ] ; then
+    $BMSUC -u $user_mail -a
+  fi
+  if [ ! "$($BMSUC -u $user_mail -s | grep "is active")" ] ; then
+    $BMSUC -u $user_mail -s
+    exit 1
+  fi
+  # keep option
+  if [ -z "$(grep "^keep;$" $SIEVE_FILE)" ] ; then
+    if [ ! "$remove_message" ] ; then
+      echo "warning: adding keep option"
+      echo "keep;" >> $SIEVE_FILE
+    fi
+  else
+    if [ "$remove_message" ] ; then
+      echo "warning: removing keep option"
+      sed '/^keep;$/d' -i $SIEVE_FILE
+    fi
+  fi
+  # if there is a require
+  for forwarder in $MY_FORWARD; do
+    if [ "$(grep "redirect \"$forwarder\";" $SIEVE_FILE)" ] ; then
+      echo "$forwarder is already in sieve configuration"
+    else
+      echo "adding $forwarder into sieve rules"
+      echo "redirect \"$forwarder\";" >> $SIEVE_FILE
+    fi
+  done
+fi
+
+# if list
+if [ -n "$list_forward" ] ; then
+  # check sieve conf
+  if [ "$($BMSUC -u $user_mail -s | grep "is active")" ] ; then
+    MY_REDIRECT=`grep "^redirect.*;" $SIEVE_FILE | sed "s/redirect \"//;s/\";//"`
+    if [ -n "$MY_REDIRECT" ] ; then
+      echo "Forwards for $user_mail :"
+      for redirection in $MY_REDIRECT ; do
+        echo -e "\t- $redirection"
+      done
+    fi
+  else
+    $BMSUC -u $user_mail -s
+    exit 1
+  fi
+ exit
+fi
+
+# if delete
+if [ -n "$del_forward" ] ; then
+  DEL_FORWARD=`echo "$del_forward" | sed "s/,/ /g"`
+  # check sieve conf
+  if [ ! "$($BMSUC -u $user_mail -s | grep "is active")" ] ; then
+    $BMSUC -u $user_mail -s
+    exit 1
+  fi
+  # remove forward
+  for forwarder in $DEL_FORWARD; do
+    if [ "$forwarder" = "all" ] ; then
+      echo "Deleting all forwards for $user_mail"
+      sed "/^redirect .*\";/d" -i $SIEVE_FILE
+      sed '/^keep;/d' -i $SIEVE_FILE
+      exit 0
+    fi
+    if [ "$(grep "redirect \"$forwarder\";" $SIEVE_FILE)" ] ; then
+      echo "deleting $forwarder from sieve rules"
+      sed "/^redirect \"$forwarder\";$/d" -i $SIEVE_FILE
+      if [ ! "$(grep "^redirect .*\";" $SIEVE_FILE)" ] ; then
+        sed '/^keep;/d' -i $SIEVE_FILE
+      fi
+    else
+      echo "$forwarder is not in the sieve rules"
+      exit 1
+    fi
+  done
+fi

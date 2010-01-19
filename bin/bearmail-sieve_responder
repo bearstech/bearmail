@@ -1,0 +1,258 @@
+#!/bin/bash
+
+
+# Copyright (C) 2009 Bearstech - http://bearstech.com/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# bearmail-sieve_responder - part of bearmail
+#
+# This is a simple script for creating responders with sieve on a bearmail 
+# configuration.
+
+set -e
+
+NAME=${0##*/}
+SIEVE_DIR="/etc/bearmail/dovecot/bearmail-sieve"
+BMMAILMAP="/etc/bearmail/mailmap"
+BMSUC="/usr/sbin/bearmail-sieve_userconf"
+CRON="/etc/cron.d/bearmail_sieve"
+
+usage() {
+cat << EOF
+Usage: $NAME [OPTION]
+       --help              print this help and exit
+ -u,   --user              mail account
+ -a,   --add               add a new responder
+ -b,   --beginning-date     date of the start of responder (YYYYMMDD or now)
+ -e,   --end-date          date of the end (YYYYMMDD)
+ -d,   --del               del responder
+ -l,   --list              list content of the responder
+
+
+Example:
+  $NAME -u me@domain.tld -a -b now -e 20100823
+  $NAME -u me@domain.tld -d
+  
+EOF
+}
+
+done=0
+while test "$done" = "0"; do
+        case "$1" in
+                 -h | -help | --h | --help)
+                    usage
+                    exit 0
+                 ;;
+                 -u | --user)
+                    user_mail="$2"
+                    shift ; shift ;;
+		 -a | --add)
+		    add_responder="yes"
+		    shift ;;
+                 -b | --beginning-date)
+                    beginning_date="$2"
+                    shift ; shift ;;
+                 -e | --end-date)
+                    end_date="$2"
+                    shift ; shift ;;
+		 -d | --del)
+		    del_responder="yes"
+		    shift ;;
+		 -l | --list)
+		    list_content="yes"
+		    shift ;;
+                 --*)
+                    echo "unknown option: $1, try '$NAME -h' for help"
+                    exit 1 ;;
+                 -*)
+                    echo "unknown option: $1, try '$NAME -h' for help"
+                    exit 1 ;;
+                 *)
+                    done=1 ;;
+        esac
+done
+
+# basic validation
+if [ $# != 0 ]; then
+  usage
+  exit 1
+fi
+if [ -z "$user_mail" ] ; then
+  usage
+  exit 1
+fi
+if [ -z "$add_responder" ] && [ -z "$del_responder" ] &&  [ -z "$list_content" ]
+   then
+  usage 
+  exit 1
+fi
+if [ -n "$list_content" ] ; then
+  if [ -n "$add_responder" ] ||  [ -n "$del_responder" ] || \
+     [ -n "$beginning_date" ] || [ -n "$end_date" ] ; then
+    usage
+    exit 1
+  fi
+fi
+if [ -n "$add_responder" ] ; then
+  if [ -z "$beginning_date" ] || [ -z "$end_date" ] ; then
+    usage
+    exit 1
+  fi
+fi
+if [ -n "$del_responder" ]; then
+  if [ -n "$beginning_date" ] || [ -n "$end_date" ] ; then
+    usage
+    exit 1
+  fi
+fi
+    
+# check if user is a real account
+if [ ! "$(grep "^$user_mail:" $BMMAILMAP | grep ":local$")" ] ; then
+  echo "Error: $user_mail is not a main account."
+  exit 1
+fi
+
+# define sieve rules file
+USER_DOMAIN=`echo $user_mail | sed -e "s/.*@//"`
+USER_NAME=`echo $user_mail | sed -e "s/@.*//"`
+SIEVE_FILE="$SIEVE_DIR/$USER_DOMAIN.$USER_NAME"
+MY_BMSF="$BMDIR/$USER_DOMAIN/$USER_NAME/.dovecot.sieve"
+
+# list fonction
+if [ -n "$list_content" ] ; then
+  if [ "$($BMSUC -u $user_mail -s | grep "is active")" ] ; then
+    if [ ! "$(grep '# vacation configuration$' $SIEVE_FILE)" ] ; then
+      echo "$user_mail : no responder found for $user_mail"
+      exit
+    else
+      echo "$user_mail : responder auto-message:"
+      sed -n '/^# vacation configuration/,/";/p' $SIEVE_FILE | \
+      sed "s/#_bmcr_//" | sed -n '/^"$/,/^i";$/p' | sed '/^"$/d;/^";$/d'
+      if [ "$(grep "$BMDIR/$USER_DOMAIN/$USER_NAME/.dovecot.sieve" $CRON)" ] ; then
+        MY_BEGIN=`date -d $(date +"%Y")$(grep "$BMDIR/$USER_DOMAIN/$USER_NAME/" $CRON  | awk '{print $4 $3}') +"%d %B"`
+        echo -e "\n- Responder starts on $MY_BEGIN"
+      else
+        echo -e "\n- Responder is active and ends on $MY_END"
+      fi
+      if [ "$(grep " $user_mail " $CRON)" ] ; then
+        MY_END=`date -d $(date +"%Y")$(grep " $user_mail " $CRON  | awk '{print $4 $3}') +"%d %B"`
+        echo -e "\n- Responder ends on $MY_END"
+        exit
+      fi
+    fi
+  else
+    $BMSUC -u $user_mail -s
+  fi
+fi
+
+# delete fonction
+if [ -n "$del_responder" ]; then
+  # check sieve conf
+  if [ ! "$($BMSUC -u $user_mail -s | grep "is active")" ] ; then
+    $BMSUC -u $user_mail -s
+    exit 1
+  fi
+  # remove vacation require if needed
+  if [ "$(grep 'require "vacation";$' $SIEVE_FILE)" ] || \
+     [ "$(grep '# vacation configuration$' $SIEVE_FILE)" ] || \
+     [ "$(grep "$user_mail" $CRON)" ] || [ "$(grep "$MY_BMSF" $CRON)" ]; then
+    echo "$user_mail : deleting responder."
+    sed -e '/require "vacation";$/d' -i $SIEVE_FILE
+    sed "/# vacation configuration$/,\
+/\";/d" -i $SIEVE_FILE
+    sed "/$user_mail/d" -i $CRON
+    sed "/$USER_DOMAIN.*$USER_NAME.*dovecot.sieve/d" -i $CRON
+  else
+    echo "$user_mail : no responder found."
+  fi
+fi
+
+# adding fonction
+if [ -n "$add_responder" ] ; then
+  # check date validity
+  if [ -z "$(date -d $end_date)" ] || \
+     [ "$(date -d $end_date +"%s")" -le "$(date +"%s")" ] ; then
+    echo "Error: invalid end date"
+    exit 1
+  fi
+  if [ "$beginning_date" != "now" ] ; then
+    if [ -z "$(date -d $beginning_date)" ] ; then
+      echo "Error: invalid beginning date"
+      exit 1
+    fi
+    if [ "$beginning_date" -ge "$end_date" ] ; then
+      echo "Error: end date is before beginning date."
+      exit 1
+    fi
+    if [ "$(date -d $beginning_date +"%s")" -le "$(date +"%s")" ] ; then
+      beginning_date="now"
+    fi
+  fi
+  # check sieve conf
+  if [ "$($BMSUC -u $user_mail -s | grep "is not active")" ] ; then
+    $BMSUC -u $user_mail -a
+  fi
+  if [ ! "$($BMSUC -u $user_mail -s | grep "is active")" ] ; then
+    $BMSUC -u $user_mail -s
+    exit 1
+  fi
+  if [ "$(grep '^# vacation configuration$' $SIEVE_FILE)" ] ; then
+    echo "Error: $user_mail have already responder rules"
+    echo "you should remove it before creating another one."
+    exit 1
+  fi
+  # define user's aliases
+  USER_ALIASES=`grep "^::$user_mail$" $BMMAILMAP | sed -e "s/::$user_mail//"`
+  if [ -z "$USER_ALIASES" ] ; then
+    MY_SIEVE_ALIAS=""
+  else
+    MY_SIEVE_ALIAS=`echo -e ", \"$USER_ALIASES" | \
+                    sed -e :a -e '/$/N; s/\n/", "/; ta' | sed -e "s/$/\"/"`
+  fi
+  # ask for responder content
+  echo "Define your vacation message and end it with EOF"
+  while read input ; do
+    my_vacation="$my_vacation\n$input"
+    if [ "$input" = 'EOF' ] ; then
+      break
+    fi
+  done
+  # write vacation configuration
+  sed "2i#_bmcr_require \"vacation\";" -i $SIEVE_FILE
+  cat >> $SIEVE_FILE << EOF
+# vacation configuration
+#_bmcr_vacation
+#_bmcr_:days 15
+#_bmcr_:addresses ["$user_mail"$MY_SIEVE_ALIAS]
+#_bmcr_"
+$(echo -e "$my_vacation" | grep -v "^EOF" | sed -e "s/^/#_bmcr_/")
+";
+EOF
+  # Create cronjob
+  if [ "$beginning_date" = "now" ] ; then
+    sed -e "s/^#_bmcr_//" -i $SIEVE_FILE
+  else
+    # create the cronjob
+    MY_BDAY=`date -d $beginning_date +"%F" | awk -F "-" '{print $3}'`
+    MY_BMONTH=`date -d $beginning_date +"%F" | awk -F "-" '{print $2}'`
+
+    echo "1 0 $MY_BDAY $MY_BMONTH * root sed -e 's/^#_bmcr_//' $BMDIR/$USER_DOMAIN/$USER_NAME/.dovecot.sieve" >> $CRON
+  fi
+  # create end cronjob
+  MY_EDAY=`date -d $end_date +"%F" | awk -F "-" '{print $3}'`
+  MY_EMONTH=`date -d $end_date +"%F" | awk -F "-" '{print $2}'`
+  echo "1 0 $MY_EDAY $MY_EMONTH * root $NAME -u $user_mail -d" >> $CRON
+fi
+

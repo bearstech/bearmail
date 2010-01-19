@@ -1,0 +1,186 @@
+#!/bin/bash
+
+# Copyright (C) 2009 Bearstech - http://bearstech.com/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# bearmail-sieve_userconf - part of bearmail
+#
+# This is a simple script for creating basic user configuration with sieve 
+# on a bearmail configuration.
+
+NAME=${0##*/}
+SIEVE_DIR="/etc/bearmail/dovecot/bearmail-sieve"
+BMMAILMAP="/etc/bearmail/mailmap"
+BMDIR="/var/spool/bearmail"
+CRON="/etc/cron.d/bearmail-sieve"
+BMUSER="bearmail"
+
+usage() {
+cat << EOF
+Usage: $NAME [OPTION]
+        --help             print this help and exit
+ -u,    --user             mail account
+ -a,    --add              add sieve rules
+ -d,    --delete           delete sieve rules
+ -s,    --status           status of conf files
+
+Example:
+  $NAME -u me@domain.tld -a
+  $NAME -u me@domain.tld -d
+  $NAME -u me@domain.tld -s
+EOF
+}
+
+done=0
+while test "$done" = "0"; do
+        case "$1" in
+                 -h | -help | --h | --help)
+                    usage
+                    exit 0 ;;
+                 -u | --user)
+                    user_mail="$2"
+                    shift ; shift ;;
+                 -a | --add)
+                    add_rules="yes"
+                    shift ;;
+                 -d | --del_rules)
+                    del_rules="yes"
+                    shift ;;
+                 -s | --status)
+                    print_status="yes"
+                    shift ;;
+                 --*)
+                    echo "unknown option: $1, try '$NAME -h' for help"
+                    exit 1 ;;
+                 -*)
+                    echo "unknown option: $1, try '$NAME -h' for help"
+                    exit 1 ;;
+                 *)
+                    done=1 ;;
+        esac
+done
+
+if [ $# != 0 ]; then
+  usage
+  exit 1
+fi
+
+# check if options are correctly set
+if [ -z "$user_mail" ] ; then
+  usage
+  exit 1
+fi
+if [ -n "$print_status" ] ; then
+  if [ -n "$add_rules" ] || [ -n "$del_rules" ] ; then
+    usage
+    exit 1
+  fi
+else
+  if [ -n "$add_rules" ] && [ -n "$del_rules" ] ; then
+    usage
+    exit 1
+  fi
+fi  
+
+# check if user is a real account
+if [ ! "$(grep "^$user_mail:" $BMMAILMAP | grep ":local$")" ] ; then
+  echo "Error: $user_mail is not a main account."
+  exit 1
+fi
+
+# define sieve files
+USER_DOMAIN=`echo $user_mail | sed -e "s/.*@//"`
+USER_NAME=`echo $user_mail | sed -e "s/@.*//"`
+SIEVE_FILE="$SIEVE_DIR/$USER_DOMAIN.$USER_NAME"
+MY_BMSF="$BMDIR/$USER_DOMAIN/$USER_NAME/.dovecot.sieve"
+
+# status function
+status_function() {
+  if [ "$(ls $SIEVE_FILE 2> /dev/null)" ] ; then
+    SIEVEF="1" ; else SIEVEF="0"
+  fi
+  if [ "$(ls $MY_BMSF 2> /dev/null)" ] ; then
+    SIEVEL="1" ; else SIEVEL="0"
+  fi
+
+  if [ "$SIEVEF" -eq "1" ] ; then
+    if [ "$SIEVEL" -eq "0" ] ; then
+      echo "Error: $SIEVE_FILE exists but $MY_BMSF does not"
+      echo "You should remove this file and create rules with bearmail scripts."
+      exit 1
+    fi
+    if [ ! "$(grep "^## bearmail sieve configuration$" $SIEVE_FILE)" ] ; then
+      echo "Error: $SIEVE_FILE is not configured by bearmail."
+      echo "You should remove this file and create rules with bearmail scripts."
+      exit 1
+    fi
+  fi
+
+  if [ "$SIEVEL" -eq "1" ] ; then
+    if [ "$SIEVEF" -eq "0" ] ; then
+      echo "Error: $MY_BMSF exists but $SIEVE_FILE does not"
+      echo "You should remove this file and create rules with bearmail scripts."
+      exit 1
+    fi    
+    if [ ! -L "$MY_BMSF" ] ; then
+      echo "Error: $MY_BMSF is not configured by bearmail."
+      echo "You should remove $SIEVE_FILE and $MY_BMSF then create rules with \
+bearmail scripts."
+      exit 1
+    fi
+  fi
+
+  if [ "$SIEVEF" -eq "1" ] && [ "$SIEVEL" -eq "1" ] ; then
+      echo "Bearmail sieve configuration is active for $user_mail"
+  else
+      echo "Bearmail sieve configuration is not active for $user_mail"
+  fi
+}
+
+# add
+if [ "$add_rules" = "yes" ] ; then
+  if [ "$(status_function | grep "is not active")" ] ; then
+    echo "creating $SIEVE_FILE"
+    echo -e "## bearmail sieve configuration\n" > $SIEVE_FILE
+    mkdir -p $BMDIR/$USER_DOMAIN/$USER_NAME
+    chown $BMUSER: $BMDIR/$USER_DOMAIN/$USER_NAME
+    echo "linking $SIEVE_FILE to $MY_BMSF"
+    ln -s $SIEVE_FILE $MY_BMSF
+  else
+    status_function
+    exit 1
+  fi
+fi
+
+# del
+if [ "$del_rules" = "yes" ] ; then
+   if [ "$(ls $SIEVE_FILE 2> /dev/null)" ] ; then
+    echo "removing $SIEVE_FILE"
+    rm $SIEVE_FILE
+  fi
+  if [ "$(ls $MY_BMSF 2> /dev/null)" ] ; then
+    echo "removing $MY_BMSF"
+    rm $MY_BMSF
+  fi
+  if [ -f "$CRON" ] ; then
+    sed "/$user_mail/d" -i $CRON
+    sed "/$USER_DOMAIN.*$USER_NAME.*dovecot.sieve/d" -i $CRON
+  fi
+fi
+
+# status
+if [ "$print_status" ] ; then
+  status_function
+fi
