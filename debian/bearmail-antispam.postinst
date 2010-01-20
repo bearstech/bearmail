@@ -5,6 +5,8 @@ BMPMAS="/etc/bearmail/postfix/master.cf"
 BMPMAI="/etc/bearmail/postfix/main.cf"
 BMDDIR="/etc/bearmail/dspam/"
 
+chown dspam:dspam /etc/bearmail/dspam -R
+
 if [ "$1" = "configure" ]; then
   # check if bearmail was activate
   if [ -L /etc/mailmap ] ; then

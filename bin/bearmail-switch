@@ -17,8 +17,6 @@
 
 # bearmail-switch - part of bearmail
 
-set -e
-
 usage() {
   cat >&2 << EOF
 bearmail-switch <on|off|status|suspend>
@@ -99,7 +97,7 @@ switch_on() {
       if [ ! -L "$DPDIR" ]; then
         rsync -au --delete --exclude="*bearmail*" --exclude="dspam.conf" \
               --exclude="default.prefs" --exclude="webfrontend.conf" \
-              --exclude="dspam_tricks" $DPDIR $BMDIR/dspam/
+              --exclude="dspam_tricks" $DPDIR/ $BMDIR/dspam/
         mv $DPDIR $DPDIR.bearmail-orig
         ln -s $BMDIR/dspam $DPDIR
         $DP_INIT restart
