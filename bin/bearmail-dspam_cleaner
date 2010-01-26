@@ -145,12 +145,17 @@ for css in $(find $DSPAM_DATA_HOME/ -type f -name "*.css"); do
               '{print $1 "/" $2 "/" $3 "/" $4 "/" $5 "/" $7}')"
   CSS_ERROR="0"
   # check if the main dictionary is corrupted
-  if [ -z "$(cssstat $css)" ] ; then
+  MYCSSSTAT=`cssstat $css`
+
+  if [ "$(echo "$MYCSSSTAT" | grep "record length 0")" ] || \
+     [ -z "$MYCSSSTAT" ] ; then
     echo -e " - Error: $css is corrupted. Using backuped css."
     CSS_ERROR="1"
     DSPAM_ERROR="1"
     # check if the backup is corrupted or not
-    if [ -z "$(cssstat $BKP)" ] ; then
+    MYCSSSTATBKP=`cssstat $BKP`
+    if [ "$(echo "$MYCSSSTATBKP" | grep "record length 0")" ] || \
+       [ -z "$MYCSSSTATBKP" ] ; then
       echo -e "\tError: backup is corrupted too, removing dictionaries."
       rm $BKP $css
     else
