@@ -15,7 +15,7 @@ package Backend;
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-use Backend::Files;
+use BearMail::Backend::Files;
 
 # Should be selected by some config file
 sub backend {

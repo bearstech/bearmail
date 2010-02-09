@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl
 
 # Copyright (C) 2009 Bearstech - http://bearstech.com/
 #
@@ -21,8 +21,8 @@ use base 'CGI::Application';
 use CGI::Application::Plugin::AutoRunmode;
 use CGI::Application::Plugin::Session;
 use CGI::Application::Plugin::Redirect;
-use CGI::Application::Plugin::DebugScreen;
-use CGI::Application::Plugin::ConfigAuto (qw/cfg_file cfg/);
+use CGI::Application::Plugin::ConfigAuto qw/cfg_file cfg/;
+use CGI::Application::Plugin::DebugScreen;  # DebugScreen is done when $ENV{CGI_APP_DEBUG} is set
 use BearMail::Backend;
 use Data::Dumper;
 
@@ -38,7 +38,7 @@ sub setup {
     $self->add_callback('load_tmpl', \&_my_load_tmpl);
 
     # use a configuration file
-    $self->cfg_file('/home/bear/bearmail/conf/bearmail-web.pl');
+#    $self->cfg_file('/home/bear/bearmail/conf/bearmail-web.pl');
 }
 
 sub cgiapp_init {
