@@ -35,8 +35,8 @@ sub setup {
     # Give some interesting characteristics to our HTML::Template's
     $self->add_callback('load_tmpl', \&_my_load_tmpl);
 
-    # use a configuration file
-#    $self->cfg_file('/home/bear/bearmail/conf/bearmail-web.pl');
+    # Instanciate the backend
+    $self->{b} = BearMail::Backend::backend($self->cfg('backend'));
 }
 
 sub cgiapp_init {

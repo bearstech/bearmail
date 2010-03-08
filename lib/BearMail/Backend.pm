@@ -19,7 +19,8 @@ use BearMail::Backend::Files;
 
 # Should be selected by some config file
 sub backend {
-  return new Backend::Files;
+  my ($backend) = @_;
+  return new $backend;
 }
 
 1;
