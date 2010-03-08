@@ -23,10 +23,9 @@ use base 'BearMail::Web';
 sub default : StartRunMode {
     my $self = shift;
 
-    my $be = BearMail::Backend::backend();
     my @domains = ($self->session->param('level') eq 'postmaster')
-      ? $be->get_postmaster_domains($self->session->param('user'))
-      : $be->get_domains();
+      ? $self->{b}->get_postmaster_domains($self->session->param('user'))
+      : $self->{b}->get_domains();
 
     my $n = 0;
     foreach (@domains) {

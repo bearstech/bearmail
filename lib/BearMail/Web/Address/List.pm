@@ -26,8 +26,7 @@ sub default : StartRunMode {
     my $q = $self->query();
     my $domain = $q->param('domain');
 
-    my $be = BearMail::Backend::backend();
-    my @users = $be->get_users($domain);
+    my @users = $self->{b}->get_users($domain);
 
     my $n = 0;
     my @addresses;

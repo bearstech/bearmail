@@ -1,4 +1,4 @@
-package Backend;
+package BearMail::Backend;
 
 # Copyright (C) 2009 Bearstech - http://bearstech.com/
 #

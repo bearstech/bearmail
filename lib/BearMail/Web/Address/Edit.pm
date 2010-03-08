@@ -26,8 +26,7 @@ sub default : StartRunMode {
     my $q = $self->query();
     my $address = $q->param('address');
 
-    my $be = BearMail::Backend::backend();
-    my $user = $be->get_user($address);
+    my $user = $self->{b}->get_user($address);
 
     my $type = '';
     if    ($user->{'target'} eq 'local') { $type = 'regular'; }
