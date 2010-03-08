@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 # Copyright (C) 2009 Bearstech - http://bearstech.com/
 #
 # This program is free software: you can redistribute it and/or modify
