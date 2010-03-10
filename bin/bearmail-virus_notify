@@ -18,7 +18,8 @@
 # bearmail-notify - part of bearmail
 
 if [ -r /etc/bearmail/bearmail.conf ]; then
-        . /etc/bearmail/bearmail.conf
+        eval ` sed '/^#/d; /^ *$/d; s/"/\\"/g; s/ *= */="/; s/^/export /; s/$/"/' ` < \
+        /etc/bearmail/bearmail.conf
 fi
 
 VIRUS_SENDER="virus@$MAIN_MAIL_DOMAIN"
