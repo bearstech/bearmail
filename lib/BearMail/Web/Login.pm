@@ -37,8 +37,8 @@ sub login : StartRunMode {
         warn "Login successful, redirecting to intent='$intent'";
         return $self->redirect($self->url($intent));
 
-    } elsif(exists(%{$self->{b}->get_postmasters()}->{$email})
-            and %{$self->{b}->get_postmasters()}->{$email} eq md5_hex($pass)) {
+    } elsif(exists($self->{b}->get_postmasters()->{$email})
+            and $self->{b}->get_postmasters()->{$email} eq md5_hex($pass)) {
 
         $self->session->param('user', $email);
         $self->session->param('level', 'postmaster');

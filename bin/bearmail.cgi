@@ -30,7 +30,7 @@ CGI::Application::Dispatch->dispatch(
     args_to_new => {
         TMPL_PATH => "$bearmail_dir/template/",
         PARAMS    => {
-            cfg_file => "$bearmail_dir/conf/bearmail.conf",
+            cfg_file => "$bearmail_dir/etc/bearmail/bearmail.conf",
         }
     },
 );

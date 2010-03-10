@@ -37,7 +37,7 @@ sub setup {
     $self->add_callback('load_tmpl', \&_my_load_tmpl);
 
     # Instanciate the backend
-    $self->{b} = BearMail::Backend::backend($self->cfg('backend'));
+    $self->{b} = BearMail::Backend::backend( @{$self->cfg('backend')} );
 }
 
 sub cgiapp_init {
@@ -45,7 +45,7 @@ sub cgiapp_init {
 
     $self->session_config (
       COOKIE_PARAMS => { -name => 'bearmail', -expires => '+8days' },
-      SEND_COOKIE         => 1,
+      SEND_COOKIE   => 1,
     );
     CGI::Session->name('bearmail');
 }

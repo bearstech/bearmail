@@ -48,8 +48,8 @@ sub new() {
 
   bless \%args, $class;
 
-  $mailmap = $args{'mailmap'} if $args{'mailmap'};
-  $debug = 1 if ($args{'debug'} eq 1);
+  $mailmap = $args{'mailmap'} if defined $args{'mailmap'};
+  $debug = 1 if defined $args{'debug'};
 
   _read_mailmap();
   return \%args;

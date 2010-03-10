@@ -19,8 +19,19 @@ use BearMail::Backend::Files;
 
 # Should be selected by some config file
 sub backend {
-  my ($backend) = @_;
-  return new $backend;
+  my $backend = shift;
+  my %args;
+
+  if ($backend eq 'Backend::Files') {
+    $args{mailmap} = shift(@_) if @_;
+  }
+  elsif ($backend eq 'not_implemented') {
+    # ...
+  } else {
+    die "Unknown backend '$backend', check or set the 'backend' param in your bearmail.conf file";
+  }
+
+  return $backend->new(%args);
 }
 
 1;
