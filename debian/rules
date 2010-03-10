@@ -51,7 +51,7 @@ install: build
 	# Add here commands to install the package into debian/bearmail.
 	$(MAKE) BMMAIN=$(CURDIR)/debian/bearmail install
 	$(MAKE) BMASPAM=$(CURDIR)/debian/bearmail-antispam install
-	$(MAKE) BMCLAMAV=$(CURDIR)/debian/bearmail-clamav install
+	$(MAKE) BMCLAMAV=$(CURDIR)/debian/bearmail-antivirus install
 	$(MAKE) BMWEB=$(CURDIR)/debian/bearmail-web install
 
 

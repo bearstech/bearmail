@@ -5,6 +5,7 @@ set -e
 remove_section() {
         BMPMAS="/etc/bearmail/postfix/master.cf"
         BMPMAI="/etc/bearmail/postfix/main.cf"
+	BMPTRA="/etc/bearmail/postfix/bearmail-transport"
 
         # check if bearmail was activate
         if [ -L /etc/mailmap ] ; then
@@ -13,31 +14,30 @@ remove_section() {
         fi
         
         # configure master.cf :
-        if [ "$(grep "^## bearmail-antispam - EOC" $BMPMAS)" ]; then
-          sed "/## bearmail-antispam$/,\
-               /## bearmail-antispam - EOC/d" \
+        if [ "$(grep "^## bearmail-antivirus - EOC" $BMPMAS)" ]; then
+          sed "/## bearmail-antivirus$/,\
+               /## bearmail-antivirus - EOC/d" \
               -i $BMPMAS
-          sed -e '\!^## bearmail-antivirus$!i\
+          sed -e '\!^## bearmail-antispam$!i\
 \
-## bearmail-antispam' -i $BMPMAS
+## bearmail-antivirus' -i $BMPMAS
           sed '/./,/^$/!d' -i $BMPMAS
         fi
         
         # configure main.cf
-        if [ "$(grep "^# bearmail-antispam - EOC" $BMPMAI)" ]; then
-          sed "/# bearmail-antispam$/,\
-               /# bearmail-antispam - EOC/d" \
+        if [ "$(grep "^# bearmail-antivirus - EOC" $BMPMAI)" ]; then
+          sed "/# bearmail-antivirus$/,\
+               /# bearmail-antivirus - EOC/d" \
               -i $BMPMAI
-          sed -e '\!^# bearmail-antivirus$!i\
+          sed -e '\!^# bearmail-antispam$!i\
 \
-# bearmail-antispam' -i $BMPMAI
+# bearmail-antivirus' -i $BMPMAI
           sed '/./,/^$/!d' -i $BMPMAI
         fi
-	if [ "$(grep "bearmail-dspam_incoming" $BMPMAI)" ] ; then
-          sed '/bearmail-dspam_incoming/d' -i $BMPMAI
-        fi
-        if [ "$(grep "inet:127.0.0.1:60000" $BMPMAI)" ] ; then
-          sed '/inet:127.0.0.1:60000/d' -i $BMPMAI
+
+        # configure transport
+        if [ "$(grep "bearmail_virus-sender" $BMPTRA)" ]; then
+          sed "/bearmail_virus-sender/d" -i $BMPTRA
         fi
 
         # restart bearmail if needed
