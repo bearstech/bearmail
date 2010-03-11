@@ -1,0 +1,45 @@
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.\"             -*-Nroff-*-
+.\"
+.TH bearmail-update 8 "18 Juil 2008 " " " "Linux System Administrator's Manual"
+.SH NAME
+bearmail-update \- Apply the bearmail's database configuration.
+.SH SYNOPSIS
+.B bearmail-update
+.SH DESCRIPTION
+.B bearmail-update
+update the configuration of bearmail by reading the mailmap file.
+
+It creates the correct users configuration for postfix and dovecot.
+
+.PP
+.SH FILES
+.TP
+.I /etc/bearmail/mailmap
+information about users of bearmail, with type and passord if needed
+.TP
+.I /etc/postfix/bla
+Postfix file configuration for users
+.TP
+.I /etc/dovecot/passwd
+Dovecot file configuration for users
+.PP
+
+.SH "SEE ALSO"
+.BR bearmail-retrain_dspam (1),
+.BR bearmail-virus_notify (1),
+.BR bearmail-virus_send (1)
+
+.SH AUTHOR
+Written by Vincent Caron <vcaron@bearstech.com>
+
+Please send bug reports to Bearmail <mailsupport@bearstech.com>

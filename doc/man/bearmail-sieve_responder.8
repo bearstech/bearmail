@@ -1,0 +1,45 @@
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.\"             -*-Nroff-*-
+.\"
+.TH bearmail-sieve_responder 8 "18 Juil 2008 " " " "Linux User's Manual"
+.SH NAME
+bearmail-sieve_responder \- Send a virus to a bearmail user.
+.SH SYNOPSIS
+.B bearmail-sieve_responder
+email@domain.tld \< virus_file
+.SH DESCRIPTION
+.B bearmail-sieve_responder
+send a virus to an user.
+
+Used by postfix master.cf file, it send a virus mail after checking the correct name 
+of the virus file.
+.PP
+.SH "COMMAND\-LINE OPTIONS"
+.TP 0.5i
+.B "email"
+user's address of the incomming mail
+.PP
+.SH FILES
+.TP
+.I /etc/clamsmtp.conf
+clamsmtp configuration file
+.PP
+
+.SH "SEE ALSO"
+.BR bearmail-update (8),
+.BR bearmail-retrain_dspam (1),
+.BR bearmail-virus_notify (1)
+
+.SH AUTHORS
+Written by Benjamin Linet <blinet@bearstech.com>
+
+Please send bug reports to Bearmail <mailsupport@bearstech.com>
