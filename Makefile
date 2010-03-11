@@ -1,131 +1,45 @@
 default:
 	@echo "Available targets:"
-	@echo "  make install BMMAIN=/usr/local"
+	@echo "  make install DESTDIR=/usr/local"
 	@echo "  make clean"
 	@echo "  make deb"
 
 
-BMMAIN=usr
-BMASPAM=usr
-BMWEB=usr
-BMCLAMAV=usr
-
-install:
-	## bearmail
-	# main
-	install -D -m 755 bin/bearmail-update                                                   $(BMMAIN)/usr/sbin/bearmail-update
-	install -D -m 755 bin/bearmail-switch                                                   $(BMMAIN)/usr/sbin/bearmail-switch
-	install -D -m 644 conf/bearmail.conf                                                    $(BMMAIN)/etc/bearmail/bearmail.conf
-	install -D -m 755 bin/bearmail-sieve_responder                                          $(BMMAIN)/usr/sbin/bearmail-sieve_responder
-	install -D -m 755 bin/bearmail-sieve_forwarder                                          $(BMMAIN)/usr/sbin/bearmail-sieve_forwarder
-	install -D -m 755 bin/bearmail-sieve_userconf                                           $(BMMAIN)/usr/sbin/bearmail-sieve_userconf
-	# libs
-	install -D -m 644 lib/BearMail/Backend.pm                                               $(BMMAIN)/usr/share/bearmail/lib/Backend.pm
-	install -D -m 644 lib/BearMail/Backend/Files.pm                                         $(BMMAIN)/usr/share/bearmail/lib/Backend/Files.pm
-	# postfix
-	install -D -m 644 conf/postfix-main.cf                                                  $(BMMAIN)/etc/bearmail/postfix/main.cf
-	install -D -m 644 conf/postfix-master.cf                                                $(BMMAIN)/etc/bearmail/postfix/master.cf
-	install -D -m 644 conf/bearmail-client_access                                           $(BMMAIN)/etc/bearmail/postfix/bearmail-client_access
-	install -D -m 644 conf/bearmail-helo_access                                             $(BMMAIN)/etc/bearmail/postfix/bearmail-helo_access
-	# dovecot
-	install -D -m 644 conf/dovecot.conf                                                     $(BMMAIN)/etc/bearmail/dovecot/dovecot.conf
-	# doc
-	install -D -m 644 README                                                                $(BMMAIN)/usr/share/doc/bearmail/README
-	install -D -m 644 doc/man/bearmail-update.8.gz                                          $(BMMAIN)/usr/share/man/man8/bearmail-update.8.gz
-	install -D -m 644 doc/man/bearmail-switch.8.gz                                          $(BMMAIN)/usr/share/man/man8/bearmail-switch.8.gz
-	install -D -m 644 doc/man/bearmail-sieve_responder.8.gz                                 $(BMMAIN)/usr/share/man/man8/bearmail-sieve_responder.8.gz
-	install -D -m 644 doc/man/bearmail-sieve_forwarder.8.gz                                 $(BMMAIN)/usr/share/man/man8/bearmail-sieve_forwarder.8.gz
-	install -D -m 644 doc/man/bearmail-sieve_userconf.8.gz                                  $(BMMAIN)/usr/share/man/man8/bearmail-sieve_userconf.8.gz
-
-	## bermail-clamav
-	# postfix
-	install -D -m 755 bin/bearmail-virus_send                                               $(BMCLAMAV)/usr/bin/bearmail-virus_send
-	# clamsmtp
-	install -D -m 755 bin/bearmail-virus_notify                                             $(BMCLAMAV)/usr/bin/bearmail-virus_notify
-	install -D -m 644 conf/clamsmtpd.conf                                                   $(BMCLAMAV)/etc/bearmail/clamsmtp/clamsmtpd.conf
-	# doc
-	install -D -m 644 doc/man/bearmail-virus_send.1.gz                                      $(BMCLAMAV)/usr/share/man/man1/bearmail-virus_send.1.gz
-	install -D -m 644 doc/man/bearmail-virus_notify.1.gz                                    $(BMCLAMAV)/usr/share/man/man1/bearmail-virus_notify.1.gz
-
-	## bearmail-dspam
-	# bin
-	install -D -m 755 bin/bearmail-retrain_dspam                                            $(BMASPAM)/usr/bin/bearmail-retrain_dspam
-	install -D -m 755 bin/bearmail-dspam_cleaner                                            $(BMASPAM)/usr/sbin/bearmail-dspam_cleaner
-	# conf
-	install -D -m 644 conf/dspam/dspam.conf                                                 $(BMASPAM)/etc/bearmail/dspam/dspam.conf
-	install -D -m 644 conf/dspam/default.prefs                                              $(BMASPAM)/etc/bearmail/dspam/default.prefs
-	install -D -m 644 conf/bearmail-dspam_incoming                                          $(BMASPAM)/etc/bearmail/postfix/bearmail-dspam_incoming
-	# doc
-	install -D -m 644 doc/man/bearmail-retrain_dspam.1.gz                                   $(BMASPAM)/usr/share/man/man1/bearmail-retrain_dspam.1.gz
-	install -D -m 644 doc/man/bearmail-dspam_cleaner.8.gz                                   $(BMASPAM)/usr/share/man/man8/bearmail-dspam_cleaner.8.gz
-
-	## bearmail-web
-	# dspam-conf
-	install -D -m 755 conf/dspam/webfrontend.conf                                           $(BMWEB)/etc/bearmail/dspam/webfrontend.conf
-	install -D -m 744 conf/dspam/dspam_tricks/auth.cgi                                      $(BMWEB)/etc/bearmail/dspam/dspam_tricks/auth.cgi
-	install -D -m 744 conf/dspam/dspam_tricks/dspam_stats_wrapper.pl                        $(BMWEB)/etc/bearmail/dspam/dspam_tricks/dspam_stats_wrapper.pl
-	install -D -m 644 conf/dspam/dspam_tricks/nav_login.html                                $(BMWEB)/etc/bearmail/dspam/dspam_tricks/nav_login.html
-	# dspam-webfrontconf
-	install -D -m 744 conf/dspam/webfrontend/dspam/admin.cgi                                $(BMWEB)/usr/share/bearmail/dspam-webfrontend/dspam/admin.cgi
-	install -D -m 744 conf/dspam/webfrontend/dspam/admingraph.cgi                           $(BMWEB)/usr/share/bearmail/dspam-webfrontend/dspam/admingraph.cgi
-	install -D -m 744 conf/dspam/webfrontend/dspam/auth.cgi                                 $(BMWEB)/usr/share/bearmail/dspam-webfrontend/dspam/auth.cgi
-	install -D -m 644 conf/dspam/webfrontend/dspam/base.css                                 $(BMWEB)/usr/share/bearmail/dspam-webfrontend/dspam/base.css
-	install -D -m 744 conf/dspam/webfrontend/dspam/dspam.cgi                                $(BMWEB)/usr/share/bearmail/dspam-webfrontend/dspam/dspam.cgi
-	install -D -m 644 conf/dspam/webfrontend/dspam/dspam-logo-small.gif                     $(BMWEB)/usr/share/bearmail/dspam-webfrontend/dspam/dspam-logo-small.gif
-	install -D -m 744 conf/dspam/webfrontend/dspam/graph.cgi                                $(BMWEB)/usr/share/bearmail/dspam-webfrontend/dspam/graph.cgi
-	install -D -m 644 conf/dspam/webfrontend/dspam/logout.gif                               $(BMWEB)/usr/share/bearmail/dspam-webfrontend/dspam/logout.gif
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_admin_error.html           $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_admin_error.html
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_admin_preferences.html     $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_admin_preferences.html
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_admin_status.html          $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_admin_status.html
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_admin_user.html            $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_admin_user.html
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_alerts.html                $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_alerts.html
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_analysis.html              $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_analysis.html
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_error.html                 $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_error.html
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_fragment.html              $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_fragment.html
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_history.html               $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_history.html
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_login.html                 $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_login.html
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_performance.html           $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_performance.html
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_preferences.html           $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_preferences.html
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_quarantine.html            $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_quarantine.html
-	install -D -m 644 conf/dspam/webfrontend/dspam-templates/nav_viewmessage.html           $(BMWEB)/usr/share/bearmail/dspam-webfrontend/upstream-templates/nav_viewmessage.html
-	# doc
-	install -D -m 644 doc/mail-clients/fr/img/mail.0.png                                    $(BMWEB)/usr/share/bearmail/doc/fr/img/mail.0.png
-	install -D -m 644 doc/mail-clients/fr/img/mail.1.png                                    $(BMWEB)/etc/bearmail/doc/fr/img/mail.1.png
-	install -D -m 644 doc/mail-clients/fr/img/mail.2.png                                    $(BMWEB)/etc/bearmail/doc/fr/img/mail.2.png
-	install -D -m 644 doc/mail-clients/fr/img/mail.3.png                                    $(BMWEB)/etc/bearmail/doc/fr/img/mail.3.png
-	install -D -m 644 doc/mail-clients/fr/img/mail.4.png                                    $(BMWEB)/etc/bearmail/doc/fr/img/mail.4.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook.1.png                                 $(BMWEB)/etc/bearmail/doc/fr/img/outlook.1.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook.2.png                                 $(BMWEB)/etc/bearmail/doc/fr/img/outlook.2.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook.3.png                                 $(BMWEB)/etc/bearmail/doc/fr/img/outlook.3.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook.4.png                                 $(BMWEB)/etc/bearmail/doc/fr/img/outlook.4.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook.5.png                                 $(BMWEB)/etc/bearmail/doc/fr/img/outlook.5.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook.6.png                                 $(BMWEB)/etc/bearmail/doc/fr/img/outlook.6.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook.7.png                                 $(BMWEB)/etc/bearmail/doc/fr/img/outlook.7.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook_express.1.png                         $(BMWEB)/etc/bearmail/doc/fr/img/outlook_express.1.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook_express.2.png                         $(BMWEB)/etc/bearmail/doc/fr/img/outlook_express.2.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook_express.3.png                         $(BMWEB)/etc/bearmail/doc/fr/img/outlook_express.3.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook_express.4.png                         $(BMWEB)/etc/bearmail/doc/fr/img/outlook_express.4.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook_express.5.png                         $(BMWEB)/etc/bearmail/doc/fr/img/outlook_express.5.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook_express.6.png                         $(BMWEB)/etc/bearmail/doc/fr/img/outlook_express.6.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook_express.7.png                         $(BMWEB)/etc/bearmail/doc/fr/img/outlook_express.7.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook_express.8.png                         $(BMWEB)/etc/bearmail/doc/fr/img/outlook_express.8.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook_express.9.png                         $(BMWEB)/etc/bearmail/doc/fr/img/outlook_express.9.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook_express.10.png                        $(BMWEB)/etc/bearmail/doc/fr/img/outlook_express.10.png
-	install -D -m 644 doc/mail-clients/fr/img/outlook_express.11.png                        $(BMWEB)/etc/bearmail/doc/fr/img/outlook_express.11.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.1.png                             $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.1.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.2.png                             $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.2.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.3.png                             $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.3.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.4.png                             $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.4.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.5.png                             $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.5.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.6.png                             $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.6.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.7.png                             $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.7.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.8.png                             $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.8.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.9.png                             $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.9.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.10.png                            $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.10.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.11.png                            $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.11.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.12.png                            $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.12.png
-	install -D -m 644 doc/mail-clients/fr/img/thunderbird.13.png                            $(BMWEB)/etc/bearmail/doc/fr/img/thunderbird.13.png
-
+install: install-bearmail install-antispam install-antivirus install-web
+install-bearmail:
+	install -D -m 755 bin/bearmail-update                               $(DESTDIR)/usr/sbin/
+	install -D -m 755 bin/bearmail-switch                               $(DESTDIR)/usr/sbin/
+	install -D -m 755 bin/bearmail-sieve_*                              $(DESTDIR)/usr/sbin/
+	install -D -m 644 conf/bearmail.conf                                $(DESTDIR)/etc/bearmail/
+	install -D -m 644 conf/postfix/*                                    $(DESTDIR)/etc/bearmail/postfix/
+	install -D -m 644 conf/dovecot/*                                    $(DESTDIR)/etc/bearmail/dovecot/
+	install -D -m 644 lib/BearMail/Backend.pm                           $(DESTDIR)/usr/share/perl5/BearMail/Backend.pm
+	install -D -m 644 lib/BearMail/Backend/Files.pm                     $(DESTDIR)/usr/share/perl5/BearMail//Backend/Files.pm
+#	install -D -m 644 README                                            $(DESTDIR)/usr/share/doc/bearmail/README
+	install -D -m 644 doc/man/bearmail-update.8.gz                      $(DESTDIR)/usr/share/man/man8/bearmail-update.8.gz
+	install -D -m 644 doc/man/bearmail-switch.8.gz                      $(DESTDIR)/usr/share/man/man8/bearmail-switch.8.gz
+	install -D -m 644 doc/man/bearmail-sieve_*                          $(DESTDIR)/usr/share/man/man8/
+install-antivirus:
+	install -D -m 755 bin/bearmail-virus*                               $(DESTDIR)/usr/lib/bearmail/
+	install -D -m 644 conf/clamsmtpd.conf                               $(DESTDIR)/etc/bearmail/clamsmtp/clamsmtpd.conf
+install-antispam:
+	install -D -m 755 bin/bearmail-retrain_dspam                        $(DESTDIR)/usr/lib/bearmail/
+	install -D -m 755 bin/bearmail-dspam_cleaner                        $(DESTDIR)/usr/sbin/
+	install -D -m 644 conf/dspam/*.conf                                 $(DESTDIR)/etc/bearmail/dspam/
+	install -D -m 755 conf/dspam/webfrontend.pl                         $(DESTDIR)/etc/bearmail/dspam/webfrontend.conf
+	install -D -m 644 conf/dspam/*.prefs                                $(DESTDIR)/etc/bearmail/dspam/
+	install -D -m 644 conf/bearmail-dspam_incoming                      $(DESTDIR)/etc/bearmail/postfix/
+	install -D -m 744 conf/dspam/dspam_tricks/*.cgi                     $(DESTDIR)/etc/bearmail/dspam/dspam_tricks/
+	install -D -m 744 conf/dspam/dspam_tricks/*.pl                      $(DESTDIR)/etc/bearmail/dspam/dspam_tricks/
+	install -D -m 644 conf/dspam/dspam_tricks/*.html                    $(DESTDIR)/etc/bearmail/dspam/dspam_tricks/
+	install -D -m 644 conf/dspam/webfrontend/dspam/*.css                $(DESTDIR)/usr/share/bearmail/dspam-webfrontend/dspam/
+	install -D -m 744 conf/dspam/webfrontend/dspam/*.cgi                $(DESTDIR)/usr/share/bearmail/dspam-webfrontend/dspam/
+	install -D -m 644 conf/dspam/webfrontend/dspam/*.gif                $(DESTDIR)/usr/share/bearmail/dspam-webfrontend/dspam/
+	install -D -m 644 conf/dspam/webfrontend/dspam-templates/*          $(DESTDIR)/usr/share/bearmail/dspam-webfrontend/upstream-templates/
+	install -D -m 644 doc/man/bearmail-dspam_cleaner.8.gz               $(DESTDIR)/usr/share/man/man8/
+install-web:
+	install -D -m 644 doc/mail-clients/fr/img/*                         $(DESTDIR)/usr/share/bearmail/htdoc/fr/img/
+	install -D -m 644 doc/mail-clients/fr/*html                         $(DESTDIR)/usr/share/bearmail/htdoc/fr/
 
 
 clean:
@@ -133,6 +47,9 @@ clean:
 	rm -f debian/bearmail.debhelper.log
 	rm -f debian/files
 	rm -fr debian/bearmail
+	rm -fr debian/bearmail-antivirus
+	rm -fr debian/bearmail-antispam
+	rm -fr debian/bearmail-web
 
 deb:
 	dpkg-buildpackage -rfakeroot -uc -us

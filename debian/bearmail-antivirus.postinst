@@ -32,7 +32,7 @@ bearmail_scan      unix  -       -       n       -       16      smtp\
 \
 # re-send viruses when asked to : \
 bearmail_virus-sender    unix    -       n       n       -       10      pipe\
-  flags= user=clamsmtp argv=/usr/bin/bearmail-virus_send $sender\
+  flags= user=clamsmtp argv=/usr/lib/bearmail/bearmail-virus_send $sender\
 ## bearmail-antivirus - EOC
 ' -i $BMPMAS
     sed '/./,/^$/!d' -i $BMPMAS

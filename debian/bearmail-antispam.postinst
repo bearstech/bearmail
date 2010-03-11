@@ -25,7 +25,7 @@ bearmail_dspam     unix  -       -       n       -       10      lmtp\
 \
 # bearmail dspam retrainer\
 bearmail_dspam-retrain   unix    -       n       n       -       10      pipe\
-  flags= user=dspam:dspam argv=/etc/bearmail/bearmail-retrain_dspam $sender $nexthop\
+  flags= user=dspam:dspam argv=/usr/lib/bearmail/bearmail-retrain_dspam $sender $nexthop\
 \
 # dspam outgoing port\
 127.0.0.1:10027 inet    n       -       n       -       -       smtpd\

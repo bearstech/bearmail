@@ -1,9 +1,3 @@
-usr/sbin
-etc/bearmail
-etc/bearmail/dovecot
-etc/bearmail/dovecot/bearmail-sieve
-usr/share/bearmail/
-usr/share/bearmail/lib
-usr/share/bearmail/lib/Backend
-usr/share/doc/bearmail
-var/spool/bearmail
+/usr/sbin/
+/etc/bearmail/postfix
+/etc/bearmail/dovecot
