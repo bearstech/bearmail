@@ -14,10 +14,9 @@ install-bearmail:
 	install -D -m 644 conf/postfix/*                                    $(DESTDIR)/etc/bearmail/postfix/
 	install -D -m 644 conf/dovecot/*                                    $(DESTDIR)/etc/bearmail/dovecot/
 	install -D -m 644 lib/BearMail/Backend.pm                           $(DESTDIR)/usr/share/perl5/BearMail/Backend.pm
-	install -D -m 644 lib/BearMail/Backend/Files.pm                     $(DESTDIR)/usr/share/perl5/BearMail//Backend/Files.pm
-#	install -D -m 644 README                                            $(DESTDIR)/usr/share/doc/bearmail/README
-	install -D -m 644 doc/man/bearmail-update.8.gz                      $(DESTDIR)/usr/share/man/man8/bearmail-update.8.gz
-	install -D -m 644 doc/man/bearmail-switch.8.gz                      $(DESTDIR)/usr/share/man/man8/bearmail-switch.8.gz
+	install -D -m 644 lib/BearMail/Backend/Files.pm                     $(DESTDIR)/usr/share/perl5/BearMail/Backend/Files.pm
+	install -D -m 644 doc/man/bearmail-update.8                         $(DESTDIR)/usr/share/man/man8/
+	install -D -m 644 doc/man/bearmail-switch.8                         $(DESTDIR)/usr/share/man/man8/
 	install -D -m 644 doc/man/bearmail-sieve_*                          $(DESTDIR)/usr/share/man/man8/
 install-antivirus:
 	install -D -m 755 bin/bearmail-virus*                               $(DESTDIR)/usr/lib/bearmail/
@@ -36,7 +35,7 @@ install-antispam:
 	install -D -m 744 conf/dspam/webfrontend/dspam/*.cgi                $(DESTDIR)/usr/share/bearmail/dspam-webfrontend/dspam/
 	install -D -m 644 conf/dspam/webfrontend/dspam/*.gif                $(DESTDIR)/usr/share/bearmail/dspam-webfrontend/dspam/
 	install -D -m 644 conf/dspam/webfrontend/dspam-templates/*          $(DESTDIR)/usr/share/bearmail/dspam-webfrontend/upstream-templates/
-	install -D -m 644 doc/man/bearmail-dspam_cleaner.8.gz               $(DESTDIR)/usr/share/man/man8/
+	install -D -m 644 doc/man/bearmail-dspam_cleaner.8                  $(DESTDIR)/usr/share/man/man8/
 install-web:
 	install -D -m 644 doc/mail-clients/fr/img/*                         $(DESTDIR)/usr/share/bearmail/htdoc/fr/img/
 	install -D -m 644 doc/mail-clients/fr/*html                         $(DESTDIR)/usr/share/bearmail/htdoc/fr/
