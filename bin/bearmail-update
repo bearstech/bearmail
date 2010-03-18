@@ -21,7 +21,7 @@ use BearMail::Backend::Files;
 use Getopt::Long qw(:config no_auto_abbrev no_ignore_case bundling);
 
 # options
-my $debug = 0;
+my $debug;
 my $mailmap;
 my $help;
 
