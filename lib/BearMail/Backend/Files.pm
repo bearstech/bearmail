@@ -36,7 +36,8 @@ use Exporter 'import';
 # from 'bearmail-update' which has been stashed in the 'Implementation' part
 # of this package.
 
-
+my $program = "bearmail-update";
+my $version = "0.2";
 my %records;
 my %by_domain;
 my @domains;

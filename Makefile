@@ -25,14 +25,14 @@ install-antispam:
 	install -D -m 755 bin/bearmail-retrain_dspam                        $(DESTDIR)/usr/lib/bearmail/
 	install -D -m 755 bin/bearmail-dspam_cleaner                        $(DESTDIR)/usr/sbin/
 	install -D -m 644 conf/dspam/*.conf                                 $(DESTDIR)/etc/bearmail/dspam/
-	install -D -m 755 conf/dspam/webfrontend.pl                         $(DESTDIR)/etc/bearmail/dspam/webfrontend.conf
+	install -D -m 644 conf/dspam/webfrontend.pl                         $(DESTDIR)/etc/bearmail/dspam/webfrontend.conf
 	install -D -m 644 conf/dspam/*.prefs                                $(DESTDIR)/etc/bearmail/dspam/
 	install -D -m 644 conf/bearmail-dspam_incoming                      $(DESTDIR)/etc/bearmail/postfix/
-	install -D -m 744 conf/dspam/dspam_tricks/*.cgi                     $(DESTDIR)/etc/bearmail/dspam/dspam_tricks/
+	install -D -m 755 conf/dspam/dspam_tricks/*.cgi                     $(DESTDIR)/etc/bearmail/dspam/dspam_tricks/
 	install -D -m 744 conf/dspam/dspam_tricks/*.pl                      $(DESTDIR)/etc/bearmail/dspam/dspam_tricks/
 	install -D -m 644 conf/dspam/dspam_tricks/*.html                    $(DESTDIR)/etc/bearmail/dspam/dspam_tricks/
 	install -D -m 644 conf/dspam/webfrontend/dspam/*.css                $(DESTDIR)/usr/share/bearmail/dspam-webfrontend/dspam/
-	install -D -m 744 conf/dspam/webfrontend/dspam/*.cgi                $(DESTDIR)/usr/share/bearmail/dspam-webfrontend/dspam/
+	install -D -m 755 conf/dspam/webfrontend/dspam/*.cgi                $(DESTDIR)/usr/share/bearmail/dspam-webfrontend/dspam/
 	install -D -m 644 conf/dspam/webfrontend/dspam/*.gif                $(DESTDIR)/usr/share/bearmail/dspam-webfrontend/dspam/
 	install -D -m 644 conf/dspam/webfrontend/dspam-templates/*          $(DESTDIR)/usr/share/bearmail/dspam-webfrontend/upstream-templates/
 	install -D -m 644 doc/man/bearmail-dspam_cleaner.8                  $(DESTDIR)/usr/share/man/man8/

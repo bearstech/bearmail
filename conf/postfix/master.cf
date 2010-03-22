@@ -9,7 +9,7 @@
 #smtp      inet  n       -       -       -       -       smtpd
 smtp      inet  n       -       -       -       -        smtpd
 
-## bearmail-clamav
+## bearmail-antivirus
 ## bearmail-antispam
 
 # submission

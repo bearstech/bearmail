@@ -1,4 +1,4 @@
 /usr/sbin/
 /etc/bearmail/postfix
-/etc/bearmail/dovecot
+/etc/bearmail/dovecot/bearmail-sieve
 /usr/share/man/man8/

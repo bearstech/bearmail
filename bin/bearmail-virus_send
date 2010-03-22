@@ -83,7 +83,7 @@ my %mail = (
   From    => "$virus_sender",
   Subject => "/!\\ [virus] /!\\ - $virus_subject",
   'Content-Type' => "multipart/mixed; boundary=$virus_boundary",
-  'X-Mailer' => "Bearstech quarantined viruses sender",
+  'X-Mailer' => "Bearmail quarantined viruses sender",
   );
 
 $mail{smtp} = '127.0.0.1';

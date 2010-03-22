@@ -58,8 +58,8 @@ suspend_status() {
 switch_on() {
   is_on && { echo "Bearmail is already on."; exit 0; }
 
-  # check if bearmail-clamav is there and correctly configured
-  if [ "$(grep "^## bearmail-clamav - EOC" $BMDIR/postfix/master.cf)" ] ; then
+  # check if bearmail-antivirus is there and correctly configured
+  if [ "$(grep "^## bearmail-antivirus - EOC" $BMDIR/postfix/master.cf)" ] ; then
     if [ ! "$(grep "^LocalSocket $CVSOCK" $CVDIR/clamd.conf)" ] ; then
       echo "Error: clamav is not configured to use socket at $CVSOCK"
       suspend_mailserver

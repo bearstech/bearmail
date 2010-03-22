@@ -9,7 +9,7 @@ inet_interfaces = all
 
 # Default relaying rules: accept local aliases (see virtual_pipes), 
 # no smarthost, accept locally generated emails
-mydestination = bearmail.tld, localhost
+mydestination = localhost
 relayhost     =
 mynetworks    = 127.0.0.0/8
 # Default relaying rules - EOC
@@ -90,6 +90,6 @@ smtpd_client_restrictions =
 #  reject_rbl_client my.rbl.server.tld
 # DNSRBL - EOC
 
-# bearmail-clamav
+# bearmail-antivirus
 
 # bearmail-antispam

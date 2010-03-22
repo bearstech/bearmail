@@ -18,8 +18,8 @@
 # bearmail-notify - part of bearmail
 
 if [ -r /etc/bearmail/bearmail.conf ]; then
-        eval ` sed '/^#/d; /^ *$/d; s/"/\\"/g; s/ *= */="/; s/^/export /; s/$/"/' ` < \
-        /etc/bearmail/bearmail.conf
+#        eval ` sed '/^#/d; /^ *$/d; s/"/\\"/g; s/ *= */="/; s/^/export /; s/$/"/' ` < \
+        . /etc/bearmail/bearmail.conf
 fi
 
 VIRUS_SENDER="virus@$MAIN_MAIL_DOMAIN"
@@ -30,7 +30,7 @@ MAILTO=$RECIPIENTS
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
 LINE="-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
-if [ ! -z "$MY_VIRUS_TIME" ] && [ "$MY_LANGUAGE" == "fr" ] ; then
+if [ ! -z "$DAYS_TO_KEEP_VIRUSES" ] && [ "$MY_LANGUAGE" == "fr" ] ; then
 sendmail -i $RECIPIENTS << EOF
 To: $RECIPIENTS
 From: $VIRUS_SENDER
@@ -53,7 +53,7 @@ Pour des questions de sécurité, nous vous conseillons de ne pas
 récupérer l'email en question et de demander à votre correspondant
 de vous reformuler le mail sans virus.
 
-Toutefois, durant un délais de $DAYS_TO_KEEP_VIRUSES jours à partir d'aujourd'hui,
+Toutefois, durant un délai de $DAYS_TO_KEEP_VIRUSES jours à partir d'aujourd'hui,
 vous pourrez récupérer le message contaminé en envoyant un
 mail à $VIRUS_SENDER et en mettant pour sujet :
 $(echo "$EMAIL"|sed -e "s#/var/spool/clamsmtp/##g")
@@ -71,7 +71,7 @@ EOF
 fi
 
 ## english version
-if [ ! -z "$MY_VIRUS_TIME" ] && [ "$MY_LANGUAGE" == "en" ] ; then
+if [ ! -z "$DAYS_TO_KEEP_VIRUSES" ] && [ "$MY_LANGUAGE" == "en" ] ; then
 sendmail -i $RECIPIENTS << EOF
 To: $RECIPIENTS
 From: $VIRUS_SENDER
@@ -94,7 +94,7 @@ Pour des questions de sécurité, nous vous conseillons de ne pas
 récupérer l'email en question et de demander à votre correspondant
 de vous reformuler le mail sans virus.
 
-Toutefois, durant un délais de $MY_VIRUS_TIME jours à partir d'aujourd'hui,
+Toutefois, durant un délai de $DAYS_TO_KEEP_VIRUSES jours à partir d'aujourd'hui,
 vous pourrez récupérer le message contaminé en envoyant un
 mail à $VIRUS_SENDER et en mettant pour sujet :
 $(echo "$EMAIL"|sed -e "s#/var/spool/clamsmtp/##g")
