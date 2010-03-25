@@ -18,22 +18,22 @@
 # bearmail-notify - part of bearmail
 
 if [ -r /etc/bearmail/bearmail.conf ]; then
-#        eval ` sed '/^#/d; /^ *$/d; s/"/\\"/g; s/ *= */="/; s/^/export /; s/$/"/' ` < \
-        . /etc/bearmail/bearmail.conf
+  eval `sed '/^#/d; /^ *$/d; s/"/\\"/g; s/ *= */="/; s/^/export /; s/$/"/' \
+       /etc/bearmail/bearmail.conf`
 fi
-
-VIRUS_SENDER="virus@$MAIN_MAIL_DOMAIN"
-ORGANIZATION="$MAIN_MAIL_DOMAIN"
-MAILTO=$RECIPIENTS
 
 # formail should be in PATH
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-
 LINE="-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
-if [ ! -z "$DAYS_TO_KEEP_VIRUSES" ] && [ "$MY_LANGUAGE" == "fr" ] ; then
-sendmail -i $RECIPIENTS << EOF
-To: $RECIPIENTS
-From: $VIRUS_SENDER
+VIRUS_SENDER="virus@$MAIN_MAIL_DOMAIN"
+VIRUS_SENDER_IDENT="(AntiVirus System)"
+ORGANIZATION="$MAIN_MAIL_DOMAIN"
+
+for recipient in $RECIPIENTS; do
+  if [ ! -z "$DAYS_TO_KEEP_VIRUSES" ] && [ "$MY_LANGUAGE" == "fr" ] ; then
+sendmail -i -t -f $VIRUS_SENDER << EOF
+To: $recipient
+From: $VIRUS_SENDER $VIRUS_SENDER_IDENT
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Subject: Un virus a =?UTF-8?B?w6l0w6kgZMOpdGVjdMOp?= : $VIRUS
@@ -68,13 +68,13 @@ $(formail -X "" < $EMAIL)
 $LINE
 EOF
 
-fi
+  fi
 
-## english version
-if [ ! -z "$DAYS_TO_KEEP_VIRUSES" ] && [ "$MY_LANGUAGE" == "en" ] ; then
-sendmail -i $RECIPIENTS << EOF
-To: $RECIPIENTS
-From: $VIRUS_SENDER
+  ## english version
+  if [ ! -z "$DAYS_TO_KEEP_VIRUSES" ] && [ "$MY_LANGUAGE" == "en" ] ; then
+sendmail -i -t -f $VIRUS_SENDER << EOF
+To: $recipient
+From: $VIRUS_SENDER $VIRUS_SENDER_IDENT
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Subject: A virus was found : $VIRUS
@@ -109,5 +109,5 @@ $(formail -X "" < $EMAIL)
 $LINE
 EOF
 
-fi
-
+  fi
+done
