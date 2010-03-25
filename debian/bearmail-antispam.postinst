@@ -6,9 +6,9 @@ BMPMAI="/etc/bearmail/postfix/main.cf"
 BMDDIR="/etc/bearmail/dspam/"
 
 chown dspam:dspam /etc/bearmail/dspam/*{.conf,.prefs}
-chown dspam:dspam /etc/bearmail/dspam/dspam_tricks/*{.cgi,.pl}
-chown dspam:dspam /usr/share/bearmail/dspam-webfrontend/dspam/*.cgi
-chmod 600 /etc/bearmail/dspam/webfrontend.conf
+#chown dspam:dspam /etc/bearmail/dspam/dspam_tricks/*{.cgi,.pl}
+#chown dspam:dspam /usr/share/bearmail/dspam-webfrontend/dspam/*.cgi
+#chmod 600 /etc/bearmail/dspam/webfrontend.conf
 
 if [ "$1" = "configure" ]; then
   # check if bearmail was activate

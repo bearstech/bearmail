@@ -2,7 +2,4 @@
 /usr/sbin/
 /etc/bearmail/dspam/
 /etc/bearmail/postfix/
-/etc/bearmail/dspam/dspam_tricks/
-/usr/share/bearmail/dspam-webfrontend/dspam/
-/usr/share/bearmail/dspam-webfrontend/upstream-templates/
 /usr/share/man/man8/
