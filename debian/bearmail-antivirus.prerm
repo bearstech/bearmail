@@ -40,9 +40,6 @@ remove_section() {
           sed "/^# bearmail-antivirus/d" -i $BMPAL
           sed "/bearmail-virus_send/d" -i $BMPAL
         fi
-#        if [ "$(grep "bearmail_virus-sender" $BMPTRA)" ]; then
-#          sed "/bearmail_virus-sender/d" -i $BMPTRA
-#        fi
 
         # restart bearmail if needed
         if [ "$BEARMAIL_ON" -eq "1" ] ; then

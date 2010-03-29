@@ -33,7 +33,6 @@ DOVECOT_INIT="/etc/init.d/dovecot"
 
 CDIR="/etc"
 CLAMSMTP_INIT="/etc/init.d/clamsmtp"
-#CLAMAV_INIT="/etc/init.d/clamav-daemon"
 
 CVDIR="/etc/clamav/"
 CVSOCK="/var/run/clamav/clamd.ctl"
@@ -73,7 +72,6 @@ switch_on() {
         ln -s $BMDIR/clamsmtp/clamsmtpd.conf $CDIR/clamsmtpd.conf
         $CLAMSMTP_INIT stop
 	$CLAMSMTP_INIT start
-        #$CLAMAV_INIT restart
       fi
     fi
   fi

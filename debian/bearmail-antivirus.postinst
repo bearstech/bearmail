@@ -43,9 +43,6 @@ bearmail_scan      unix  -       -       n       -       16      smtp\
   -o mynetworks_style=host\
   -o smtpd_authorized_xforward_hosts=127.0.0.0/8\
 \
-# re-send viruses when asked to : \
-#bearmail_virus-sender    unix    -       n       n       -       10      pipe\
-#  flags= user=clamsmtp argv=/usr/lib/bearmail/bearmail-virus_send $sender\
 ## bearmail-antivirus - EOC
 ' -i $BMPMAS
     sed '/./,/^$/!d' -i $BMPMAS
@@ -67,9 +64,6 @@ content_filter = bearmail_scan:[127.0.0.1]:10025\
 virus: |/usr/lib/bearmail/bearmail-virus_send
 EOF
     newaliases
-#    MY_DOMAIN=`cat /etc/mailname`
-#    echo "virus@$MY_DOMAIN bearmail_virus-sender:" >> $BMPTRA
-#    echo "Warning: using $MY_DOMAIN for bearmail_virus-sender"
   fi
 
   # restart bearmail if needed
