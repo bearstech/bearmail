@@ -33,7 +33,7 @@ DOVECOT_INIT="/etc/init.d/dovecot"
 
 CDIR="/etc"
 CLAMSMTP_INIT="/etc/init.d/clamsmtp"
-CLAMAV_INIT="/etc/init.d/clamav-daemon"
+#CLAMAV_INIT="/etc/init.d/clamav-daemon"
 
 CVDIR="/etc/clamav/"
 CVSOCK="/var/run/clamav/clamd.ctl"
@@ -51,7 +51,8 @@ suspend_status() {
   if [ -n "$SUSPEND" ] ; then
     $* stop
   else
-    $* restart
+    $* stop
+    $* start
   fi
 }
 
@@ -70,8 +71,9 @@ switch_on() {
       if [ ! -L "$CDIR/clamsmtpd.conf" ]; then
         mv $CDIR/clamsmtpd.conf $CDIR/clamsmtpd.conf.bearmail-orig
         ln -s $BMDIR/clamsmtp/clamsmtpd.conf $CDIR/clamsmtpd.conf
-        $CLAMSMTP_INIT restart
-        $CLAMAV_INIT restart
+        $CLAMSMTP_INIT stop
+	$CLAMSMTP_INIT start
+        #$CLAMAV_INIT restart
       fi
     fi
   fi
@@ -100,8 +102,10 @@ switch_on() {
               --exclude="dspam_tricks" $DPDIR/ $BMDIR/dspam/
         mv $DPDIR $DPDIR.bearmail-orig
         ln -s $BMDIR/dspam $DPDIR
-        $DP_INIT restart
-        $PG_INIT restart
+        $DP_INIT stop
+	$DP_INIT start
+        $PG_INIT stop
+	$PG_INIT start
       fi
     fi
   fi
@@ -134,8 +138,8 @@ switch_on() {
   bearmail-update
 
   # restart services
-  $POSTFIX_INIT restart
-  $DOVECOT_INIT restart
+  $POSTFIX_INIT start
+  $DOVECOT_INIT start
   echo "Bearmail is now On."
 }
 
@@ -143,7 +147,8 @@ switch_off() {
   # update of postfix configuration
   if [ -d "$PDIR.bearmail-orig" ] ; then
     rsync -au --delete --exclude="*bearmail*" --exclude="main.cf" \
-          --exclude="master.cf" $BMDIR/postfix/ $PDIR.bearmail-orig/
+          --exclude="master.cf" $BMDIR/postfix/ \
+          $PDIR.bearmail-orig/
     rm $PDIR
     mv $PDIR.bearmail-orig $PDIR
     suspend_status $POSTFIX_INIT

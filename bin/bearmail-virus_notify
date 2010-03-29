@@ -25,9 +25,8 @@ fi
 # formail should be in PATH
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 LINE="-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
-VIRUS_SENDER="virus@$MAIN_MAIL_DOMAIN"
+VIRUS_SENDER="virus"
 VIRUS_SENDER_IDENT="(AntiVirus System)"
-ORGANIZATION="$MAIN_MAIL_DOMAIN"
 
 for recipient in $RECIPIENTS; do
   if [ ! -z "$DAYS_TO_KEEP_VIRUSES" ] && [ "$MY_LANGUAGE" == "fr" ] ; then
@@ -38,7 +37,6 @@ Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Subject: Un virus a =?UTF-8?B?w6l0w6kgZMOpdGVjdMOp?= : $VIRUS
 X-Mailer: Bearmail antivirus system
-Organization: $ORGANIZATION
 
 Bonjour,
 
@@ -56,7 +54,7 @@ de vous reformuler le mail sans virus.
 Toutefois, durant un délai de $DAYS_TO_KEEP_VIRUSES jours à partir d'aujourd'hui,
 vous pourrez récupérer le message contaminé en envoyant un
 mail à $VIRUS_SENDER et en mettant pour sujet :
-$(echo "$EMAIL"|sed -e "s#/var/spool/clamsmtp/##g")
+$(echo "$EMAIL"|sed -e "s#/var/spool/clamsmtp-bearmail/##g")
 
 
 Voici les en-têtes du message en question :
@@ -79,7 +77,6 @@ Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Subject: A virus was found : $VIRUS
 X-Mailer: Bearmail antivirus system
-Organization: $ORGANIZATION
 
 Hello,
 
@@ -97,7 +94,7 @@ de vous reformuler le mail sans virus.
 Toutefois, durant un délai de $DAYS_TO_KEEP_VIRUSES jours à partir d'aujourd'hui,
 vous pourrez récupérer le message contaminé en envoyant un
 mail à $VIRUS_SENDER et en mettant pour sujet :
-$(echo "$EMAIL"|sed -e "s#/var/spool/clamsmtp/##g")
+$(echo "$EMAIL"|sed -e "s#/var/spool/clamsmtp-bearmail/##g")
 
 
 Voici les en-têtes du message en question :

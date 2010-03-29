@@ -3,16 +3,29 @@ set -e
 
 BMPMAS="/etc/bearmail/postfix/master.cf"
 BMPMAI="/etc/bearmail/postfix/main.cf"
-BMPTRA="/etc/bearmail/postfix/bearmail-transport"
+BMPAL="/etc/aliases"
 CVDIR="/etc/clamav/"
+BMCSD="/var/spool/clamsmtp-bearmail"
+BMCRD="/var/run/clamsmtp-bearmail"
 
 if [ "$1" = "configure" ]; then
+
+  # create spool and run dir for clamsmtpd
+  [ -d "$BMCSD" ] || install -m 750 -o bearmail -g bearmail -d $BMCSD
+  [ -d "$BMCRD" ] || install -m 755 -o bearmail -g bearmail -d $BMCRD
+
+  # adding bearmail to clamav and restarting clamav
+  invoke-rc.d clamsmtp stop
+  adduser clamav bearmail
+  invoke-rc.d clamav-daemon stop
+  invoke-rc.d clamav-daemon start
+ 
   # check if bearmail was activate
   if [ -L /etc/mailmap ] ; then
     bearmail-switch suspend
     BEARMAIL_ON="1"
   fi
-
+ 
   # configure master.cf :
   if [ ! "$(grep "^## bearmail-antivirus - EOC" $BMPMAS)" ]; then
     sed -e '\!^## bearmail-antivirus$!a\
@@ -31,8 +44,8 @@ bearmail_scan      unix  -       -       n       -       16      smtp\
   -o smtpd_authorized_xforward_hosts=127.0.0.0/8\
 \
 # re-send viruses when asked to : \
-bearmail_virus-sender    unix    -       n       n       -       10      pipe\
-  flags= user=clamsmtp argv=/usr/lib/bearmail/bearmail-virus_send $sender\
+#bearmail_virus-sender    unix    -       n       n       -       10      pipe\
+#  flags= user=clamsmtp argv=/usr/lib/bearmail/bearmail-virus_send $sender\
 ## bearmail-antivirus - EOC
 ' -i $BMPMAS
     sed '/./,/^$/!d' -i $BMPMAS
@@ -47,11 +60,16 @@ content_filter = bearmail_scan:[127.0.0.1]:10025\
     sed '/./,/^$/!d' -i $BMPMAI
   fi
 
-  # configure transport
-  if [ ! "$(grep "bearmail_virus-sender" $BMPTRA)" ]; then
-    MY_DOMAIN=`cat /etc/mailname`
-    echo "virus@$MY_DOMAIN bearmail_virus-sender:" >> $BMPTRA
-    echo "Warning: using $MY_DOMAIN for bearmail_virus-sender"
+  # configure aliases
+  if [ ! "$(grep "^# bearmail-antivirus" $BMPAL)" ]; then
+    cat >> $BMPAL << EOF
+# bearmail-antivirus
+virus: |/usr/lib/bearmail/bearmail-virus_send
+EOF
+    newaliases
+#    MY_DOMAIN=`cat /etc/mailname`
+#    echo "virus@$MY_DOMAIN bearmail_virus-sender:" >> $BMPTRA
+#    echo "Warning: using $MY_DOMAIN for bearmail_virus-sender"
   fi
 
   # restart bearmail if needed

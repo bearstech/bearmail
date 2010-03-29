@@ -1,12 +1,12 @@
 #!/bin/sh -e
 
+BMPAL="/etc/aliases"
+BMPMAS="/etc/bearmail/postfix/master.cf"
+BMPMAI="/etc/bearmail/postfix/main.cf"
+BMPTRA="/etc/bearmail/postfix/bearmail-transport"
+
 set -e
-
 remove_section() {
-        BMPMAS="/etc/bearmail/postfix/master.cf"
-        BMPMAI="/etc/bearmail/postfix/main.cf"
-	BMPTRA="/etc/bearmail/postfix/bearmail-transport"
-
         # check if bearmail was activate
         if [ -L /etc/mailmap ] ; then
           bearmail-switch suspend
@@ -36,9 +36,13 @@ remove_section() {
         fi
 
         # configure transport
-        if [ "$(grep "bearmail_virus-sender" $BMPTRA)" ]; then
-          sed "/bearmail_virus-sender/d" -i $BMPTRA
+        if [ "$(grep "^# bearmail-antivirus" $BMPAL)" ]; then
+          sed "/^# bearmail-antivirus/d" -i $BMPAL
+          sed "/bearmail-virus_send/d" -i $BMPAL
         fi
+#        if [ "$(grep "bearmail_virus-sender" $BMPTRA)" ]; then
+#          sed "/bearmail_virus-sender/d" -i $BMPTRA
+#        fi
 
         # restart bearmail if needed
         if [ "$BEARMAIL_ON" -eq "1" ] ; then
@@ -51,20 +55,15 @@ remove_section() {
 case "$1" in
     upgrade)
         ;;
-
     deconfigure)
         ;;
-    purge)
-	;;
     remove)
-        remove_section
-        ;;
+        remove_section ;;
     failed-upgrade)
         ;;
     *)
         echo "prerm called with unknown argument \`$1'" >&2
-        exit 1
-        ;;
+        exit 1 ;;
 esac
 #DEBHELPER#
 exit 0

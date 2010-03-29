@@ -23,10 +23,19 @@
 use strict;
 use Mail::Sendmail;
 
-my $asker = $ARGV[0];
 my @headers = <STDIN>;
 
+# search asker
+my @asker = grep /From: /, @headers;
+my $asker = shift @asker;
+if ($asker) {
+  chomp $asker;
+  $asker =~ m/^From:(.*)/i;
+  $asker = $1;
+}
+
 # search file name in headers
+my @sender = grep /From: /, @headers;
 my @virus_name = grep /Subject: /, @headers;
 my $virus_name = shift @virus_name;
 if ($virus_name) {
@@ -36,7 +45,7 @@ if ($virus_name) {
   }
 
 # open the virus file and send it
-open(VIRUS, "< /var/spool/clamsmtp/virus$virus_name") || die "Can't read /var/spool/clamsmtp/virus$virus_name";
+open(VIRUS, "< /var/spool/clamsmtp-bearmail/virus$virus_name") || die "Can't read /var/spool/clamsmtp-bearmail/virus$virus_name";
   my @virus_file = <VIRUS>;
 close VIRUS;
 

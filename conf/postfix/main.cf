@@ -2,14 +2,14 @@
 
 # Server identity and availability
 smtpd_banner    = $myhostname ESMTP $mail_name
-myhostname      = bearmail.tld
-myorigin        = bearmail.tld
+myhostname      = mail.bearmail.tld
+myorigin        = mail.bearmail.tld
 inet_interfaces = all
 # Server identity and availability - EOC
 
 # Default relaying rules: accept local aliases (see virtual_pipes), 
 # no smarthost, accept locally generated emails
-mydestination = localhost
+mydestination = mail.bearmail.tld localhost
 relayhost     =
 mynetworks    = 127.0.0.0/8
 # Default relaying rules - EOC
@@ -19,6 +19,7 @@ biff                = no
 append_dot_mydomain = no
 recipient_delimiter = +
 mailbox_size_limit  = 10485760
+default_privs       = bearmail
 # Misc settings - EOC
 
 # TLS/SSL support
