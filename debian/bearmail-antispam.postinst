@@ -4,6 +4,9 @@ set -e
 BMPMAS="/etc/bearmail/postfix/master.cf"
 BMPMAI="/etc/bearmail/postfix/main.cf"
 BMDDIR="/etc/bearmail/dspam/"
+BMPAL="/etc/aliases"
+BMDSD="/var/spool/dspam-bearmail"
+
 
 chown dspam:dspam /etc/bearmail/dspam/*{.conf,.prefs}
 #chown dspam:dspam /etc/bearmail/dspam/dspam_tricks/*{.cgi,.pl}
@@ -11,6 +14,11 @@ chown dspam:dspam /etc/bearmail/dspam/*{.conf,.prefs}
 #chmod 600 /etc/bearmail/dspam/webfrontend.conf
 
 if [ "$1" = "configure" ]; then
+  # create spool dir and add bearmail to dspam
+  [ -d "$BMDSD" ] || install -m 770 -o dspam -g dspam -d $BMDSD
+  invoke-rc.d dspam stop
+  adduser dspam bearmail
+   
   # check if bearmail was activate
   if [ -L /etc/mailmap ] ; then
     bearmail-switch suspend
@@ -25,10 +33,6 @@ bearmail_dspam     unix  -       -       n       -       10      lmtp\
  -o smtp_send_xforward_command=yes\
  -o disable_mime_output_conversion=yes\
  -o smtp_generic_maps=\
-\
-# bearmail dspam retrainer\
-bearmail_dspam-retrain   unix    -       n       n       -       10      pipe\
-  flags= user=dspam:dspam argv=/usr/lib/bearmail/bearmail-retrain_dspam $sender $nexthop\
 \
 # dspam outgoing port\
 127.0.0.1:10027 inet    n       -       n       -       -       smtpd\
@@ -65,6 +69,17 @@ dspam_destination_recipient_limit = 1\
   if [ "$(grep "^START=no" /etc/default/dspam)" ] ; then
     sed -e "s/^START=no/START=yes/" -i /etc/default/dspam
   fi
+
+  # configure aliases
+  if [ ! "$(grep "^# bearmail-antispam" $BMPAL)" ]; then
+    cat >> $BMPAL << EOF
+# bearmail-antispam
+spam: |/usr/lib/bearmail/bearmail-dspam_retrain_spam
+ham: |/usr/lib/bearmail/bearmail-dspam_retrain_ham
+EOF
+    newaliases
+  fi
+
 
   # restart bearmail if needed
   if [ "$BEARMAIL_ON" ] ; then

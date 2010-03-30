@@ -27,9 +27,16 @@ use MIME::Base64 qw(decode_base64);
 my @mail = <STDIN>;
 
 # arguments for the script
-my $dspam_user = $ARGV[0];
-my $dspam_type = $ARGV[1];
-#print "dspam_user = $dspam_user\ndspam_type = $dspam_type\n\n";
+# search sender
+my @dspam_user = grep /From: /, @mail;
+my $dspam_user = shift @dspam_user;
+if ($dspam_user) {
+  chomp $dspam_user;
+  $dspam_user =~ m/^From:(.*)<(.*)>/i;
+  $dspam_user = $2;
+}
+
+my $dspam_type = "innocent";
 
 # look for inline (and easy to find) DSPAM signature
 my @signature = grep /^X-DSPAM-Signature:/, @mail;
@@ -39,15 +46,12 @@ if ($signature) {
   chomp $signature; # remove \n at end of line, if found
   $signature =~ s/^X-DSPAM-Signature: //;
   system ("/usr/bin/dspam --user $dspam_user --class=$dspam_type --source=error --signature=$signature");
- # print "on a une signature ! $signature \n";
 
 } else { 
   # not found, we need to do some work
-#  print "on va rechercher la signature ...\n";
 
   # look for base64 MIME part
   if (grep /^Content-Transfer-Encoding: base64/, @mail) {
-#    print "Signature trouvée, il y a un truc en base64 dans ce mail, recherche de parties MIME\n";
     
     my @boundary = grep /^Content-Type: multipart\/mixed; boundary/,@mail;
     my $boundary = shift @boundary;
@@ -56,7 +60,6 @@ if ($signature) {
       $boundary =~ m/^Content-Type: multipart\/mixed; boundary="?([-A-Za-z0-9.+_\/=|*]*)"?$/;
       $boundary = $1;
     }
-#    print "boundary to split MIME parts : $boundary\n"; 
 
     my $mail = join("",@mail);
     # \Q to quote all dangerous stuff that can be interpreted as a regexp (+*. etc.)

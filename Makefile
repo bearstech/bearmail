@@ -22,7 +22,7 @@ install-antivirus:
 	install -D -m 755 bin/bearmail-virus*                               $(DESTDIR)/usr/lib/bearmail/
 	install -D -m 644 conf/clamsmtpd.conf                               $(DESTDIR)/etc/bearmail/clamsmtp/clamsmtpd.conf
 install-antispam:
-	install -D -m 755 bin/bearmail-retrain_dspam                        $(DESTDIR)/usr/lib/bearmail/
+	install -D -m 755 bin/bearmail-dspam_retrain*                       $(DESTDIR)/usr/lib/bearmail/
 	install -D -m 755 bin/bearmail-dspam_cleaner                        $(DESTDIR)/usr/sbin/
 	install -D -m 644 conf/dspam/*.conf                                 $(DESTDIR)/etc/bearmail/dspam/
 #	install -D -m 644 conf/dspam/webfrontend.pl                         $(DESTDIR)/etc/bearmail/dspam/webfrontend.conf

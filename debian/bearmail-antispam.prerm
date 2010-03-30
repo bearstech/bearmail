@@ -5,6 +5,7 @@ set -e
 remove_section() {
         BMPMAS="/etc/bearmail/postfix/master.cf"
         BMPMAI="/etc/bearmail/postfix/main.cf"
+	BMPAL="/etc/aliases"
 
         # check if bearmail was activate
 	BEARMAIL_ON="0"
@@ -41,6 +42,13 @@ remove_section() {
           sed '/inet:127.0.0.1:60000/d' -i $BMPMAI
         fi
 
+        # configure transport
+        if [ "$(grep "^# bearmail-antispam" $BMPAL)" ]; then
+          sed "/^# bearmail-antispam/d" -i $BMPAL
+          sed "/bearmail-dspam_retrain_spam/d" -i $BMPAL
+          sed "/bearmail-dspam_retrain_ham/d" -i $BMPAL
+        fi
+
         # restart bearmail if needed
         if [ "$BEARMAIL_ON" -eq "1" ] ; then
           echo "Restarting bearmail"
@@ -55,8 +63,6 @@ case "$1" in
 
     deconfigure)
         ;;
-    purge)
-	;;
     remove)
         remove_section
         ;;

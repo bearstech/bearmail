@@ -1,0 +1,101 @@
+#!/usr/bin/perl -w 
+
+# Copyright (C) 2009 Bearstech - http://bearstech.com/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# bearmail-retrain_dspam - part of bearmail
+
+use strict;   
+use Data::Dumper;
+
+use MIME::Base64 qw(decode_base64);
+
+# this could be dangerous if the mail weighs several megabytes (all
+# data in RAM, plus multiple copies)
+my @mail = <STDIN>;
+
+# arguments for the script
+# search sender
+my @dspam_user = grep /From: /, @mail;
+my $dspam_user = shift @dspam_user;
+if ($dspam_user) {
+  chomp $dspam_user;
+  $dspam_user =~ m/^From:(.*)<(.*)>/i;
+  $dspam_user = $2;
+}
+
+my $dspam_type = "spam";
+
+# look for inline (and easy to find) DSPAM signature
+my @signature = grep /^X-DSPAM-Signature:/, @mail;
+my $signature = shift @signature;
+
+if ($signature) {
+  chomp $signature; # remove \n at end of line, if found
+  $signature =~ s/^X-DSPAM-Signature: //;
+  system ("/usr/bin/dspam --user $dspam_user --class=$dspam_type --source=error --signature=$signature");
+
+} else { 
+  # not found, we need to do some work
+
+  # look for base64 MIME part
+  if (grep /^Content-Transfer-Encoding: base64/, @mail) {
+    
+    my @boundary = grep /^Content-Type: multipart\/mixed; boundary/,@mail;
+    my $boundary = shift @boundary;
+
+    if (defined $boundary) {
+      $boundary =~ m/^Content-Type: multipart\/mixed; boundary="?([-A-Za-z0-9.+_\/=|*]*)"?$/;
+      $boundary = $1;
+    }
+
+    my $mail = join("",@mail);
+    # \Q to quote all dangerous stuff that can be interpreted as a regexp (+*. etc.)
+    my @parts = split(/--\Q$boundary/,$mail);
+
+    my @encoded_message;
+    foreach my $part (@parts) {
+      # if this is the part we're looking for (let's hope there's only ONE base64 part in the mail)
+      if ($part =~ m/Content-Transfer-Encoding: base64/) {
+        #print Dumper(\$part);
+        
+        my $inside = 0;
+        my @lines = split /\n/,$part;
+        shift @lines; # remove first (empty) line
+        foreach my $line (@lines) {
+          if ($line eq '' and not $inside) {
+            $inside = 1;
+            next;
+          }
+          if ($line eq '' and $inside) {
+            $inside = 0;
+          }
+          if ($inside) {
+            push @encoded_message,$line;
+          }
+        }
+      }
+    }
+    my $block = join('',@encoded_message);
+    my @decoded_message = decode_base64($block); # tadaaa !
+    foreach (@decoded_message) {
+     if (m/X-DSPAM-Signature: (.*)/i) {
+       my $signature = $1;
+       system("/usr/bin/dspam --user $dspam_user --class=$dspam_type --source=error --signature=$signature");
+      }
+      }
+  }
+}
+
