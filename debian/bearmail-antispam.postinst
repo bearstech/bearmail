@@ -9,9 +9,6 @@ BMDSD="/var/spool/dspam-bearmail"
 
 
 chown dspam:dspam /etc/bearmail/dspam/*{.conf,.prefs}
-#chown dspam:dspam /etc/bearmail/dspam/dspam_tricks/*{.cgi,.pl}
-#chown dspam:dspam /usr/share/bearmail/dspam-webfrontend/dspam/*.cgi
-#chmod 600 /etc/bearmail/dspam/webfrontend.conf
 
 if [ "$1" = "configure" ]; then
   # create spool dir and add bearmail to dspam
