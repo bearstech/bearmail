@@ -45,13 +45,20 @@ sub login : StartRunMode {
         if defined $master_pass and $master_pass eq md5_hex($pass) and
            $email =~ /^(admin(inistrator)?|root)$/i;
 
-    return $self->login_page();
+    if((defined $domain_pass) or ($email =~ /^(admin(inistrator)?|root)$/i)) {
+      return $self->login_page("password");
+    } else {
+      return $self->login_page("email");
+    }
 }
 
 sub login_page {
     my $self = shift;
+    my $error = shift;
 
     my $tmpl = $self->load_tmpl('login.html');
+    $tmpl->param("error_".$error => 1) if $error;
+
     return $tmpl->output;
 }
 

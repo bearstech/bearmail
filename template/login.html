@@ -14,6 +14,16 @@
             <input type="password" name="password" id="password" value="admin" />
           </label>
         </p>
+	<TMPL_IF NAME="error_password">
+	<p class="error">
+	  Echec: le mot de passe est incorrect, essayez à nouveau.
+	</p>
+	</TMPL_IF>
+	<TMPL_IF NAME="error_email">
+	<p class="error">
+	  Echec: cette adresse email est inconnue.
+	</p>
+	</TMPL_IF>
         <p id="submit">
           <input type="submit" name="login" value="Connexion"/>
         </p>
