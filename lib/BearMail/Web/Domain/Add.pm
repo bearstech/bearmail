@@ -1,4 +1,4 @@
-package BearMail::Web::Domain::List;
+package BearMail::Web::Domain::Add;
 
 # Copyright (C) 2009 Bearstech - http://bearstech.com/
 #
@@ -15,32 +15,22 @@ package BearMail::Web::Domain::List;
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# domain listing webui page - part of bearmail
+# Domain creation webui page - part of bearmail
 
 use strict;
 use base 'BearMail::Web';
 
 sub default : StartRunMode {
     my $self = shift;
+    my $q = $self->query();
+    my $backend = $self->{b};
 
-    my @domains;
-    if ($self->session->param('level') eq 'postmaster') {
-      push(@domains, { name => $_ })
-        foreach($self->{b}->get_postmaster_domains($self->session->param('user')));
-    } else {
-      push(@domains, { name => $_ }) foreach($self->{b}->get_domains());
-    }
+    $backend->add_domain($q->param('domain'), 
+      "postmaster@".$q->param('domain'), $q->param('password')); #FIXME
+    $backend->commit();
 
-    my $n = 0;
-    foreach (@domains) {
-      $_->{stripe} = ($n++ % 2) ? 'odd' : 'even';
-      $_->{info}   = '';
-    }
+    return $self->redirect($self->url('domain_list'));
 
-    my $tmpl = $self->load_tmpl('domain_list.html');
-    $tmpl->param(DOMAINS => \@domains);
-    $tmpl->param(CURRENT_IS_DOMAIN_LIST => 1);
-    return $tmpl->output;
 }
 
 1;

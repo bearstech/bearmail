@@ -4,7 +4,7 @@
     <div class="main form">
       <h1>Nouveau compte</h1>
 
-      <form method="post" action="#/address_list">
+      <form method="post" action="#/address_add">
 
         <fieldset>
           <legend>Identification</legend>
@@ -19,7 +19,7 @@
         <fieldset>
           <legend>Utilisation</legend>
           <div>
-            <label for="regular">Réception normale</label> <input type="radio" name="type" id="regular" value="regular" checked="checked" /> 
+            <label for="local">Réception normale</label> <input type="radio" name="type" id="local" value="local" checked="checked" /> 
           </div>
 
           <div class="group">
@@ -40,6 +40,28 @@
             </div>
           </div>
         </fieldset>
+
+	<TMPL_IF NAME="ERROR_DOMAIN_DOESNT_EXIST">
+	<p class="error">
+		Le domaine n'existe pas encore ! Créez le d'abord,
+		ou créez une adresse pour un domaine éxistant !
+	</p>
+	</TMPL_IF>
+
+	<TMPL_IF NAME="ERROR_BAD_CONFIGURATION">
+	<p class="error">
+		Mauvaise configuration !
+		L'adresse existe peut être déja ?
+	</p>
+	</TMPL_IF>
+
+	<TMPL_IF NAME="ERROR_COMMIT">
+	<p class="error">
+		Impossible d'appliquer les modifications !
+		Vérifiez le droit d'écriture sur le fichier mailmap si vous
+		utilisez le backend 'files' !
+	</p>
+	</TMPL_IF>
 
         <div class="yesno">
           <input type="submit" name="save" id="save" value="Créer" class="apply" />

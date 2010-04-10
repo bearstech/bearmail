@@ -15,6 +15,7 @@ package Backend::Files;
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+use Digest::MD5 qw(md5 md5_hex md5_base64);
 use Carp;
 use Exporter 'import';
 @EXPORT_OK = qw(new commit apply get_domains get_users get_user set_domain set_address add_domain add_address del_domain del_address get_postmasters get_postmaster_domains); 
@@ -36,13 +37,29 @@ use Exporter 'import';
 # from 'bearmail-update' which has been stashed in the 'Implementation' part
 # of this package.
 
-my $program = "bearmail-update";
-my $version = "0.2";
+my $program = "bearmail";
+my $version = "0.3";
 my %records;
 my %by_domain;
 my @domains;
 my $mailmap = "/etc/bearmail/mailmap";
 my $debug = 0;
+
+my %files;
+my %allowed = (
+  'addr_normal pw_md5 local'           => 'regular_account',
+  'addr_normal pw_none aliases'        => 'alias',
+  'addr_normal pw_none pipe'           => 'pipe',
+  'addr_catchall pw_none aliases'      => 'catchall',
+  'addr_catchall pw_none domain_alias' => 'domain_alias',
+);
+
+
+
+#
+### Exported methods
+#
+
 
 sub new() {
   my ($class, %args) = @_;
@@ -58,13 +75,13 @@ sub new() {
 
 sub commit() {
   my ($self) = @_;
-
+  _sort_mailmap();
   _write_mailmap();
 }
 
 sub apply() {
   my ($self) = @_;
-
+  _sort_mailmap();
   _prepare_postfix_conf();
   _prepare_dovecot_conf();
   _write_conf();
@@ -72,21 +89,16 @@ sub apply() {
 
 sub get_domains() {
   my ($self) = @_;
-
-  my @hashed;
-  push(@hashed, { name => $_ }) foreach @domains;
-  return @hashed;
+  return @domains;
 }
 
 sub get_users() {
   my ($self, $domain) = @_;
-
   return @{$by_domain{$domain}};
 }
 
 sub get_user() {
   my ($self, $user) = @_;
-
   return $records{lc $user};
 }
 
@@ -96,13 +108,49 @@ sub set_address() {
 }
 
 sub add_domain() {
+  my ($class, $domain, $postmaster, $password) = @_;
+  if($postmaster eq "postmaster@".$domain) {
+    add_address($class, $postmaster, $password, "local");
+  } else {
+    add_address($class, "postmaster@".$domain, '', $postmaster);
+  }
 }
+
 sub add_address() {
+  my ($class, $address, $password, $target) = @_;
+  my @types;
+  $password = md5_hex($password)
+    if((not $password =~ /^[0-9a-f]{32}$/) and ($target eq "local"));
+
+  push @types, _check_field("address", $address);
+  push @types, _check_field("password", $password);
+  push @types, _check_field("target", $target);
+
+  if(!exists($allowed{"@types"})) {
+    carp "Bad configuration\n";
+    return 0;
+  } else {
+    $records{"$address"} = { 
+              address => $address,
+              password => $password,
+              target => $target
+    }; 
+  }
 }
 
 sub del_domain() {
+  my ($class, $domain) = @_;
+  if(scalar(@{$by_domain{$domain}}) le 1) {
+    delete($records{"postmaster\@$domain"});
+  } else {
+    carp "There are remaining email addresses for this domain !\n";
+    carp "Delete them first !\n";
+  }
 }
+
 sub del_address() {
+  my ($class, $address) = @_;
+  delete($records{"$address"}); 
 }
 
 sub get_postmasters() {
@@ -122,19 +170,12 @@ sub get_postmaster_domains() {
   return @hashed;
 }
 
-#
-# Implementation
-#
 
 
-my %files;
-my %allowed = (
-  'addr_normal pw_md5 local'           => 'regular_account',
-  'addr_normal pw_none aliases'        => 'alias',
-  'addr_normal pw_none pipe'           => 'pipe',
-  'addr_catchall pw_none aliases'      => 'catchall',
-  'addr_catchall pw_none domain_alias' => 'domain_alias',
-);
+#
+### Implementation (non-exported methods)
+#
+
 
 # Read a simple "mailmap" configuration file, where:
 #  - empty lines are ignored
@@ -173,12 +214,20 @@ sub _read_mailmap {
   }
 
   close MAILMAP;
-
   _sort_mailmap();
 }
 
-sub _write_mailmap {
-  croak "not implemented";
+sub _write_mailmap {   #FIXME: Add a lock !
+  return if !%records;
+
+  open(MAILMAP, ">$mailmap") or croak "$mailmap: $!";
+
+  foreach(keys %records) {
+    print MAILMAP $records{$_}->{"address"}, ":", $records{$_}->{"password"},
+       ":", $records{$_}->{"target"}, "\n";
+  }
+
+  close MAILMAP;
 }
 
 # Field constraints. See https://scratch.bearstech.com/trac/ticket/34
@@ -226,6 +275,12 @@ sub _check_address {
 # by domains, then by local part. Fill in @domains also.
 #
 sub _sort_mailmap {
+
+  #FIXME ok ?
+  # Reset data structures before sorting (to be able to re-sort on modifications)
+  %by_domain = ();
+  @domains = [];
+
   foreach(keys %records) {
     /^([^@]+)@([^@]+)$/;
     my ($local, $domain) = ($1, $2);
@@ -247,7 +302,7 @@ sub _sort_mailmap {
         }
       } else {
         foreach(split(',', $_->{target})) {
-          next if (!$records{$_}->{password}); # FIXME: keep ? Security pupose: don't keep postmasters without passwords
+          next if (!$records{$_}->{password}); # FIXME: keep ? Security purpose: don't keep postmasters without passwords
           if(exists($postmasters{$_})) {
             push(@{$postmasters{$_}->{domains}}, $dom);
           } else {
