@@ -19,7 +19,9 @@ set -e
 purge_section() {
         rm -rf /etc/ssl/certs/bearmail.pem \
                /etc/ssl/private/bearmail.pem \
-               /etc/bearmail /var/spool/bearmail/*/*/.dovecot*
+               /etc/cron.d/bearmail* \
+               /etc/bearmail/postfix/ /etc/bearmail/dovecot/ \
+               /var/spool/bearmail/*/*/.dovecot*
 	deluser bearmail
 }
 
@@ -36,7 +38,6 @@ case "$1" in
         # Clear ssl certs & co
         purge_section
         ;;
-
     *)
         echo "postrm called with unknown argument \`$1'" >&2
         exit 0

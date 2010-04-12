@@ -13,8 +13,10 @@ chown dspam:dspam /etc/bearmail/dspam/*{.conf,.prefs}
 if [ "$1" = "configure" ]; then
   # create spool dir and add bearmail to dspam
   [ -d "$BMDSD" ] || install -m 770 -o dspam -g dspam -d $BMDSD
-  invoke-rc.d dspam stop
-  adduser dspam bearmail
+  if [ ! "$(grep "^bearmail:" /etc/group | grep dspam)" ] ; then
+    invoke-rc.d dspam stop
+    adduser dspam bearmail
+  fi
    
   # check if bearmail was activate
   if [ -L /etc/mailmap ] ; then
@@ -67,19 +69,36 @@ dspam_destination_recipient_limit = 1\
     sed -e "s/^START=no/START=yes/" -i /etc/default/dspam
   fi
 
-  # configure aliases
-  if [ ! "$(grep "^# bearmail-antispam" $BMPAL)" ]; then
-    cat >> $BMPAL << EOF
-# bearmail-antispam
-spam: |/usr/lib/bearmail/bearmail-dspam_retrain_spam
-ham: |/usr/lib/bearmail/bearmail-dspam_retrain_ham
-EOF
-    newaliases
+#  # configure aliases
+  if [ "$(grep "bearmail-dspam_retrain" $BMPAL |grep -v "#")" ]; then
+    if [ ! "$(grep "^bm-spam:.*bearmail-dspam_retrain_spam" $BMPAL)" ]; then
+      echo "Warning: it seems that you changed bearmail-dspam_retrain_spam in $BMPAL"
+      echo "Be sure that you RTFM."
+    fi
+    if [ ! "$(grep "^bm-ham:.*bearmail-dspam_retrain_ham" $BMPAL)" ]; then
+      echo "Warning: it seems that you changed bearmail-dspam_retrain_ham in $BMPAL"
+      echo "Be sure that you RTFM."
+    fi
+  fi
+  if [ ! "$(grep "bearmail-dspam_retrain" $BMPAL |grep -v "#")" ]; then
+    if [ "$(grep "^bm-spam:" $BMPAL)" ]; then
+      echo "Warning: bm-spam exists in $BMPAL but is not configured for bearmail"
+      echo "Please RTFM"
+    else
+      echo "bm-spam: |/usr/lib/bearmail/bearmail-dspam_retrain_spam" >> $BMPAL
+      newaliases
+    fi
+    if [ "$(grep "^bm-ham:" $BMPAL)" ]; then
+      echo "Warning: bm-ham exists in $BMPAL but is not configured for bearmail"
+      echo "Please RTFM"
+    else
+      echo "bm-ham: |/usr/lib/bearmail/bearmail-dspam_retrain_ham" >> $BMPAL
+      newaliases
+    fi
   fi
 
-
   # restart bearmail if needed
-  if [ "$BEARMAIL_ON" ] ; then
+  if [ "$BEARMAIL_ON" ]; then
     echo "Restarting bearmail"
     bearmail-switch on
   fi

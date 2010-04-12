@@ -23,7 +23,7 @@ if [ "$1" = "configure" ]; then
 
   # If it's a new installation of bearmail :
   if [ ! -f /etc/bearmail/mailmap ] ; then
-    HOSTNAME=`hostname --fqdn`
+    HOSTNAME=`cat /etc/mailname`
     BEARMAIL_UID=`id -u bearmail`
     BEARMAIL_GID=`id -g bearmail`
 
@@ -32,22 +32,19 @@ if [ "$1" = "configure" ]; then
     chown -R bearmail:bearmail /etc/bearmail/dovecot/bearmail-sieve
 
     # set hostname in conf files
-    for conffile in postfix/main.cf postfix/master.cf dovecot/dovecot.conf bearmail.conf; do
+    for conffile in postfix/main.cf postfix/master.cf dovecot/dovecot.conf; do
       sed -e "s/bearmail.tld/$HOSTNAME/g" -i /etc/bearmail/$conffile
       sed -e "s/bearmail_uid/$BEARMAIL_UID/g" -i /etc/bearmail/$conffile
       sed -e "s/bearmail_gid/$BEARMAIL_GID/g" -i /etc/bearmail/$conffile      
     done
 
-    # set transport file
-    touch /etc/bearmail/postfix/bearmail-transport
-
     # Create mailmap and Setting default domain
-    echo "Warning: setting $HOSTNAME to virtual domains in bearmail. \
-Please RTFM."
+    #echo "Warning: setting $HOSTNAME to virtual domains in bearmail. \
+#Please RTFM."
     # generate random passwd foor root
-    MY_PASSWD=`perl -e '@c=("A".."Z","a".."z",0..9);\
-                        print join("",@c[map{rand @c}(1..8)])'`
-    MY_PLAIN_MD5=`echo -n "$MY_PASSWD" | md5sum | sed -e "s/  -$//"`
+ #   MY_PASSWD=`perl -e '@c=("A".."Z","a".."z",0..9);\
+ #                       print join("",@c[map{rand @c}(1..8)])'`
+ #   MY_PLAIN_MD5=`echo -n "$MY_PASSWD" | md5sum | sed -e "s/  -$//"`
 
     cat > /etc/bearmail/mailmap << EOF
 # /etc/bearmail/mailmap - Sample mail account configuration
@@ -70,18 +67,13 @@ Please RTFM."
 #
 # Read the fine manual for more informations
 
-## $HOSTNAME
-#
-root@$HOSTNAME:$MY_PLAIN_MD5:local
-postmaster@$HOSTNAME::root@$HOSTNAME
-
 EOF
 
     #  echo "Adding $HOSTNAME domain .. done"
-    echo "Your password for root@$HOSTNAME"
-    echo "    will be : $MY_PASSWD"
+#    echo "Your password for root@$HOSTNAME"
+#    echo "    will be : $MY_PASSWD"
 
-    echo "$HOSTNAME" > /etc/mailname
+#    echo "$HOSTNAME" > /etc/mailname
     echo "$HOSTNAME REJECT You are not me!" >> /etc/bearmail/postfix/bearmail-helo_access
   fi
 fi

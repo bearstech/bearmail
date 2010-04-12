@@ -3,8 +3,7 @@
 #
 # see: dh_installdeb(1)
 
-BMDSD="/var/spool/clamsmtp-bearmail"
-BMCRD="/var/run/clamsmtp-bearmail"
+BMDSD="/var/spool/dpsma-bearmail"
 
 set -e
 

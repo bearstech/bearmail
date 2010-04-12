@@ -15,39 +15,28 @@ remove_section() {
         fi
         
         # configure master.cf :
-        if [ "$(grep "^## bearmail-antispam - EOC" $BMPMAS)" ]; then
-          sed "/## bearmail-antispam$/,\
-               /## bearmail-antispam - EOC/d" \
-              -i $BMPMAS
-          sed -e '\!^## bearmail-antivirus$!i\
+        sed "/## bearmail-antispam$/,\
+             /## bearmail-antispam - EOC/d" \
+            -i $BMPMAS
+        sed -e '\!^## bearmail-antivirus$!i\
 \
 ## bearmail-antispam' -i $BMPMAS
-          sed '/./,/^$/!d' -i $BMPMAS
-        fi
+        sed '/./,/^$/!d' -i $BMPMAS
         
         # configure main.cf
-        if [ "$(grep "^# bearmail-antispam - EOC" $BMPMAI)" ]; then
-          sed "/# bearmail-antispam$/,\
-               /# bearmail-antispam - EOC/d" \
-              -i $BMPMAI
-          sed -e '\!^# bearmail-antivirus$!i\
+        sed "/# bearmail-antispam$/,\
+             /# bearmail-antispam - EOC/d" \
+            -i $BMPMAI
+        sed -e '\!^# bearmail-antivirus$!i\
 \
 # bearmail-antispam' -i $BMPMAI
-          sed '/./,/^$/!d' -i $BMPMAI
-        fi
-	if [ "$(grep "bearmail-dspam_incoming" $BMPMAI)" ] ; then
-          sed '/bearmail-dspam_incoming/d' -i $BMPMAI
-        fi
-        if [ "$(grep "inet:127.0.0.1:60000" $BMPMAI)" ] ; then
-          sed '/inet:127.0.0.1:60000/d' -i $BMPMAI
-        fi
+        sed '/./,/^$/!d' -i $BMPMAI
+        sed '/bearmail-dspam_incoming/d' -i $BMPMAI
+        sed '/inet:127.0.0.1:60000/d' -i $BMPMAI
 
-        # configure transport
-        if [ "$(grep "^# bearmail-antispam" $BMPAL)" ]; then
-          sed "/^# bearmail-antispam/d" -i $BMPAL
-          sed "/bearmail-dspam_retrain_spam/d" -i $BMPAL
-          sed "/bearmail-dspam_retrain_ham/d" -i $BMPAL
-        fi
+        # configure aliases
+        sed "/bearmail-dspam_retrain_spam/d" -i $BMPAL
+        sed "/bearmail-dspam_retrain_ham/d" -i $BMPAL
 
         # restart bearmail if needed
         if [ "$BEARMAIL_ON" -eq "1" ] ; then

@@ -1,1 +1,6 @@
-/usr/share/bearmail/htdoc/fr/img/
+usr/share/bearmail/htdoc/fr/img
+usr/share/bearmail/public
+usr/share/bearmail/templates
+usr/share/perl5/BearMail/Web/Address
+usr/share/perl5/BearMail/Web/Domain
+etc/bearmail

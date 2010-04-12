@@ -15,10 +15,12 @@ if [ "$1" = "configure" ]; then
   [ -d "$BMCRD" ] || install -m 755 -o bearmail -g bearmail -d $BMCRD
 
   # adding bearmail to clamav and restarting clamav
-  invoke-rc.d clamsmtp stop
-  adduser clamav bearmail
-  invoke-rc.d clamav-daemon stop
-  invoke-rc.d clamav-daemon start
+  if [ ! "$(grep "^bearmail:" /etc/group | grep clamav)" ] ; then
+    invoke-rc.d clamsmtp stop
+    adduser clamav bearmail
+    invoke-rc.d clamav-daemon stop
+    invoke-rc.d clamav-daemon start
+  fi
  
   # check if bearmail was activate
   if [ -L /etc/mailmap ] ; then
@@ -58,12 +60,22 @@ content_filter = bearmail_scan:[127.0.0.1]:10025\
   fi
 
   # configure aliases
-  if [ ! "$(grep "^# bearmail-antivirus" $BMPAL)" ]; then
-    cat >> $BMPAL << EOF
-# bearmail-antivirus
-virus: |/usr/lib/bearmail/bearmail-virus_send
+  if [ "$(grep "bearmail-virus_send" $BMPAL |grep -v "#")" ]; then
+    if [ ! "$(grep "^bm-antivirus:.*bearmail-virus_send" $BMPAL)" ] ; then
+      echo "Warning: it seems that you changed bearmail-virus_send in $BMPAL"
+      echo "Be sure that you RTFM."
+    fi
+  fi
+  if [ ! "$(grep "bearmail-virus_send" $BMPAL |grep -v "#")" ]; then
+    if [ "$(grep "^bm-antivirus:" $BMPAL)" ]; then
+      echo "Warning: bm-antivirus exists in $BMPAL but is not configured for bearmail"
+      echo "Please RTFM"
+    else
+      cat >> $BMPAL << EOF
+bm-antivirus: |/usr/lib/bearmail/bearmail-virus_send
 EOF
-    newaliases
+      newaliases
+    fi
   fi
 
   # restart bearmail if needed

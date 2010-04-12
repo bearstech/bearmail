@@ -1,9 +1,6 @@
 Bearmail - http://forge.bearstech.com/trac/wiki/BearMail
 
-A glue and simple management tool for:
+There are some significant differences between the Debian Bearmail packages,
+and the source from upstream:
 
- - Postfix (SMTP)
- - Dovecot (IMAP, POP)
- - Clam-AV anti-virus
- - Dspam anti-spam
-
+1. The Debian install is working and correctly configured

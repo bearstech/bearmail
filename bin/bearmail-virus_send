@@ -45,7 +45,7 @@ if ($virus_name) {
   }
 
 # open the virus file and send it
-open(VIRUS, "< /var/spool/clamsmtp-bearmail/virus$virus_name") || die "Can't read /var/spool/clamsmtp-bearmail/virus$virus_name";
+open(VIRUS, "< /var/spool/clamsmtp-bearmail/virus$virus_name") || die "/var/spool/clamsmtp-bearmail/virus$virus_name: $!";
   my @virus_file = <VIRUS>;
 close VIRUS;
 

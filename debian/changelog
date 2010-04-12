@@ -1,4 +1,10 @@
-bearmail (0.1-2010032208) unstable; urgency=low
+bearmail (0.2-2010040801) unstable; urgency=low
+
+  * cleaning and lots of works
+
+ -- Benjamin Linet <blinet@bearstech.com>  Wed, 7 Apr 2010 16:00:29 +0200
+
+bearmail (0.1-2008052701) unstable; urgency=low
 
   * Initial Release.
 

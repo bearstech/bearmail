@@ -25,21 +25,16 @@ remove_section() {
         fi
         
         # configure main.cf
-        if [ "$(grep "^# bearmail-antivirus - EOC" $BMPMAI)" ]; then
-          sed "/# bearmail-antivirus$/,\
-               /# bearmail-antivirus - EOC/d" \
-              -i $BMPMAI
-          sed -e '\!^# bearmail-antispam$!i\
+        sed "/# bearmail-antivirus$/,\
+             /# bearmail-antivirus - EOC/d" \
+            -i $BMPMAI
+        sed -e '\!^# bearmail-antispam$!i\
 \
 # bearmail-antivirus' -i $BMPMAI
-          sed '/./,/^$/!d' -i $BMPMAI
-        fi
+        sed '/./,/^$/!d' -i $BMPMAI
 
-        # configure transport
-        if [ "$(grep "^# bearmail-antivirus" $BMPAL)" ]; then
-          sed "/^# bearmail-antivirus/d" -i $BMPAL
-          sed "/bearmail-virus_send/d" -i $BMPAL
-        fi
+        # configure aliases
+        sed "/bearmail-virus_send/d" -i $BMPAL
 
         # restart bearmail if needed
         if [ "$BEARMAIL_ON" -eq "1" ] ; then

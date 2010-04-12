@@ -10,11 +10,10 @@ install-bearmail:
 	install -D -m 755 bin/bearmail-update                               $(DESTDIR)/usr/sbin/
 	install -D -m 755 bin/bearmail-switch                               $(DESTDIR)/usr/sbin/
 	install -D -m 755 bin/bearmail-sieve_*                              $(DESTDIR)/usr/sbin/
-	install -D -m 644 conf/bearmail.conf                                $(DESTDIR)/etc/bearmail/
 	install -D -m 644 conf/postfix/*                                    $(DESTDIR)/etc/bearmail/postfix/
 	install -D -m 644 conf/dovecot/*                                    $(DESTDIR)/etc/bearmail/dovecot/
-	install -D -m 644 lib/BearMail/Backend.pm                           $(DESTDIR)/usr/share/perl5/BearMail/Backend.pm
-	install -D -m 644 lib/BearMail/Backend/Files.pm                     $(DESTDIR)/usr/share/perl5/BearMail/Backend/Files.pm
+	install -D -m 644 lib/BearMail/Backend.pm                           $(DESTDIR)/usr/share/perl5/BearMail/
+	install -D -m 644 lib/BearMail/Backend/Files.pm                     $(DESTDIR)/usr/share/perl5/BearMail/Backend/
 	install -D -m 644 doc/man/bearmail-update.8                         $(DESTDIR)/usr/share/man/man8/
 	install -D -m 644 doc/man/bearmail-switch.8                         $(DESTDIR)/usr/share/man/man8/
 	install -D -m 644 doc/man/bearmail-sieve_*                          $(DESTDIR)/usr/share/man/man8/
@@ -31,7 +30,14 @@ install-antispam:
 install-web:
 	install -D -m 644 doc/mail-clients/fr/img/*                         $(DESTDIR)/usr/share/bearmail/htdoc/fr/img/
 	install -D -m 644 doc/mail-clients/fr/*html                         $(DESTDIR)/usr/share/bearmail/htdoc/fr/
-
+	install -D -m 644 public/*                                          $(DESTDIR)/usr/share/bearmail/public/
+	install -D -m 644 template/*                                        $(DESTDIR)/usr/share/bearmail/templates/
+	install -D -m 644 lib/BearMail/Web.pm                               $(DESTDIR)/usr/share/perl5/BearMail/
+	install -D -m 644 lib/BearMail/Web/Address/*                        $(DESTDIR)/usr/share/perl5/BearMail/Web/Address/
+	install -D -m 644 lib/BearMail/Web/Domain/*                         $(DESTDIR)/usr/share/perl5/BearMail/Web/Domain/
+	install -D -m 644 lib/BearMail/Web/*.pm                             $(DESTDIR)/usr/share/perl5/BearMail/Web/
+	install -D -m 755 bin/bearmail.cgi                                  $(DESTDIR)/usr/share/bearmail/
+	install -D -m 644 conf/bearmail.conf                                $(DESTDIR)/etc/bearmail/
 
 clean:
 	rm -f *-stamp

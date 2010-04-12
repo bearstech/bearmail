@@ -34,8 +34,9 @@ Description: Antivirus support for Bearmail
 
 Package: bearmail-antispam
 Architecture: all
-Depends: bearmail (= ${binary:Version}), dspam, dspam-webfrontend, postgrey
-Description: DSPAM support for Bearmail
+Depends: bearmail (= ${binary:Version}), dspam, postgrey, adduser
+Suggests: dovecot-antispam
+Description: Antispam support for Bearmail
  Bearmail will help you centralize configuration for the following services:
   - Postfix (SMTP)
   - Dovecot (IMAP, POP)
@@ -48,7 +49,8 @@ Description: DSPAM support for Bearmail
 
 Package: bearmail-web
 Architecture: all
-Depends: bearmail (= ${binary:Version})
+Depends: bearmail (= ${binary:Version}), libcgi-application-basic-plugin-bundle-perl
+Suggests: httpd-cgi
 Description: Web interface for Bearmail
  Bearmail will help you centralize configuration for the following services:
   - Postfix (SMTP)
