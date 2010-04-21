@@ -49,7 +49,7 @@ clean:
 	rm -fr debian/bearmail-web
 
 deb:
-	dpkg-buildpackage -rfakeroot -uc -us
+	dpkg-buildpackage -rfakeroot -uc -us -A
 
 
 CPAN_MODULES= \

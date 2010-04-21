@@ -1,3 +1,9 @@
+bearmail (0.3) unstable; urgency=low
+
+  * First production targeted release, minor fixes as 0.3.x will folow. 
+
+ -- Vincent CARON <vcaron@bearstech.com>  Wed, 21 Apr 2010 16:27:18 +0200
+
 bearmail (0.2-2010040801) unstable; urgency=low
 
   * cleaning and lots of works
