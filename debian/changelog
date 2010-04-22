@@ -1,3 +1,10 @@
+bearmail (0.3.2) unstable; urgency=low
+
+  * Gave up with the 'bearmail-' prefix for config files, continued. 
+  * README.Debian modified for Debian adminsys quickguide
+
+ -- Vincent CARON <vcaron@bearstech.com>  Thu, 22 Apr 2010 17:32:57 +0200
+
 bearmail (0.3.1) unstable; urgency=low
 
   * Gave up with the 'bearmail-' prefix for config files, they
