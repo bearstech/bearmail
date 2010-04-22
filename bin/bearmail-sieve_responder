@@ -248,7 +248,7 @@ EOF
     MY_BDAY=`date -d $beginning_date +"%F" | awk -F "-" '{print $3}'`
     MY_BMONTH=`date -d $beginning_date +"%F" | awk -F "-" '{print $2}'`
 
-    echo "1 0 $MY_BDAY $MY_BMONTH * root sed -e 's/^#_bmcr_//' $BMDIR/$USER_DOMAIN/$USER_NAME/.dovecot.sieve" >> $CRON
+    echo "1 0 $MY_BDAY $MY_BMONTH * root sed -e 's/^#_bmcr_//' -i $BMDIR/$USER_DOMAIN/$USER_NAME/.dovecot.sieve" >> $CRON
   fi
   # create end cronjob
   MY_EDAY=`date -d $end_date +"%F" | awk -F "-" '{print $3}'`
