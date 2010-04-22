@@ -97,4 +97,4 @@ scache	  unix	-	-	-	-	1	scache
 
 # dovecoy deliver
 dovecot   unix  -       n       n       -       -       pipe
-  flags=DRhu user=bearmail:bearmail argv=/usr/lib/dovecot/deliver -f ${sender} -d ${recipient}
+  flags=DRhu user=bearmail:bearmail argv=/usr/lib/dovecot/deliver -f ${sender} -d ${user}@${nexthop}
