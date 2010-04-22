@@ -95,9 +95,8 @@ switch_on() {
     else
       # update dspam/postgrey configuration
       if [ ! -L "$DPDIR" ]; then
-        rsync -au --delete --exclude="*bearmail*" --exclude="dspam.conf" \
-              --exclude="default.prefs" --exclude="webfrontend.conf" \
-              --exclude="dspam_tricks" $DPDIR/ $BMDIR/dspam/
+        rsync -au --delete --exclude="dspam.conf" --exclude="default.prefs" \
+              $DPDIR/ $BMDIR/dspam/
         mv $DPDIR $DPDIR.bearmail-orig
         ln -s $BMDIR/dspam $DPDIR
         $DP_INIT stop
@@ -114,19 +113,20 @@ switch_on() {
  
   # update of bearmail postfix configuration
   if [ ! -L "$PDIR" ] ; then
-    rsync -au --delete --exclude="*bearmail*" --exclude="main.cf" \
-          --exclude="master.cf" $PDIR/ $BMDIR/postfix/
+    rsync -au --delete --exclude="virtual_*" --exclude="*_access" \
+          --exclude="main.cf" --exclude="master.cf" \
+          $PDIR/ $BMDIR/postfix/
     mv $PDIR $PDIR.bearmail-orig
     ln -s $BMDIR/postfix $PDIR
-    for bearmap in $(ls $PDIR/bearmail* | grep -v ".db"); do
+    for bearmap in $(ls $PDIR/{virtual_*,*_access} | grep -v ".db"); do
       postmap $bearmap
     done
   fi
 
   # update of bearmail dovecot configuration
   if [ ! -L "$DDIR" ] ; then
-    rsync -au --delete --exclude="*bearmail*" --exclude="dovecot.conf" \
-          $DDIR/ $BMDIR/dovecot/
+    rsync -au --delete --exclude="sieve" --exclude="dovecot.conf" \
+          --exclude="passwd" $DDIR/ $BMDIR/dovecot/
     mv $DDIR $DDIR.bearmail-orig
     ln -s $BMDIR/dovecot $DDIR
   fi
@@ -144,9 +144,9 @@ switch_on() {
 switch_off() {
   # update of postfix configuration
   if [ -d "$PDIR.bearmail-orig" ] ; then
-    rsync -au --delete --exclude="*bearmail*" --exclude="main.cf" \
-          --exclude="master.cf" $BMDIR/postfix/ \
-          $PDIR.bearmail-orig/
+    rsync -au --delete --exclude="virtual_*" --exclude="*_access" \
+          --exclude="main.cf" --exclude="master.cf" \
+          $BMDIR/postfix/ $PDIR.bearmail-orig/
     rm $PDIR
     mv $PDIR.bearmail-orig $PDIR
     suspend_status $POSTFIX_INIT
@@ -154,8 +154,8 @@ switch_off() {
 
   # update of dovecot configuration
   if [ -d "$DDIR.bearmail-orig" ]; then
-    rsync -au --delete --exclude="*bearmail*" --exclude="dovecot.conf" \
-          $BMDIR/dovecot/ $DDIR.bearmail-orig/
+    rsync -au --delete --exclude="sieve" --exclude="dovecot.conf" \
+          --exclude="passwd" $BMDIR/dovecot/ $DDIR.bearmail-orig/
     rm $DDIR
     mv $DDIR.bearmail-orig $DDIR
     suspend_status $DOVECOT_INIT
@@ -169,9 +169,8 @@ switch_off() {
   fi
 
   if [ -d "$DPDIR.bearmail-orig" ] ; then
-    rsync -au --delete --exclude="*bearmail*" --exclude="dspam.conf" \
-          --exclude="default.prefs" --exclude="webfrontend.conf" \
-          --exclude="dspam_tricks" $BMDIR/dspam/ $DPDIR.bearmail-orig/
+    rsync -au --delete --exclude="dspam.conf" --exclude="default.prefs" \
+          $BMDIR/dspam/ $DPDIR.bearmail-orig/
     rm $DPDIR
     mv $DPDIR.bearmail-orig $DPDIR
     suspend_status $DP_INIT

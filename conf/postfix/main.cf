@@ -50,7 +50,6 @@ smtpd_sasl_path             = private/auth
 # Virtual domains, mailboxes, aliases and transport
 alias_maps              = hash:/etc/aliases hash:/etc/postfix/bearmail-virtual_pipes
 alias_database          = hash:/etc/aliases
-transport_maps          = hash:/etc/postfix/bearmail-transport
 virtual_mailbox_domains = hash:/etc/postfix/bearmail-virtual_domains
 virtual_mailbox_maps    = hash:/etc/postfix/bearmail-virtual_mailboxes
 virtual_alias_maps      = hash:/etc/postfix/bearmail-virtual_aliases
