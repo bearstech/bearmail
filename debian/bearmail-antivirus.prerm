@@ -3,7 +3,7 @@
 BMPAL="/etc/aliases"
 BMPMAS="/etc/bearmail/postfix/master.cf"
 BMPMAI="/etc/bearmail/postfix/main.cf"
-BMPTRA="/etc/bearmail/postfix/bearmail-transport"
+BMPTRA="/etc/bearmail/postfix/transport"
 
 set -e
 remove_section() {

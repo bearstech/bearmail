@@ -23,7 +23,7 @@
 set -e
 
 NAME=${0##*/}
-SIEVE_DIR="/etc/bearmail/dovecot/bearmail-sieve"
+SIEVE_DIR="/etc/bearmail/dovecot/sieve"
 BMMAILMAP="/etc/bearmail/mailmap"
 BMSUC="/usr/sbin/bearmail-sieve_userconf"
 

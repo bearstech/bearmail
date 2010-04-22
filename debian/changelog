@@ -1,3 +1,10 @@
+bearmail (0.3.1) unstable; urgency=low
+
+  * Gave up with the 'bearmail-' prefix for config files, they
+    are already in /etc/bearmail/ folder.  Untested patch.
+
+ -- Vincent CARON <vcaron@bearstech.com>  Thu, 22 Apr 2010 16:47:10 +0200
+
 bearmail (0.3) unstable; urgency=low
 
   * First production targeted release, minor fixes as 0.3.x will folow. 

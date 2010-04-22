@@ -28,8 +28,8 @@ if [ "$1" = "configure" ]; then
     BEARMAIL_GID=`id -g bearmail`
 
     # set global conf file for sieve
-    touch /etc/bearmail/dovecot/bearmail-sieve/global.conf
-    chown -R bearmail:bearmail /etc/bearmail/dovecot/bearmail-sieve
+    touch /etc/bearmail/dovecot/sieve/global.conf
+    chown -R bearmail:bearmail /etc/bearmail/dovecot/sieve
 
     # set hostname in conf files
     for conffile in postfix/main.cf postfix/master.cf dovecot/dovecot.conf; do
@@ -74,7 +74,7 @@ EOF
 #    echo "    will be : $MY_PASSWD"
 
 #    echo "$HOSTNAME" > /etc/mailname
-    echo "$HOSTNAME REJECT You are not me!" >> /etc/bearmail/postfix/bearmail-helo_access
+    echo "$HOSTNAME REJECT You are not me!" >> /etc/bearmail/postfix/helo_access
   fi
 fi
 

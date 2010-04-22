@@ -25,7 +25,7 @@ install-antispam:
 	install -D -m 755 bin/bearmail-dspam_cleaner                        $(DESTDIR)/usr/sbin/
 	install -D -m 644 conf/dspam/*.conf                                 $(DESTDIR)/etc/bearmail/dspam/
 	install -D -m 644 conf/dspam/*.prefs                                $(DESTDIR)/etc/bearmail/dspam/
-	install -D -m 644 conf/bearmail-dspam_incoming                      $(DESTDIR)/etc/bearmail/postfix/
+	install -D -m 644 conf/dspam_incoming                               $(DESTDIR)/etc/bearmail/postfix/
 	install -D -m 644 doc/man/bearmail-dspam_cleaner.8                  $(DESTDIR)/usr/share/man/man8/
 install-web:
 	install -D -m 644 doc/mail-clients/fr/img/*                         $(DESTDIR)/usr/share/bearmail/htdoc/fr/img/

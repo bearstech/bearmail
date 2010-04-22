@@ -21,7 +21,7 @@
 # on a bearmail configuration.
 
 NAME=${0##*/}
-SIEVE_DIR="/etc/bearmail/dovecot/bearmail-sieve"
+SIEVE_DIR="/etc/bearmail/dovecot/sieve"
 BMMAILMAP="/etc/bearmail/mailmap"
 BMDIR="/var/spool/bearmail"
 CRON="/etc/cron.d/bearmail-sieve"

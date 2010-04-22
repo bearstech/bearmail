@@ -59,7 +59,7 @@ dspam_destination_recipient_limit = 1\
   if [ ! "$(grep "bearmail-dspam_incoming" $BMPMAI)" ] ; then
     sed -e '\!^# RCPT TO access restrictions - EOC$!i\
   check_policy_service inet:127.0.0.1:60000\
-  check_recipient_access pcre:/etc/postfix/bearmail-dspam_incoming
+  check_recipient_access pcre:/etc/postfix/dspam_incoming
 ' -i $BMPMAI
     sed '/./,/^$/!d' -i $BMPMAI
   fi

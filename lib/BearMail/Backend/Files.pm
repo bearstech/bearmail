@@ -316,11 +316,11 @@ sub _sort_mailmap {
 }
 
 # Postfix conf files, expected settings in main.cf:
-#   virtual_mailbox_domains   = hash:/etc/bearmail/postfix/bearmail-virtual_domains
-#   virtual_mailbox_mailboxes = hash:/etc/bearmail/postfix/bearmail-virtual_mailboxes
-#   virtual_alias_maps        = hash:/etc/bearmail/postfix/bearmail-virtual_aliases
+#   virtual_mailbox_domains   = hash:/etc/bearmail/postfix/virtual_domains
+#   virtual_mailbox_mailboxes = hash:/etc/bearmail/postfix/virtual_mailboxes
+#   virtual_alias_maps        = hash:/etc/bearmail/postfix/virtual_aliases
 #   alias_maps                = hash:/etc/aliases,
-#                               hash:/etc/bearmail/postfix/bearmail-virtual_pipes
+#                               hash:/etc/bearmail/postfix/virtual_pipes
 sub _prepare_postfix_conf {
   my $virtual_domains   = join("\n", map { "$_ dummy" } @domains);
   my $virtual_mailboxes = '';
@@ -354,10 +354,10 @@ sub _prepare_postfix_conf {
     }
   }
 
-  $files{'/etc/bearmail/postfix/bearmail-virtual_domains'}   = $virtual_domains;
-  $files{'/etc/bearmail/postfix/bearmail-virtual_mailboxes'} = $virtual_mailboxes;
-  $files{'/etc/bearmail/postfix/bearmail-virtual_aliases'}   = $virtual_aliases;
-  $files{'/etc/bearmail/postfix/bearmail-virtual_pipes'}     = $virtual_pipes;
+  $files{'/etc/bearmail/postfix/virtual_domains'}   = $virtual_domains;
+  $files{'/etc/bearmail/postfix/virtual_mailboxes'} = $virtual_mailboxes;
+  $files{'/etc/bearmail/postfix/virtual_aliases'}   = $virtual_aliases;
+  $files{'/etc/bearmail/postfix/virtual_pipes'}     = $virtual_pipes;
 }
 
 # Dovecot auth files, expected settings in dovecot.cf:
@@ -382,7 +382,7 @@ sub _prepare_dovecot_conf {
       $passwd .= "$address:{PLAIN-MD5}$password:bearmail:bearmail::/var/spool/bearmail/$d/${local}::\n";
     }
   }
-  $files{"/etc/bearmail/dovecot/bearmail-passwd"} = $passwd;
+  $files{"/etc/bearmail/dovecot/passwd"} = $passwd;
 }
 
 sub _write_conf {
