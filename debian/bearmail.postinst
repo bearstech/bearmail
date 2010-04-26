@@ -28,6 +28,7 @@ if [ "$1" = "configure" ]; then
     BEARMAIL_GID=`id -g bearmail`
 
     # set global conf file for sieve
+    [ -d "/etc/bearmail/dovecot/sieve" ] || mkdir -p /etc/bearmail/dovecot/sieve
     touch /etc/bearmail/dovecot/sieve/global.conf
     chown -R bearmail:bearmail /etc/bearmail/dovecot/sieve
 
