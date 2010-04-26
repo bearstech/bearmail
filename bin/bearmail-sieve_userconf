@@ -152,6 +152,8 @@ bearmail scripts."
 # add
 if [ "$add_rules" = "yes" ] ; then
   if [ "$(status_function | grep "is not active")" ] ; then
+    ROOTSD="$BMUD/$USER_DOMAIN/$USER_NAME/sieve"
+    [ -d "$ROOTSD" ] || -m 770 -o $BMUSER -g $BMUSER -d $ROOTSD
     echo "creating $SIEVE_FILE"
     echo -e "## bearmail sieve configuration\n" > $SIEVE_FILE
     mkdir -p $BMDIR/$USER_DOMAIN/$USER_NAME
