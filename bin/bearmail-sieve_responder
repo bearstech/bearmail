@@ -24,7 +24,7 @@
 set -e
 
 NAME=${0##*/}
-SIEVE_DIR="/etc/bearmail/dovecot/sieve"
+BMUD="/var/spool/bearmail"
 BMMAILMAP="/etc/bearmail/mailmap"
 BMSUC="/usr/sbin/bearmail-sieve_userconf"
 CRON="/etc/cron.d/bearmail_sieve"
@@ -127,7 +127,7 @@ fi
 # define sieve rules file
 USER_DOMAIN=`echo $user_mail | sed -e "s/.*@//"`
 USER_NAME=`echo $user_mail | sed -e "s/@.*//"`
-SIEVE_FILE="$SIEVE_DIR/$USER_DOMAIN.$USER_NAME"
+SIEVE_FILE="$$BMUD/$USER_DOMAIN/$USER_NAME/sieve/dovecot.sieve"
 MY_BMSF="$BMDIR/$USER_DOMAIN/$USER_NAME/.dovecot.sieve"
 
 # list fonction

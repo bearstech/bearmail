@@ -21,7 +21,7 @@
 # on a bearmail configuration.
 
 NAME=${0##*/}
-SIEVE_DIR="/etc/bearmail/dovecot/sieve"
+BMUD="/var/spool/bearmail"
 BMMAILMAP="/etc/bearmail/mailmap"
 BMDIR="/var/spool/bearmail"
 CRON="/etc/cron.d/bearmail-sieve"
@@ -103,7 +103,7 @@ fi
 # define sieve files
 USER_DOMAIN=`echo $user_mail | sed -e "s/.*@//"`
 USER_NAME=`echo $user_mail | sed -e "s/@.*//"`
-SIEVE_FILE="$SIEVE_DIR/$USER_DOMAIN.$USER_NAME"
+SIEVE_FILE="$BMUD/$USER_DOMAIN/$USER_NAME/sieve/dovecot.sieve"
 MY_BMSF="$BMDIR/$USER_DOMAIN/$USER_NAME/.dovecot.sieve"
 
 # status function

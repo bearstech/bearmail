@@ -23,8 +23,8 @@
 set -e
 
 NAME=${0##*/}
-SIEVE_DIR="/etc/bearmail/dovecot/sieve"
 BMMAILMAP="/etc/bearmail/mailmap"
+BMUD="/var/spool/bearmail"
 BMSUC="/usr/sbin/bearmail-sieve_userconf"
 
 function usage() {
@@ -113,7 +113,7 @@ fi
 # sieve param
 USER_DOMAIN=`echo $user_mail | sed -e "s/.*@//"`
 USER_NAME=`echo $user_mail | sed -e "s/@.*//"`
-SIEVE_FILE="$SIEVE_DIR/$USER_DOMAIN.$USER_NAME"
+SIEVE_FILE="$BMUD/$USER_DOMAIN/$USER_NAME/sieve/dovecot.sieve"
 
 # if add option
 if [ -n "$add_forward" ] ; then
