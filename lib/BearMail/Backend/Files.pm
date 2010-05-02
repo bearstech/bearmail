@@ -302,11 +302,13 @@ sub _sort_mailmap {
         }
       } else {
         foreach(split(',', $_->{target})) {
-          next if (!$records{$_}->{password}); # FIXME: keep ? Security purpose: don't keep postmasters without passwords
-          if(exists($postmasters{$_})) {
-            push(@{$postmasters{$_}->{domains}}, $dom);
-          } else {
-            $postmasters{$_} = { password => $records{$_}->{password}, domains => [ $dom ] };
+          if(exists($records{$_})) {
+            next unless defined($records{$_}->{password}); # FIXME: keep ? Security purpose: don't keep postmasters without passwords
+            if(exists($postmasters{$_})) {
+              push(@{$postmasters{$_}->{domains}}, $dom);
+            } else {
+              $postmasters{$_} = { password => $records{$_}->{password}, domains => [ $dom ] };
+            }
           }
         }
       }
