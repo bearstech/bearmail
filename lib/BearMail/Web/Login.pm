@@ -70,6 +70,7 @@ sub login_ok {
     # every operation instead of being stored in s{level}, FIXME)
     $self->session->param('user', $user);
     $self->session->param('level', $level);
+    $self->session->flush();
 
     # Redirect to the original page the user intended to go, or some fitting
     # default page depending on user privileges.

@@ -24,8 +24,6 @@ use CGI::Application::Plugin::DebugScreen;  # DebugScreen is done when $ENV{CGI_
 use BearMail::Backend;
 use Data::Dumper;
 
-
-
 sub setup {
     my $self = shift;
 

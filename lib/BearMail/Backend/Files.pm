@@ -18,6 +18,7 @@ package Backend::Files;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use Carp;
 use Exporter 'import';
+use Fcntl ':flock';
 @EXPORT_OK = qw(new commit apply get_domains get_users get_user set_domain set_address add_domain add_address del_domain del_address get_postmasters get_postmaster_domains); 
 
 # Implement mail-platform configuration via a plain file storage schema.
@@ -40,6 +41,8 @@ use Exporter 'import';
 my $program = "bearmail";
 my $version = "0.3";
 my %records;
+my %new_records;
+my @records_to_delete;
 my %by_domain;
 my @domains;
 my $mailmap = "/etc/bearmail/mailmap";
@@ -109,6 +112,12 @@ sub set_address() {
 
 sub add_domain() {
   my ($class, $domain, $postmaster, $password) = @_;
+
+  if(exists($by_domain{$domain})) {
+    carp "Domain $domain already exist !";
+    return 0;
+  }
+
   if($postmaster eq "postmaster@".$domain) {
     add_address($class, $postmaster, $password, "local");
   } else {
@@ -130,7 +139,7 @@ sub add_address() {
     carp "Bad configuration\n";
     return 0;
   } else {
-    $records{"$address"} = { 
+    $new_records{"$address"} = { 
               address => $address,
               password => $password,
               target => $target
@@ -141,7 +150,7 @@ sub add_address() {
 sub del_domain() {
   my ($class, $domain) = @_;
   if(scalar(@{$by_domain{$domain}}) le 1) {
-    delete($records{"postmaster\@$domain"});
+    push(@records_to_delete, "postmaster\@$domain");
   } else {
     carp "There are remaining email addresses for this domain !\n";
     carp "Delete them first !\n";
@@ -150,7 +159,7 @@ sub del_domain() {
 
 sub del_address() {
   my ($class, $address) = @_;
-  delete($records{"$address"}); 
+  push(@records_to_delete, $address); 
 }
 
 sub get_postmasters() {
@@ -191,6 +200,8 @@ sub _read_mailmap {
   return if %records; # Parse mailmap only once
 
   open(MAILMAP, "<$mailmap") or croak "$mailmap: $!";
+  flock(MAILMAP, LOCK_NB);
+
 
   while(<MAILMAP>) {
     chomp;
@@ -213,21 +224,30 @@ sub _read_mailmap {
     $records{lc $rec{'address'}} = \%rec;
   }
 
-  close MAILMAP;
+  close(MAILMAP);
+  flock(MAILMAP, LOCK_UN);
   _sort_mailmap();
 }
 
-sub _write_mailmap {   #FIXME: Add a lock !
+sub _write_mailmap {
   return if !%records;
 
   open(MAILMAP, ">$mailmap") or croak "$mailmap: $!";
+  flock(MAILMAP, LOCK_EX + LOCK_NB)
+    or croak "Can't get exclusive lock on $mailmap: $!";
+
+  _read_mailmap();
+  %records = (%records, %new_records);
+  delete($records{$_}) foreach(@records_to_delete);
+  _sort_mailmap();
 
   foreach(keys %records) {
     print MAILMAP $records{$_}->{"address"}, ":", $records{$_}->{"password"},
        ":", $records{$_}->{"target"}, "\n";
   }
 
-  close MAILMAP;
+  flock(MAILMAP, LOCK_UN);
+  close(MAILMAP);
 }
 
 # Field constraints. See https://scratch.bearstech.com/trac/ticket/34

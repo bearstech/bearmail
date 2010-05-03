@@ -34,7 +34,7 @@ sub dispatch_args {
             cfg_file => "$bearmail_dir/conf/bearmail.conf",
         }
     },
-    debug => 1,
+    #debug => 1,
     table       => [
             ':app'     => {},
             ':app/:rm' => {},

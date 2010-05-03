@@ -36,7 +36,7 @@ sub default : StartRunMode {
       $target =~ s/\s//;
     }
 
-    if(grep(/$domain/, $backend->get_domains())) {
+    if(grep(/^$domain$/, $backend->get_domains())) {
       $backend->add_address($email, $password, $target) 
         or error($self, "BAD_CONFIGURATION");
       $backend->commit()
