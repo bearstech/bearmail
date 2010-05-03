@@ -12,9 +12,9 @@
         </tr>
 <TMPL_LOOP NAME=DOMAINS>
         <tr class="<TMPL_VAR NAME=STRIPE>">
-          <td class="key"><TMPL_VAR NAME=NAME></td>
-          <td><TMPL_VAR NAME=INFO></td>
-          <td><a href="#/address_list?domain=<TMPL_VAR NAME=NAME>">Modifier</a> | <a href="#/domain_delete?domain=<TMPL_VAR NAME=NAME>">Supprimer</a></td>
+          <td class="key"><a href="#/address_list?domain=<TMPL_VAR NAME=NAME>"><TMPL_VAR NAME=NAME></a></td>
+          <td><TMPL_VAR NAME=INFO> ?</td>
+          <td><a href="#/domain_delete?domain=<TMPL_VAR NAME=NAME>">Supprimer</a></td>
         </tr>
 </TMPL_LOOP>
       </table>
