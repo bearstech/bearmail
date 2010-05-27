@@ -39,7 +39,7 @@ use Fcntl ':flock';
 # of this package.
 
 my $program = "bearmail";
-my $version = "0.3";
+my $version = "0.3.3";
 my %records;
 my %new_records;
 my @records_to_delete;

@@ -1,3 +1,12 @@
+bearmail (0.3.3) unstable; urgency=low
+
+  * Fixed bug #17 where non-hosted domains were improperly looped locally
+  * Sieve support: moved conf files to maildirs
+  * Added mod_perl support (BearMail/Dispatch.pm)
+  * Web UI tweak on domain_list mode
+
+ -- Vincent CARON <vcaron@bearstech.com>  Thu, 27 May 2010 16:20:28 +0200
+
 bearmail (0.3.2) unstable; urgency=low
 
   * Gave up with the 'bearmail-' prefix for config files, continued. 
