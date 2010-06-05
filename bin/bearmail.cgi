@@ -19,18 +19,5 @@
 
 use strict;
 use CGI::Carp qw/fatalsToBrowser/; 
-use CGI::Application::Dispatch;
-use Cwd;
-
-my $bearmail_dir = $ENV{'BEARMAIL'} || cwd().'/..';
-
-CGI::Application::Dispatch->dispatch(
-    prefix      => 'BearMail::Web',
-    default     => 'login',
-    args_to_new => {
-        TMPL_PATH => "$bearmail_dir/template/",
-        PARAMS    => {
-            cfg_file => "$bearmail_dir/etc/bearmail/bearmail.conf",
-        }
-    },
-);
+use BearMail::Dispatch;
+BearMail::Dispatch->dispatch();

@@ -21,15 +21,48 @@ BearMail CGI - Web interface
 
 3. Configure your web server
 
-  You will need to map 'bearmail.cgi' to the [...]public/bearmail.cgi URL.
-  For instance in Apache-speak:
+  Bearmail UI can be hosted by either CGI or Apache mod_perl2.
 
-    Alias       /foobar/             /home/bob/bearmail/public/
-    ScriptAlias /foobar/bearmail.cgi /home/bob/bearmail/bin/bearmail.cgi
+  Here is a sample configuration file for Apache using CGI:
 
-  Bearmail may be served from any URL, it uses relative links as much
-  as possible and a bit of auto-configuration magic when necessary.
-  Which means than the Bearmail webgui is easily 'relocatable'.
+	#
+	### CGI bearmail hosting
+	#
+	
+	<VirtualHost *:80>
+	        ServerAdmin admin@company
+	        DocumentRoot /bearmail/bearmail/public
+	
+		# Optional: /etc/bearmail/bearmail.conf by default
+	        SetEnv BEARMAIL_CONF /path/to/bearmail/conf/bearmail.conf
 
-  FIXME: document mod_perl2 configuration.
+	        ScriptAlias /bearmail /bearmail/bearmail/bin/bearmail.cgi
+	</VirtualHost>
 
+
+  And one for Apache mod_perl2:
+
+	#
+	### mod_perl bearmail hosting
+	#
+	
+	<VirtualHost *:80>
+	       ServerAdmin admin@company
+	       DocumentRoot /path/to/bearmail/public
+	
+	       # Optional: /etc/bearmail/bearmail.conf by default
+	       SetEnv BEARMAIL_CONF /path/to/bearmail/conf/bearmail.conf
+
+
+		# Optional: if using not-packaged Bearmail, libs not being in
+		# standard @INC
+		PerlOptions +Parent
+		PerlSwitches -I/bearmail/bearmail/lib
+		PerlOptions +GlobalRequest
+
+		PerlModule BearMail::Dispatch
+		<Location /bearmail>
+			SetHandler perl-script
+			PerlHandler BearMail::Dispatch
+		</Location>
+	</VirtualHost>

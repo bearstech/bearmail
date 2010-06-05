@@ -17,21 +17,25 @@
 
 package BearMail::Dispatch;
 use base 'CGI::Application::Dispatch';
+use Config::Auto;
 use strict;
 use warnings;
 use CGI::Carp qw/fatalsToBrowser/; 
 no warnings 'redefine';
 
 sub dispatch_args {
-  my $bearmail_dir = $ENV{'BEARMAIL'};
+  my $bearmail_conf = $ENV{'BEARMAIL_CONF'};
+  $bearmail_conf ||= "/etc/bearmail/bearmail.conf";
+
+  my $config = Config::Auto::parse("$bearmail_conf");
 
   return {
     prefix      => 'BearMail::Web',
     default => 'login',
     args_to_new => {
-        TMPL_PATH => "$bearmail_dir/template/",
+        TMPL_PATH => $config->{'bearmail_tmpl_path'},
         PARAMS    => {
-            cfg_file => "$bearmail_dir/conf/bearmail.conf",
+            cfg_file => "$bearmail_conf",
         }
     },
     #debug => 1,
