@@ -28,4 +28,17 @@ sub default : StartRunMode {
     return $tmpl->output;
 }
 
+sub add : RunMode {
+    my $self = shift;
+    my $q = $self->query();
+    my $backend = $self->{b};
+
+    $backend->add_domain($q->param('domain'), 
+      "postmaster@".$q->param('domain'), $q->param('password')); #FIXME
+    $backend->commit();
+
+    return $self->redirect($self->url('domain_list'));
+
+}
+
 1;
