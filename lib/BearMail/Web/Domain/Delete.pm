@@ -22,9 +22,19 @@ use base 'BearMail::Web';
 
 sub default : StartRunMode {
     my $self = shift;
-
+    my $q = $self->query();
     my $tmpl = $self->load_tmpl('domain_delete.html');
+    $tmpl->param(DOMAIN => $q->param('domain'));
     return $tmpl->output;
 }
 
+sub del : RunMode {
+    my $self = shift;
+    my $q = $self->query();
+    my $backend = $self->{b};
+
+    $backend->del_domain($q->param('domain'));
+    $backend->commit();
+    return $self->redirect($self->url('domain_list'));
+}
 1;
