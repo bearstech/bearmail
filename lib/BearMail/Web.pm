@@ -35,7 +35,8 @@ sub setup {
     $self->add_callback('load_tmpl', \&_my_load_tmpl);
 
     # Instanciate the backend
-    $self->{b} = BearMail::Backend::backend( @{$self->cfg('backend')} );
+    my $backend = $self->cfg('backend');
+    $self->{b} = BearMail::Backend::backend( defined $backend ? @$backend : '' );
 }
 
 sub cgiapp_init {
