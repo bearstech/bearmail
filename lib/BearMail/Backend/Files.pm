@@ -1,4 +1,4 @@
-package Backend::Files;
+package BearMail::Backend::Files;
 
 # Copyright (C) 2009 Bearstech - http://bearstech.com/
 #
@@ -69,8 +69,9 @@ sub new() {
 
   bless \%args, $class;
 
-  $mailmap = $args{'mailmap'} if defined $args{'mailmap'};
-  $debug = 1 if defined $args{'debug'};
+  croak("Please set mailmap's path in your bearmail.conf configuration file") if not defined $args{'mailmap'};
+  $mailmap = $args{'mailmap'};
+  $debug = 0 + defined $args{'debug'};
 
   _read_mailmap();
   return \%args;
@@ -199,10 +200,9 @@ sub get_postmaster_domains() {
 sub _read_mailmap {
   return if %records; # Parse mailmap only once
 
-  $mtime = stat($mailmap)->mtime;
   open(MAILMAP, "<$mailmap") or croak "$mailmap: $!";
   flock(MAILMAP, LOCK_NB);
-
+  $mtime = stat($mailmap)->mtime;
 
   while(<MAILMAP>) {
     chomp;

@@ -22,16 +22,12 @@ sub backend {
   my $backend = shift;
   my %args;
 
-  if ($backend eq 'Backend::Files') {
+  if ($backend eq 'Files') {
     $args{mailmap} = shift(@_) if @_;
-  }
-  elsif ($backend eq 'not_implemented') {
-    # ...
-  } else {
-    die "Unknown backend '$backend', check or set the 'backend' param in your bearmail.conf file";
+    return BearMail::Backend::Files->new(%args);
   }
 
-  return $backend->new(%args);
+  die "Unknown backend '$backend', check or set the 'backend' param in your bearmail.conf file";
 }
 
 1;
