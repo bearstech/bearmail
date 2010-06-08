@@ -19,6 +19,7 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 use Carp;
 use Exporter 'import';
 use Fcntl ':flock';
+use File::stat;
 @EXPORT_OK = qw(new commit apply get_domains get_users get_user set_domain set_address add_domain add_address del_domain del_address get_postmasters get_postmaster_domains); 
 
 # Implement mail-platform configuration via a plain file storage schema.
@@ -41,12 +42,11 @@ use Fcntl ':flock';
 my $program = "bearmail";
 my $version = "0.3.3";
 my %records;
-my %new_records;
-my @records_to_delete;
 my %by_domain;
 my @domains;
 my $mailmap = "/etc/bearmail/mailmap";
 my $debug = 0;
+my $mtime;
 
 my %files;
 my %allowed = (
@@ -139,7 +139,7 @@ sub add_address() {
     carp "Bad configuration\n";
     return 0;
   } else {
-    $new_records{"$address"} = { 
+    $records{"$address"} = { 
               address => $address,
               password => $password,
               target => $target
@@ -150,7 +150,7 @@ sub add_address() {
 sub del_domain() {
   my ($class, $domain) = @_;
   if(scalar(@{$by_domain{$domain}}) le 1) {
-    push(@records_to_delete, "postmaster\@$domain");
+    delete($records{"postmaster\@$domain"});
   } else {
     carp "There are remaining email addresses for this domain !\n";
     carp "Delete them first !\n";
@@ -159,7 +159,7 @@ sub del_domain() {
 
 sub del_address() {
   my ($class, $address) = @_;
-  push(@records_to_delete, $address); 
+  delete($records{"$address"});
 }
 
 sub get_postmasters() {
@@ -199,6 +199,7 @@ sub get_postmaster_domains() {
 sub _read_mailmap {
   return if %records; # Parse mailmap only once
 
+  $mtime = stat($mailmap)->mtime;
   open(MAILMAP, "<$mailmap") or croak "$mailmap: $!";
   flock(MAILMAP, LOCK_NB);
 
@@ -224,26 +225,28 @@ sub _read_mailmap {
     $records{lc $rec{'address'}} = \%rec;
   }
 
-  close(MAILMAP);
   flock(MAILMAP, LOCK_UN);
+  close(MAILMAP);
   _sort_mailmap();
 }
 
 sub _write_mailmap {
   return if !%records;
+  my $m = stat($mailmap)->mtime;
+  if($m ne $mtime) {
+    warn "File was modified by a non-locking friendly program since last parsing, won't merge";
+    return 0;
+  }
+
 
   open(MAILMAP, ">$mailmap") or croak "$mailmap: $!";
-  flock(MAILMAP, LOCK_EX + LOCK_NB)
+  flock(MAILMAP, LOCK_EX | LOCK_NB)
     or croak "Can't get exclusive lock on $mailmap: $!";
-
-  _read_mailmap();
-  %records = (%records, %new_records);
-  delete($records{$_}) foreach(@records_to_delete);
-  _sort_mailmap();
 
   foreach(keys %records) {
     print MAILMAP $records{$_}->{"address"}, ":", $records{$_}->{"password"},
-       ":", $records{$_}->{"target"}, "\n";
+       ":", $records{$_}->{"target"}, "\n"
+       or croak("Can't write mailmap $mailmap: $!");
   }
 
   flock(MAILMAP, LOCK_UN);

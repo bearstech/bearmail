@@ -35,10 +35,19 @@ sub add : RunMode {
 
     $backend->add_domain($q->param('domain'), 
       "postmaster@".$q->param('domain'), $q->param('password')); #FIXME
-    $backend->commit();
+    $backend->commit()
+        or error($self, "COMMIT");
 
     return $self->redirect($self->url('domain_list'));
 
+}
+
+sub error {
+    my ($self, $error) = @_;
+    my $tmpl = $self->load_tmpl('error.html');
+    $tmpl->param(NEXT => $self->url('domain_new'));
+    $tmpl->param("ERROR_$error" => 1);
+    return $tmpl->output;
 }
 
 1;

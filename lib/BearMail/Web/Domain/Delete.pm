@@ -34,7 +34,19 @@ sub del : RunMode {
     my $backend = $self->{b};
 
     $backend->del_domain($q->param('domain'));
-    $backend->commit();
-    return $self->redirect($self->url('domain_list'));
+    if($backend->commit()) {
+      return $self->redirect($self->url('domain_list'));
+    } else {
+      error($self, "COMMIT");
+    }
 }
+
+sub error {
+    my ($self, $error) = @_;
+    my $tmpl = $self->load_tmpl('error.html');
+    $tmpl->param("NEXT" => $self->url('domain_list'));
+    $tmpl->param("ERROR_$error" => 1);
+    return $tmpl->output;
+}
+
 1;
