@@ -15,7 +15,7 @@
 
 # BearMail mod_perl dispatcher - part of bearmail
 
-package BearMail::Dispatch;
+package BearMail::Web::Dispatch;
 use base 'CGI::Application::Dispatch';
 use Config::Auto;
 use strict;

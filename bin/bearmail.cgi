@@ -19,5 +19,5 @@
 
 use strict;
 use CGI::Carp qw/fatalsToBrowser/; 
-use BearMail::Dispatch;
-BearMail::Dispatch->dispatch();
+use BearMail::Web::Dispatch;
+BearMail::Web::Dispatch->dispatch();

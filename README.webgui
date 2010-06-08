@@ -60,9 +60,9 @@ BearMail CGI - Web interface
 		PerlSwitches -I/bearmail/bearmail/lib
 		PerlOptions +GlobalRequest
 
-		PerlModule BearMail::Dispatch
+		PerlModule BearMail::Web::Dispatch
 		<Location /bearmail>
 			SetHandler perl-script
-			PerlHandler BearMail::Dispatch
+			PerlHandler BearMail::Web::Dispatch
 		</Location>
 	</VirtualHost>
