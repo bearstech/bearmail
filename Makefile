@@ -55,14 +55,14 @@ deb:
 CPAN_MODULES= \
     http://search.cpan.org/CPAN/authors/id/M/MA/MARKSTOS/CGI-Application-4.31.tar.gz \
     http://search.cpan.org/CPAN/authors/id/M/MA/MARKSTOS/CGI-Application-Dispatch-2.17.tar.gz \
-    http://search.cpan.org/CPAN/authors/id/T/TH/THILO/CGI-Application-Plugin-AutoRunmode-0.16.tar.gz \
-    http://search.cpan.org/CPAN/authors/id/M/MA/MARKSTOS/CGI-Application-Plugin-ConfigAuto-1.31.tar.gz \
+    http://search.cpan.org/CPAN/authors/id/T/TH/THILO/CGI-Application-Plugin-AutoRunmode-0.17.tar.gz \
+    http://search.cpan.org/CPAN/authors/id/M/MA/MARKSTOS/CGI-Application-Plugin-ConfigAuto-1.32.tar.gz \
     http://search.cpan.org/CPAN/authors/id/W/WO/WONKO/CGI-Application-Plugin-ViewCode-1.02.tar.gz \
     http://search.cpan.org/CPAN/authors/id/C/CE/CEESHEK/CGI-Application-Plugin-Redirect-1.00.tar.gz \
     http://search.cpan.org/CPAN/authors/id/C/CE/CEESHEK/CGI-Application-Plugin-Session-1.03.tar.gz \
     http://search.cpan.org/CPAN/authors/id/N/NE/NEKOKAK/CGI-Application-Plugin-DebugScreen-0.06.tar.gz \
     http://search.cpan.org/CPAN/authors/id/M/MS/MSCHWERN/UNIVERSAL-require-0.13.tar.gz \
-    http://search.cpan.org/CPAN/authors/id/D/DR/DROLSKY/Exception-Class-1.29.tar.gz \
+    http://search.cpan.org/CPAN/authors/id/D/DR/DROLSKY/Exception-Class-1.30.tar.gz \
     http://search.cpan.org/CPAN/authors/id/D/DA/DAGOLDEN/Exception-Class-TryCatch-1.12.tar.gz \
     http://search.cpan.org/CPAN/authors/id/T/TM/TMTM/Class-Data-Inheritable-0.08.tar.gz \
     http://search.cpan.org/CPAN/authors/id/D/DR/DROLSKY/Devel-StackTrace-1.22.tar.gz \
@@ -80,7 +80,7 @@ cpan_unpack: cpan_fetch
 
 cpan_fixes: cpan_unpack
 	cd .cache; \
-	cd CGI-Application-Plugin-AutoRunmode-0.16 && \
+	cd CGI-Application-Plugin-AutoRunmode-0.17 && \
 	    mkdir -p lib/CGI/Application/Plugin && \
 	    mv AutoRunmode* lib/CGI/Application/Plugin 2>/dev/null; true
 	cd .cache; \

@@ -20,7 +20,7 @@ use CGI::Application::Plugin::AutoRunmode;
 use CGI::Application::Plugin::Session;
 use CGI::Application::Plugin::Redirect;
 use CGI::Application::Plugin::ConfigAuto qw/cfg_file cfg/;
-use CGI::Application::Plugin::DebugScreen;  # DebugScreen is done when $ENV{CGI_APP_DEBUG} is set
+use CGI::Application::Plugin::DebugScreen;  # DebugScreen is active when $ENV{CGI_APP_DEBUG} is set
 use BearMail::Backend;
 use Data::Dumper;
 
