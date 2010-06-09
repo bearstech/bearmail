@@ -14,31 +14,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # BearMail mod_perl dispatcher - part of bearmail
+#
+# This module has no run_mode (:RunMode attribute) on purpose.
 
 package BearMail::Web::Dispatch;
 use base 'CGI::Application::Dispatch';
-use Config::Auto;
 use strict;
 use warnings;
-use CGI::Carp qw/fatalsToBrowser/; 
-no warnings 'redefine';
+#no warnings 'redefine';
 
 sub dispatch_args {
-  my $bearmail_conf = $ENV{'BEARMAIL_CONF'};
-  $bearmail_conf ||= "/etc/bearmail/bearmail.conf";
-
-  my $config = Config::Auto::parse("$bearmail_conf");
+  my $conf = $ENV{BEARMAIL_CONF} || '/etc/bearmail/bearmail.conf';
 
   return {
     prefix      => 'BearMail::Web',
-    default => 'login',
+    default     => 'login',
     args_to_new => {
-        TMPL_PATH => $config->{'bearmail_tmpl_path'},
-        PARAMS    => {
-            cfg_file => "$bearmail_conf",
-        }
+        PARAMS      => { cfg_file => $conf }
     },
-    #debug => 1,
     table       => [
             ':app'     => {},
             ':app/:rm' => {},

@@ -22,21 +22,25 @@ use CGI::Application::Plugin::Redirect;
 use CGI::Application::Plugin::ConfigAuto qw/cfg_file cfg/;
 use CGI::Application::Plugin::DebugScreen;  # DebugScreen is active when $ENV{CGI_APP_DEBUG} is set
 use BearMail::Backend;
-use Data::Dumper;
+use CGI::Carp;
 
 sub setup {
     my $self = shift;
+
+    # Instanciate the backend
+    my $backend = $self->cfg('backend');
+    croak "Backend (flatfile, sql, ...) not set, please define 'backend' in bearmail.conf" if not defined $backend;
+    $self->{b} = BearMail::Backend::backend( @$backend );
 
     # CGI.pm sets a default ISO-8859-1 charset in the Content-Type header.
     # We prefer omitting it and let browsers honor the <meta> in page <header>'s.
     $self->query->charset('');
 
-    # Give some interesting characteristics to our HTML::Template's
+    # Configure HTML::Template rendering
+    my $tmpl_path = $self->cfg('template_path');
+    croak "Template path not set, please define 'template_path' in bearmail.conf" if not defined $tmpl_path;
+    $self->tmpl_path($tmpl_path);
     $self->add_callback('load_tmpl', \&_my_load_tmpl);
-
-    # Instanciate the backend
-    my $backend = $self->cfg('backend');
-    $self->{b} = BearMail::Backend::backend( defined $backend ? @$backend : '' );
 }
 
 sub cgiapp_init {
