@@ -2,9 +2,9 @@
 <TMPL_INCLUDE NAME="menu.html">
 
     <div class="main">
-      <h1>Compte &rarr; blinet@bearstech.com</h1>
+      <h1>Compte &rarr; <TMPL_VAR NAME=ADDRESS></h1>
 
-      <form method="post" action="#/address_list">
+      <form method="post" action="#/address_delete/del">
         <div class="dialog warning">
           <h1>Attention !</h1>
           <p>
@@ -18,6 +18,7 @@
             <input type="submit" id="cancel" value="Annuler"/>
           </p>
         </div>
+	<input type="hidden" name="address" value="<TMPL_VAR NAME=ADDRESS>"/>
       </form>
     </div>
     <script type="text/javascript"><!--

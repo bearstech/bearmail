@@ -22,8 +22,33 @@ use base 'BearMail::Web';
 
 sub default : StartRunMode {
     my $self = shift;
-
+    my $q = $self->query();
     my $tmpl = $self->load_tmpl('address_delete.html');
+    $tmpl->param(ADDRESS=> $q->param('address'));
+    return $tmpl->output;
+}
+
+sub del : RunMode {
+    my $self = shift;
+    my $q = $self->query();
+    my $backend = $self->{b};
+
+    my $address = $q->param('address');
+    my $domain = $address;
+    $domain =~ s/.+@//;
+    $backend->del_address($address);
+    if($backend->commit()) {
+      return $self->redirect($self->url('address_list?domain='.$domain));
+    } else {
+      error($self, "COMMIT", $domain);
+    }
+}
+
+sub error {
+    my ($self, $error, $domain) = @_;
+    my $tmpl = $self->load_tmpl('error.html');
+    $tmpl->param("NEXT" => $self->url('address_list?domain='.$domain));
+    $tmpl->param("ERROR_$error" => 1);
     return $tmpl->output;
 }
 

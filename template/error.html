@@ -1,0 +1,15 @@
+<TMPL_INCLUDE NAME="header.html">
+<TMPL_INCLUDE NAME="menu.html">
+
+    <div class="main">
+      <h1>Erreur !</h1>
+	<TMPL_IF NAME="ERROR_COMMIT">
+	<p class="error">
+		Le fichier mailmap a été modifié par un logiciel ne supportant
+		pas le locking, les changements ont étés perdus !<br/><br/>
+		<a href="<TMPL_VAR NAME=NEXT>">Continuer</a>
+	</p>
+	</TMPL_IF>
+    </div>
+
+<TMPL_INCLUDE NAME="footer.html">
