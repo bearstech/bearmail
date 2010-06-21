@@ -20,17 +20,28 @@ use Test::More tests => 9;
 use lib '../lib';
 use BearMail::Backend::Files;
 use FreezeThaw qw(cmpStr);
+use File::Basename;
 
-my $mailmap = '../conf/mailmap';
+my $mailmap = dirname($0).'/../doc/examples/mailmap';
 
 my $b = BearMail::Backend::Files->new( debug => 0, mailmap => $mailmap );
 
+my $postmasters = {
+          'postmaster@psychemusic.com' => 'ec54e458d83dbbddbf03170895df79bd',
+          'postmaster@computeit.net' => '469bb8061b76aa02d311696a2f719714',
+          'postmaster@freshnewz.com' => '1ae8a6e65b3b6c8e7bb5aa69783c7af9',
+          'postmaster@freeyoursoft.org' => '1557458102a622baecbf0be2d0feb250',
+          'postmaster@flyingbirds.fr' => '4b58eaf79f4203d3ad89d0a140310d3f',
+          'postmaster@figueres.name' => 'c1297b00533db5bbc687eab9fd7900b6',
+          'postmaster@bestbeers.be' => 'af3365411ed9d9b57a758c01e2419b9a'
+};
+
 ok( defined $b, 'new() returned something' );
 ok( $b->isa('BearMail::Backend::Files'), 'and it\'s the right class' );
-is( $b->get_domains(), 2, 'correct number of domains');
-is( $b->get_users('company.com'), 5, 'correct number of company.com domain users');
-is( $b->get_users('other.com'), 1, 'correct number of other.com domain users');
-is( ${$b->get_user('fortune@company.com')}{'target'}, '|/bin/fortune', 'correct target of fortune@company.com user' );
-is( ${$b->get_user('bob@company.com')}{'password'}, '9a8ad92c50cae39aa2c5604fd0ab6d8c', 'correct bob@company.com password' );
-is( cmpStr($b->get_postmasters(), { 'bob@company.com' => '9a8ad92c50cae39aa2c5604fd0ab6d8c' }), 0,  'correct postmasters list' );
-is( cmpStr($b->get_postmaster_domains('bob@company.com'), { name => 'company.com' }), 0, 'correct controlled domains for bob@company.com' );
+is( $b->get_domains(), 7, 'correct number of domains');
+is( $b->get_users('flyingbirds.fr'), 11, 'correct number of flyingbirds.fr domain users');
+is( $b->get_users('psychemusic.com'), 5, 'correct number of psychemusic.com domain users');
+is( ${$b->get_user('fortunes@freshnewz.com')}{'target'}, '|/bin/fortune', 'correct target of fortunes@freshnewz.com user' );
+is( ${$b->get_user('clara.fourcade@flyingbirds.fr')}{'password'}, '4b7318bdb1725959d3d8bba5b0ffae79', 'correct clara.fourcade@flyingbirds.fr password' );
+is( cmpStr($b->get_postmasters(), $postmasters), 0,  'correct postmasters list' );
+is( cmpStr($b->get_postmaster_domains('postmaster@bestbeers.be'), { name => 'bestbeers.be' }), 0, 'correct controlled domains for postmaster@bestbeers.be' );
