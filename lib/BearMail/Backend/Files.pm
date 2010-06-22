@@ -20,7 +20,7 @@ use Carp;
 use Exporter 'import';
 use Fcntl ':flock';
 use File::stat;
-@EXPORT_OK = qw(new commit apply get_domains get_users get_user set_domain set_address add_domain add_address del_domain del_address get_postmasters get_postmaster_domains); 
+@EXPORT_OK = qw(get_accounts new commit apply get_domains get_users get_user set_domain set_address add_domain add_address del_domain del_address get_postmasters get_postmaster_domains); 
 
 # Implement mail-platform configuration via a plain file storage schema.
 #
@@ -39,69 +39,67 @@ use File::stat;
 # from 'bearmail-update' which has been stashed in the 'Implementation' part
 # of this package.
 
-my %records;
-my %by_domain;
-my @domains;
-my $mailmap;
-my $debug = 0;
-my $mtime;
-
-my %files;
-my %allowed = (
-  'addr_normal pw_md5 local'           => 'regular_account',
-  'addr_normal pw_none aliases'        => 'alias',
-  'addr_normal pw_none pipe'           => 'pipe',
-  'addr_catchall pw_none aliases'      => 'catchall',
-  'addr_catchall pw_none domain_alias' => 'domain_alias',
-);
-
-
 
 #
 ### Exported methods
 #
 
-
 sub new() {
   my ($class, %args) = @_;
 
-  bless \%args, $class;
-
   croak("Please set mailmap's path in your bearmail.conf configuration file") if not defined $args{'mailmap'};
-  $mailmap = $args{'mailmap'};
-  $debug = 0 + defined $args{'debug'};
 
-  _read_mailmap();
-  return \%args;
+  my $self = {
+    records => {},
+    by_domain => {},
+    domains => [],
+    mailmap => $args{'mailmap'},
+    debug => 0 + defined $args{'debug'},
+    mtime => 0, #FIXME
+    files => {},
+    allowed => {
+      'addr_normal pw_md5 local'           => 'regular_account',
+      'addr_normal pw_none aliases'        => 'alias',
+      'addr_normal pw_none pipe'           => 'pipe',
+      'addr_catchall pw_none aliases'      => 'catchall',
+      'addr_catchall pw_none domain_alias' => 'domain_alias',
+    },
+  };
+
+
+  bless $self, $class;
+
+  $self->_read_mailmap();
+  return $self;
 }
 
 sub commit() {
   my ($self) = @_;
-  _sort_mailmap();
-  _write_mailmap();
+  $self->_sort_mailmap();
+  $self->_write_mailmap();
 }
 
 sub apply() {
   my ($self) = @_;
-  _sort_mailmap();
-  _prepare_postfix_conf();
-  _prepare_dovecot_conf();
-  _write_conf();
+  $self->_sort_mailmap();
+  $self->_prepare_postfix_conf();
+  $self->_prepare_dovecot_conf();
+  $self->_write_conf();
 }
 
 sub get_domains() {
   my ($self) = @_;
-  return @domains;
+  return @{$self->{domains}};
 }
 
 sub get_users() {
   my ($self, $domain) = @_;
-  return @{$by_domain{$domain}};
+  return @{$self->{by_domain}{$domain}};
 }
 
 sub get_user() {
   my ($self, $user) = @_;
-  return $records{lc $user};
+  return $self->{records}{lc $user};
 }
 
 sub set_domain() {
@@ -110,35 +108,35 @@ sub set_address() {
 }
 
 sub add_domain() {
-  my ($class, $domain, $postmaster, $password) = @_;
+  my ($self, $domain, $postmaster, $password) = @_;
 
-  if(exists($by_domain{$domain})) {
+  if(exists($self->{by_domain}->{$domain})) {
     carp "Domain $domain already exist !";
     return 0;
   }
 
   if($postmaster eq "postmaster@".$domain) {
-    add_address($class, $postmaster, $password, "local");
+    $self->add_address($postmaster, $password, "local");
   } else {
-    add_address($class, "postmaster@".$domain, '', $postmaster);
+    $self->add_address("postmaster@".$domain, '', $postmaster);
   }
 }
 
 sub add_address() {
-  my ($class, $address, $password, $target) = @_;
+  my ($self, $address, $password, $target) = @_;
   my @types;
   $password = md5_hex($password)
     if((not $password =~ /^[0-9a-f]{32}$/) and ($target eq "local"));
 
-  push @types, _check_field("address", $address);
-  push @types, _check_field("password", $password);
-  push @types, _check_field("target", $target);
+  push @types, $self->_check_field("address", $address);
+  push @types, $self->_check_field("password", $password);
+  push @types, $self->_check_field("target", $target);
 
-  if(!exists($allowed{"@types"})) {
+  if(!exists($self->{allowed}{"@types"})) {
     carp "Bad configuration\n";
     return 0;
   } else {
-    $records{"$address"} = { 
+    $self->{records}->{"$address"} = { 
               address => $address,
               password => $password,
               target => $target
@@ -147,9 +145,9 @@ sub add_address() {
 }
 
 sub del_domain() {
-  my ($class, $domain) = @_;
-  if(scalar(@{$by_domain{$domain}}) le 1) {
-    delete($records{"postmaster\@$domain"});
+  my ($self, $domain) = @_;
+  if(scalar(@{$self->{by_domain}->{$domain}}) le 1) {
+    delete($self->{records}->{"postmaster\@$domain"});
   } else {
     carp "There are remaining email addresses for this domain !\n";
     carp "Delete them first !\n";
@@ -157,15 +155,15 @@ sub del_domain() {
 }
 
 sub del_address() {
-  my ($class, $address) = @_;
-  delete($records{"$address"});
+  my ($self, $address) = @_;
+  delete($self->{records}->{"$address"});
 }
 
 sub get_postmasters() {
   my ($self) = @_;
   my %npostmasters;
-  foreach(keys(%postmasters)) {
-    $npostmasters{$_} = $postmasters{$_}->{password};
+  foreach(keys(%{$self->{postmasters}})) {
+    $npostmasters{$_} = $self->{postmasters}->{$_}->{password};
   }
 #my %npostmasters = map { $_ => $postmasters{$_}->{password} } %postmasters;
   return \%npostmasters;
@@ -174,7 +172,7 @@ sub get_postmasters() {
 sub get_postmaster_domains() {
   my ($self, $user) = @_;
   my @hashed;
-  push(@hashed, { name => $_ }) foreach @{$postmasters{$user}->{domains}};
+  push(@hashed, { name => $_ }) foreach @{$self->{postmasters}->{$user}->{domains}};
   return @hashed;
 }
 
@@ -196,11 +194,12 @@ sub get_postmaster_domains() {
 #  - a 'target' (local delivery, aliases, domain alias, program)
 #
 sub _read_mailmap {
-  return if %records; # Parse mailmap only once
+  my ($self) = @_;
 
-  open(MAILMAP, "<$mailmap") or croak "$mailmap: $!";
+#FIXME  return if defined($self->{records}); # Parse mailmap only once
+  open(MAILMAP, "<$self->{mailmap}") or croak "$self->{mailmap}: $!";
   flock(MAILMAP, LOCK_NB);
-  $mtime = stat($mailmap)->mtime;
+  $self->{mtime} = stat($self->{mailmap})->mtime;
 
   while(<MAILMAP>) {
     chomp;
@@ -213,38 +212,39 @@ sub _read_mailmap {
     my @types;
     foreach ('address', 'password', 'target') {
       my $field = shift @fields;
-      push @types, _check_field($_, $field);
+      push @types, $self->_check_field($_, $field);
       $rec{$_} = $field;
     }
-    my $type = $allowed{"@types"};
+
+    my $type = $self->{allowed}->{"@types"};
     croak "unsupported configuration (@types)" if !defined $type;
 
     # Users are key'ed by lowercase address (must be unique)
-    $records{lc $rec{'address'}} = \%rec;
+    $self->{records}->{lc $rec{'address'}} = \%rec;
   }
 
   flock(MAILMAP, LOCK_UN);
   close(MAILMAP);
-  _sort_mailmap();
+  $self->_sort_mailmap();
 }
 
 sub _write_mailmap {
-  return if !%records;
-  my $m = stat($mailmap)->mtime;
-  if($m ne $mtime) {
+  my ($self) = @_;
+
+  my $m = stat($self->{mailmap})->mtime;
+  if($m ne $self->{mtime}) {
     warn "File was modified by a non-locking friendly program since last parsing, won't merge";
     return 0;
   }
 
-
-  open(MAILMAP, ">$mailmap") or croak "$mailmap: $!";
+  open(MAILMAP, ">$self->{mailmap}") or croak "$self->{mailmap}: $!";
   flock(MAILMAP, LOCK_EX | LOCK_NB)
     or croak "Can't get exclusive lock on $mailmap: $!";
 
-  foreach(keys %records) {
-    print MAILMAP $records{$_}->{"address"}, ":", $records{$_}->{"password"},
-       ":", $records{$_}->{"target"}, "\n"
-       or croak("Can't write mailmap $mailmap: $!");
+  foreach(keys %{$self->{records}}) {
+    print MAILMAP $self->{records}->{$_}->{"address"}, ":", $self->{records}->{$_}->{"password"},
+       ":", $self->{records}->{$_}->{"target"}, "\n"
+       or croak("Can't write mailmap $self->{mailmap}: $!");
   }
 
   flock(MAILMAP, LOCK_UN);
@@ -254,12 +254,12 @@ sub _write_mailmap {
 # Field constraints. See https://scratch.bearstech.com/trac/ticket/34
 #
 sub _check_field {
-  my ($key, $val) = @_;
+  my ($self, $key, $val) = @_;
 
   if ($key eq 'address') {
     my $addr = $val;
     $addr =~ s/^\*@/x@/;  # Allow catch-all
-    croak "malformed address: $val" if not _check_address($addr);
+    croak "malformed address: $val" if not $self->_check_address($addr);
     croak "non-unique address: $val" if defined $records{lc $val};
 
     return $val =~ m/^\*@/ ? 'addr_catchall' : 'addr_normal';
@@ -279,7 +279,7 @@ sub _check_field {
     croak "can ony alias one domain at once" if @aliases > 1 && $type eq 'domain_alias';
 
     foreach (@aliases) {
-      croak "malformed address: $_" if not _check_address($_);
+      croak "malformed address: $_" if not $self->_check_address($_);
     }
     return $type;
   }
@@ -288,7 +288,7 @@ sub _check_field {
 # Email address basic check. It's a (small) RFC822 subset.
 #
 sub _check_address {
-  my $address = shift;
+  my ($self, $address) = @_;
   return $address =~ /^[A-Za-z0-9\-\._]+@[A-Za-z0-9\-\.]+$/;
 }
 
@@ -296,46 +296,47 @@ sub _check_address {
 # by domains, then by local part. Fill in @domains also.
 #
 sub _sort_mailmap {
+  my ($self) = @_;
 
   #FIXME ok ?
   # Reset data structures before sorting (to be able to re-sort on modifications)
-  %by_domain = ();
-  @domains = [];
+  $self->{by_domain} = ();
+  $self->{domains} = [];
 
-  foreach(keys %records) {
+  foreach(keys %{$self->{records}}) {
     /^([^@]+)@([^@]+)$/;
     my ($local, $domain) = ($1, $2);
 
-    $by_domain{$domain} = [] if !defined $by_domain{$domain};
-    $records{$_}->{'address_local'} = $local;
-    push @{$by_domain{$domain}}, $records{$_};
+    $self->{by_domain}->{$domain} = [] if !defined $self->{by_domain}->{$domain};
+    $self->{records}->{$_}->{'address_local'} = $local;
+    push @{$self->{by_domain}->{$domain}}, $self->{records}->{$_};
   }
 
-  foreach my $dom (keys %by_domain) {
-    @{$by_domain{$dom}} = sort { $a->{'address'} cmp $b->{'address'} } @{$by_domain{$dom}};
-    foreach(@{$by_domain{$dom}}) {
+  foreach my $dom (keys %{$self->{by_domain}}) {
+    @{$self->{by_domain}->{$dom}} = sort { $a->{'address'} cmp $b->{'address'} } @{$self->{by_domain}->{$dom}};
+    foreach(@{$self->{by_domain}->{$dom}}) {
       next if ($_->{address_local} ne 'postmaster');
       if($_->{password}) {
-        if(exists($postmasters{$_->{address}})) {
-          push(@{$postmasters{$_->{address}}->{domains}}, $dom);
+        if(exists($self->{postmasters}->{$_->{address}})) {
+          push(@{$self->{postmasters}->{$_->{address}}->{domains}}, $dom);
         } else {
-          $postmasters{$_->{address}} = { password => $_->{password}, domains => [ $dom ] };
+          $self->{postmasters}->{$_->{address}} = { password => $_->{password}, domains => [ $dom ] };
         }
       } else {
         foreach(split(',', $_->{target})) {
-          if(exists($records{$_})) {
-            next unless defined($records{$_}->{password}); # FIXME: keep ? Security purpose: don't keep postmasters without passwords
-            if(exists($postmasters{$_})) {
-              push(@{$postmasters{$_}->{domains}}, $dom);
+          if(exists($self->{records}->{$_})) {
+            next unless defined($self->{records}->{$_}->{password}); # FIXME: keep ? Security purpose: don't keep postmasters without passwords
+            if(exists($self->{postmasters}->{$_})) {
+              push(@{$self->{postmasters}->{$_}->{domains}}, $dom);
             } else {
-              $postmasters{$_} = { password => $records{$_}->{password}, domains => [ $dom ] };
+              $self->{postmasters}->{$_} = { password => $self->{records}->{$_}->{password}, domains => [ $dom ] };
             }
           }
         }
       }
     }
   }
-  @domains = sort keys %by_domain;
+  @{$self->{domains}} = sort keys %{$self->{by_domain}};
 }
 
 # Postfix conf files, expected settings in main.cf:
@@ -345,18 +346,19 @@ sub _sort_mailmap {
 #   alias_maps                = hash:/etc/aliases,
 #                               hash:/etc/bearmail/postfix/virtual_pipes
 sub _prepare_postfix_conf {
-  my $virtual_domains   = join("\n", map { "$_ dummy" } @domains);
+  my ($self) = @_;
+  my $virtual_domains   = join("\n", map { "$_ dummy" } @{$self->{domains}});
   my $virtual_mailboxes = '';
   my $virtual_aliases   = '';
   my $virtual_pipes     = '';
 
-  foreach my $d (@domains) {
+  foreach my $d (@{$self->{domains}}) {
     my $comment = $virtual_mailboxes eq '' ? "" : "\n";
     $comment .= "# $d\n#\n";
     $virtual_mailboxes .= $comment;
     $virtual_aliases   .= $comment;
 
-    foreach (@{$by_domain{$d}}) {
+    foreach (@{$self->{by_domain}->{$d}}) {
       my $address = $_->{'address'};
       my $target  = $_->{'target'};
       $address =~ s/^\*//;    # Fix catch-all syntax
@@ -377,10 +379,10 @@ sub _prepare_postfix_conf {
     }
   }
 
-  $files{'/etc/bearmail/postfix/virtual_domains'}   = $virtual_domains;
-  $files{'/etc/bearmail/postfix/virtual_mailboxes'} = $virtual_mailboxes;
-  $files{'/etc/bearmail/postfix/virtual_aliases'}   = $virtual_aliases;
-  $files{'/etc/bearmail/postfix/virtual_pipes'}     = $virtual_pipes;
+  $self->{files}->{'/etc/bearmail/postfix/virtual_domains'}   = $virtual_domains;
+  $self->{files}->{'/etc/bearmail/postfix/virtual_mailboxes'} = $virtual_mailboxes;
+  $self->{files}->{'/etc/bearmail/postfix/virtual_aliases'}   = $virtual_aliases;
+  $self->{files}->{'/etc/bearmail/postfix/virtual_pipes'}     = $virtual_pipes;
 }
 
 # Dovecot auth files, expected settings in dovecot.cf:
@@ -392,11 +394,12 @@ sub _prepare_postfix_conf {
 #   }
 #
 sub _prepare_dovecot_conf {
+  my ($self) = @_;
   my $passwd = '';
 
-  foreach my $d (@domains) {
+  foreach my $d (@{$self->{domains}}) {
 
-    foreach (@{$by_domain{$d}}) {
+    foreach (@{$self->{by_domain}->{$d}}) {
       my $password = $_->{'password'};
       next if $password eq '';
 
@@ -405,13 +408,14 @@ sub _prepare_dovecot_conf {
       $passwd .= "$address:{PLAIN-MD5}$password:bearmail:bearmail::/var/spool/bearmail/$d/${local}::\n";
     }
   }
-  $files{"/etc/bearmail/dovecot/passwd"} = $passwd;
+  $self->{files}->{"/etc/bearmail/dovecot/passwd"} = $passwd;
 }
 
 sub _write_conf {
+  my ($self) = @_;
   my $header = "# Generated by BearMail::Backend::Files.\n# Please edit $mailmap instead of this file.\n\n";
 
-  foreach (sort keys %files) {
+  foreach (sort keys %{$self->{files}}) {
     if (!$debug) {
       open(CONF, ">$_") or croak "$_: $!";
       select CONF;
@@ -419,7 +423,7 @@ sub _write_conf {
       print "--\n-- $_\n--\n";
     }
 
-    print $header.$files{$_}."\n";
+    print $header.$self->{files}->{$_}."\n";
 
     if (!$debug) {
       close(CONF);
