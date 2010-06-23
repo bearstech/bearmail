@@ -19,7 +19,7 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 use Carp;
 use Exporter 'import';
 use Fcntl ':flock';
-use File::stat;
+use File::stat ();
 @EXPORT_OK = qw(get_accounts new commit apply get_domains get_users get_user set_domain set_address add_domain add_address del_domain del_address get_postmasters get_postmaster_domains); 
 
 # Implement mail-platform configuration via a plain file storage schema.
@@ -199,7 +199,7 @@ sub _read_mailmap {
 #FIXME  return if defined($self->{records}); # Parse mailmap only once
   open(MAILMAP, "<$self->{mailmap}") or croak "$self->{mailmap}: $!";
   flock(MAILMAP, LOCK_NB);
-  $self->{mtime} = stat($self->{mailmap})->mtime;
+  $self->{mtime} = File::stat::stat($self->{mailmap})->mtime;
 
   while(<MAILMAP>) {
     chomp;
@@ -231,7 +231,7 @@ sub _read_mailmap {
 sub _write_mailmap {
   my ($self) = @_;
 
-  my $m = stat($self->{mailmap})->mtime;
+  my $m = File::stat::stat($self->{mailmap})->mtime;
   if($m ne $self->{mtime}) {
     warn "File was modified by a non-locking friendly program since last parsing, won't merge";
     return 0;
