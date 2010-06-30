@@ -1,0 +1,188 @@
+#!/usr/bin/perl -w
+
+use strict;
+use Getopt::Long;
+#use File::Path qw(make_path remove_tree);
+
+my $mailmap        = '/home/ben/mailmap';
+my $bmuser         = 'ben';
+my $user; my $opt_help; my $status; my $add_user; my $del_user;
+my $sieve_conf; my $sieve_link;
+my $sieve_conf_status; my $sieve_link_status; my $user_sieve_status;
+my $bmuid; my $bmgid;
+
+# only one option allowed
+my $arg = scalar @ARGV;
+if ($arg > 2) {
+  disp_help();
+  exit 1;
+}
+
+GetOptions('status|s=s'   => \$status,
+           'add-user|a=s' => \$add_user,
+           'del-user|d=s' => \$del_user,
+           'help|h:s'     => disp_help());
+
+sub disp_help {
+  print <<EOF;
+Usage: $0 [OPTION] [VALUE]
+  -h, --help      print this help and exit
+  -a, --add-user  add sieve rules
+  -d, --del-user  delete sieve configuration
+  -s, --status    show sieve status
+
+Ex: $0 -a postmaster\@domain.com
+    $0 -s postmaster\@domain.com
+EOF
+}
+
+# only root or sudo can run this script
+unless ($> == 0 || $< == 0) { die "You must be root" }
+
+# get global info
+sub get_infos {
+  ($user) = @_;
+
+  # check user
+  open(MAILMAP, "< $mailmap") || die "can't open $mailmap : $!";
+    my @MAILMAP=<MAILMAP>;
+  close MAILMAP;
+
+  # search email account
+  my @USER_ACCOUNT = grep /^$user:.*:local/, @MAILMAP;
+
+  # if user not found, die
+  if (!$USER_ACCOUNT[0]) { die "$user: account not found in $mailmap\n"; }
+
+  # get info
+  my $name_account; my $domain_account;
+
+  while (<@USER_ACCOUNT>) {
+    if (m/([-a-zA-Z0-9_.]+)@([-a-zA-Z0-9_.]+):.*:local$/) {
+      $name_account = $1; # get his name
+      $domain_account = $2; # get his domain
+    }
+  }
+  # get bearmail uid/gid/home
+  my $bmname; my $bmpass; my $bmquota; 
+  my $bmcomment; my $bmgcos; my $bmdir; my $bmshell; my $bmexpire;
+  ($bmname, $bmpass, $bmuid, $bmgid, $bmquota, $bmcomment, $bmgcos, $bmdir,
+   $bmshell, $bmexpire) = getpwnam("$bmuser") or die "User $bmuser not found.";
+
+  # home sieve info
+  my $domain_dir = "$bmdir/$domain_account";
+  my $home_dir   = "$domain_dir/$name_account";
+  my $sieve_dir  = "$home_dir/sieve";
+     $sieve_conf = "$sieve_dir/bearmail.sieve";
+     $sieve_link = "$home_dir/.dovecot.sieve";
+
+  # check/create sieve dir
+  if (! -d $sieve_dir) { # check/create sieve dir
+    # too new for lenny .. Need File::Path 2.08
+    # make_path ("$sieve_dir", { verbose => 1, mode => 0700, owner => "$bmuid",
+    #   group => "$bmgid" }) or die "Can't create $sieve_dir: $!.\n";}
+    foreach my $directory ($domain_dir,$home_dir,$sieve_dir) {
+      if (! -d $directory) {
+        mkdir ($directory,0700) or die "Can't create $directory: $!\n";
+        chmod (0700,$directory) or die "Can't chmod $directory: $!\n";
+        chown ($bmuid,$bmgid, "$directory") or die "Can't chown $directory: $!";
+      }
+    }
+  }
+
+  # check sieve conf
+  if (-e $sieve_conf) { 
+    if (! -f $sieve_conf) {
+      print "$sieve_conf is not a regular file.\nYou should remove it and ".
+       "restart $0\n"; exit 1 }
+    else {
+      $sieve_conf_status=1; }
+  } else { $sieve_conf_status=0; }
+
+  # check sieve link
+  if (! -e $sieve_link) {
+    $sieve_link_status=0; }
+  if (-e $sieve_link) {
+    if (! -l $sieve_link) {
+      print "$sieve_link is not a symlink.\nYou should remove this file and ".
+        "restart $0\n"; exit 1; }
+    if (-l $sieve_link) {
+      my $x = readlink ("$sieve_link");
+      if ($x eq $sieve_conf) { $sieve_link_status=1;
+      } else {
+        print "$sieve_link is a symlink of $x but not of $sieve_conf\n".
+          "You should remove this file and restart $0\n"; exit 1;
+      }
+    }
+  }
+
+  # if bearmail sieve conf is not active
+  if (($sieve_conf_status eq 0) and ($sieve_link_status eq 0)) {
+    $user_sieve_status = "$user: Bearmail sieve configuration is not active.\n";
+  }
+  # if bearmail sieve conf is active
+  if (($sieve_conf_status eq 1) and ($sieve_link_status eq 1)) {
+    $user_sieve_status = "$user: Bearmail sieve configuration is active.\n";
+  }
+  # troubles:
+  if (($sieve_conf_status eq 0) and ($sieve_link_status eq 1)) {
+    print "Error: $sieve_link is active for $user but there is no ".
+      "$sieve_conf\nYou should remove $sieve_link_status and restart $0\n";
+    exit 1;
+  }
+  if (($sieve_conf_status eq 1) and ($sieve_link_status eq 0)) {
+    print "Error: $sieve_conf exist but not $sieve_link\nYou may ".
+      "link $sieve_conf to $sieve_link\n";
+    exit 1;
+  }
+  if (($sieve_conf_status ne 0) and ($sieve_conf_status ne 1)) {
+    print "Error: $sieve_conf_status\n"; exit 1; }
+  if (($sieve_link_status ne 0) and ($sieve_link_status ne 1)) {
+    print "Error: $sieve_link_status\n"; exit 1; }
+
+}
+
+if ($status) {
+  &get_infos($status);
+
+  print "$user_sieve_status";
+}
+
+if ($add_user) {
+  &get_infos($add_user);
+
+  if ($user_sieve_status ne 
+      "$add_user: Bearmail sieve configuration is not active.\n") {
+    print "$user_sieve_status"; exit 1; }
+
+  # create sieve_conf
+  open(SIEVEF, "> $sieve_conf") or die "Can't edit $sieve_conf: $!";
+    print SIEVEF "## Generated by Bearmail ##
+require [\"fileinto\"];
+
+# rule:[AntiSpam]
+if allof (header :contains \"X-DSPAM-Result\" \"Spam\")
+{      
+       fileinto \"Spam\";
+       stop;
+}\n";
+  close SIEVEF;
+  chmod (0700,$sieve_conf) or die "Can't chmod $sieve_conf: $!\n";
+  chown ($bmuid,$bmgid, "$sieve_conf") or die "Can't chown $sieve_conf: $!";
+
+  # create sieve link
+  symlink ("$sieve_conf","$sieve_link") or die "Can't symlink $sieve_conf ".
+    "to $sieve_link: $!";
+}
+
+if ($del_user) {
+  &get_infos($del_user);
+
+  if ($user_sieve_status eq
+      "$del_user: Bearmail sieve configuration is not active.\n") {
+    print "$user_sieve_status"; exit 1; }
+
+  # remove sieve files
+  unlink($sieve_conf,$sieve_link) or die ("Erreur suppression \n");
+}
+
