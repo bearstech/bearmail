@@ -1,11 +1,28 @@
 #!/usr/bin/perl -w
 
+# Sieve on bearmail works like this
+# - bearmail user's homedir is the root spool directory of accounts
+#   - all files/directory of accounts are owned by bearmail
+# - accounts are set in the mailmap file
+# - accounts have a email like "name@domain" and so accounts homedir looks 
+#   like "root_spool_dir/domain/name"
+# - sieve configurations are set by accounts in there homedir
+#   - it needs "account_home_dir/sieve/bearmail.sieve" file where rules are set
+#     and a symlink file of it in "account_home_dir/.dovecot.sieve"
+#
+# this is a simple script that checks if an account exists in mailmap.
+# then it gets informations about this user and creates a sieve configuration
+# file for this account with its symlink
+#
+# This script can also check the curent status of the files or remove them
+
 use strict;
 use Getopt::Long;
 #use File::Path qw(make_path remove_tree);
 
-my $mailmap        = '/home/ben/mailmap';
-my $bmuser         = 'ben';
+my $mailmap        = '/home/ben/mailmap'; # mailmap file
+my $bmuser         = 'ben';               # bearmail user (to get the spool dir)
+# others needed values
 my $user; my $opt_help; my $status; my $add_user; my $del_user;
 my $sieve_conf; my $sieve_link;
 my $sieve_conf_status; my $sieve_link_status; my $user_sieve_status;
@@ -21,7 +38,7 @@ if ($arg > 2) {
 GetOptions('status|s=s'   => \$status,
            'add-user|a=s' => \$add_user,
            'del-user|d=s' => \$del_user,
-           'help|h:s'     => disp_help());
+           'help|h:s'     => \$opt_help);
 
 sub disp_help {
   print <<EOF;
@@ -36,6 +53,11 @@ Ex: $0 -a postmaster\@domain.com
 EOF
 }
 
+if ($opt_help) {
+  disp_help();
+  exit 0;
+}
+
 # only root or sudo can run this script
 unless ($> == 0 || $< == 0) { die "You must be root" }
 
@@ -43,26 +65,38 @@ unless ($> == 0 || $< == 0) { die "You must be root" }
 sub get_infos {
   ($user) = @_;
 
+#  # check user
+#  open(MAILMAP, "< $mailmap") || die "can't open $mailmap : $!";
+#    my @MAILMAP=<MAILMAP>;
+#  close MAILMAP;
+#  # search email account
+#  my @USER_ACCOUNT = grep /^$user:.*:local/, @MAILMAP;
+#
+#  # if user not found, die
+#  if (!$USER_ACCOUNT[0]) { die "$user: account not found in $mailmap\n"; }
+#
+#  # get info
+#  my $name_account; my $domain_account;
+#
+#  while (<@USER_ACCOUNT>) {
+#    if (m/([-a-zA-Z0-9_.]+)@([-a-zA-Z0-9_.]+):.*:local$/) {
+#      $name_account = $1; # get his name
+#      $domain_account = $2; # get his domain
+#    }
+#  }
+
   # check user
-  open(MAILMAP, "< $mailmap") || die "can't open $mailmap : $!";
-    my @MAILMAP=<MAILMAP>;
-  close MAILMAP;
-
-  # search email account
-  my @USER_ACCOUNT = grep /^$user:.*:local/, @MAILMAP;
-
-  # if user not found, die
-  if (!$USER_ACCOUNT[0]) { die "$user: account not found in $mailmap\n"; }
-
-  # get info
   my $name_account; my $domain_account;
+  open(MAILMAP, "< $mailmap") || die "can't open $mailmap : $!";
+    while ( my $ligne = <MAILMAP> ) { # dont set all mailmap into ram
+      if ($ligne =~ /^$user:.*:local$/) {
+        $ligne =~ m/^([-a-zA-Z0-9_.]+)@([-a-zA-Z0-9_.]+):.*:local$/;
+        $name_account = $1; # get its name
+        $domain_account = $2; } }# get its domain
+  close MAILMAP;
+  # if user not found, die
+  if (!$name_account or !$domain_account) { die "Error: $user not found.\n" }
 
-  while (<@USER_ACCOUNT>) {
-    if (m/([-a-zA-Z0-9_.]+)@([-a-zA-Z0-9_.]+):.*:local$/) {
-      $name_account = $1; # get his name
-      $domain_account = $2; # get his domain
-    }
-  }
   # get bearmail uid/gid/home
   my $bmname; my $bmpass; my $bmquota; 
   my $bmcomment; my $bmgcos; my $bmdir; my $bmshell; my $bmexpire;
@@ -91,7 +125,7 @@ sub get_infos {
   }
 
   # check sieve conf
-  if (-e $sieve_conf) { 
+  if (-e $sieve_conf) {
     if (! -f $sieve_conf) {
       print "$sieve_conf is not a regular file.\nYou should remove it and ".
        "restart $0\n"; exit 1 }
@@ -139,12 +173,10 @@ sub get_infos {
     print "Error: $sieve_conf_status\n"; exit 1; }
   if (($sieve_link_status ne 0) and ($sieve_link_status ne 1)) {
     print "Error: $sieve_link_status\n"; exit 1; }
-
 }
 
 if ($status) {
   &get_infos($status);
-
   print "$user_sieve_status";
 }
 
@@ -173,6 +205,8 @@ if allof (header :contains \"X-DSPAM-Result\" \"Spam\")
   # create sieve link
   symlink ("$sieve_conf","$sieve_link") or die "Can't symlink $sieve_conf ".
     "to $sieve_link: $!";
+  # say goodbye
+  print "$add_user: sieve configuration created\n";
 }
 
 if ($del_user) {
@@ -184,5 +218,8 @@ if ($del_user) {
 
   # remove sieve files
   unlink($sieve_conf,$sieve_link) or die ("Erreur suppression \n");
+
+  # say goodbye
+  print "$del_user: sieve configuration removed\n";
 }
 
