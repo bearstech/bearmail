@@ -28,11 +28,11 @@ my @mail = <STDIN>;
 
 # arguments for the script
 # search sender
-my @dspam_user = grep /From: /, @mail;
+my @dspam_user = grep /Return-Path: /, @mail;
 my $dspam_user = shift @dspam_user;
 if ($dspam_user) {
   chomp $dspam_user;
-  $dspam_user =~ m/^From:(.*)<(.*)>/i;
+  $dspam_user =~ m/^Return-Path:(.*)<(.*)>/i;
   $dspam_user = $2;
 }
 
