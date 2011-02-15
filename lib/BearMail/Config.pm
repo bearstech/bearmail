@@ -115,3 +115,5 @@ sub param {
 # 
 # Tunable for postmasters should implemented in something like BearMail::Settings
 # backed by a database.
+
+1;
