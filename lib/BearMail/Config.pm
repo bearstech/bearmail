@@ -35,10 +35,16 @@ match the documentation.
 
 =head1 METHODS
 
-=head2 new
+=head2 new (params...)
 
 The constructor C<new> creates and returns an empty C<BearMail::Config> object.
-You have to call its C<load> method next.
+You must call its C<load> method next or explictly define a few parameters with
+an hashref:
+
+    my $conf = BearMail::Config->new(
+        backend => 'file',
+        'template_path' => '/tmp'
+    );
 
 =head2 load $filename
 
@@ -47,6 +53,10 @@ zero (false) value.
 
 If C<load> succeeds, you can use the C<param> method to access the parameter
 values.
+
+C<load> only creates or updates value for the parsed keys: it might be called
+several times to overlay values already set via the constructor or via previous
+calls from C<load>.
 
 =head2 param $key
 
