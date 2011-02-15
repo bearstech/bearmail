@@ -229,9 +229,9 @@ sub _get_backend {
     my $cfg = shift;
 
     my $be_name = $cfg->{_}->{backend};
-    if ($be_name eq 'FlatFiles') {
+    if ($be_name eq 'flatfiles') {
         require BearMail::Backend::FlatFiles;
-        return  BearMail::Backend::FlatFiles->new($cfg->{"backend FlatFiles"});
+        return  BearMail::Backend::FlatFiles->new($cfg->{"flatfiles"});
     }
     carp "Unknown backend '$be_name' (missing BearMail::Backend::$be_name module ?)";
 }
