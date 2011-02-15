@@ -10,14 +10,33 @@ BearMail::Backend - Bearmail core class
 =head1 SYNOPSIS
 
     use BearMail::Backend;
+    use BearMail::Account;
     
     my $bb = BearMail::Backend->new();
-    $bb->login('root');
-    
-    my @domains = $bb->get_domains(search => '*bear*', range => [0, 9]);
-    my @account = $bb->get_account(search => '*@bearstech.com', range => [30, 39]);
 
-    ...
+    $bb->su('admin') || $bb->login('vcaron@bearstech.com', 'paaassw0rd');
+    printf "Using '%s' account credentials\n", $bb->user();
+
+    my $domain  = $bb->get_domain('bearstech.com');
+    my @domains = $bb->get_domains(filter => '*bear*', range => [0, 9]);
+
+    my $account = $bb->get_account
+    my @account = $bb->get_accounts(filter => '*@bearstech.com', range => [30, 39]);
+
+    my $account = new BearMail::Account(
+        address => 'test@bearstech.com',
+        target  => BearMail::Target->alias('vcaron@bearstech.com')
+    );
+    $bb->create_account($account);
+
+    $account->password('n3w_paaass');
+    $bb->update_account($account);
+ 
+    $bb->delete_account('test@bearstech.com');
+    $bb->delete_accounts(filter => 'vcaron@*');
+
+    # $bb->log()
+    # $bb->get_log(filter => , date_range => ?, limit => 100)
 
 
 =head1 DESCRIPTION
@@ -34,7 +53,7 @@ everything, trivially analyze, backup and fix things, etc.)
 For large scale and stable behaviour wrt. massive end users hitting the web
 interface, you might prefer the C<BearMail::Backend::SQL> interface.
 
-TODO: describe account, targets, autorization model.
+TODO: describe accounts, targets, autorization model.
 
 
 =head1 METHODS
@@ -72,6 +91,21 @@ to explicitly pass the backend, provide a C<BearMail::Backend> here.
 
 If the backend initialization failed for some reason, it will carp and
 this constructor will return C<undef>.
+
+Next step is to C<su> or C<login> to setup an autorization context.
+
+=head2 su
+
+Endorse some identity without authentication (root power !).
+
+=head2 login
+
+Endorse some identity with authentication check via the current
+backend.
+
+=head2 user
+
+Retrieve current endorsed identity.
 
 
 =head1 SUPPORT
