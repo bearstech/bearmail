@@ -6,6 +6,15 @@ package BearMail::Domain;
 
 BearMail::Domain - FIXME
 
+
+=head1 METHODS
+
+=head2 postmasters
+
+Returns a list of C<BearMail::Account>s which are postmasters for this
+domain.
+
+
 =head1 COPYRIGHT
 
 Copyright (C) 2010 Bearstech - http://bearstech.com/

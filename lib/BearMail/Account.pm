@@ -6,6 +6,14 @@ package BearMail::Account;
 
 BearMail::Account - FIXME
 
+
+=head1 METHODS
+
+=head2 role
+
+Returns 'admin', 'postmaster' or 'user'.
+
+
 =head1 COPYRIGHT
 
 Copyright (C) 2010 Bearstech - http://bearstech.com/
