@@ -11,7 +11,7 @@ BearMail::Backend - Bearmail core class
 
     use BearMail::Backend;
     use BearMail::Account;
-    
+
     my $bb = BearMail::Backend->new();
 
     $bb->su('admin') || $bb->login('vcaron@bearstech.com', 'paaassw0rd');
@@ -45,7 +45,7 @@ C<BearMail::Backend> is at the core of the Bearmail infrastructure. It connects
 to whatever 'backend' implements your email services and let you query and 
 configure it.
 
-For instance C<BearMail::Backend::Files> can configure a Postfix+Dovecot setup
+For instance C<BearMail::Backend::FlatFiles> can configure a Postfix+Dovecot setup
 with only the help of the filesystem. It works and scales very well up to
 a few thousands accounts, and is adminsys friendly (you can version control
 everything, trivially analyze, backup and fix things, etc.)
@@ -53,7 +53,51 @@ everything, trivially analyze, backup and fix things, etc.)
 For large scale and stable behaviour wrt. massive end users hitting the web
 interface, you might prefer the C<BearMail::Backend::SQL> interface.
 
-TODO: describe accounts, targets, autorization model.
+TODO: point to a POD describing how to setup a Postfix+Dovecot setup (depends
+on backend). Mention that the job is done via packaging in Debian.
+
+=head2 Basic model
+
+C<BearMail::Backend> is based on a simple model: it assumes that the whole
+configuration of your email platform is a list of C<BearMail::Account>.
+
+A C<BearMail::Account> in turn is a simple entry which ties a given email
+adress to a specific C<BearMail::Target>. The target describes how email
+received at the given address is handled : it can be stored in a mail
+spool, re-sent to a list of other email addresses, handled by a third
+party application (filter, vacation notifier), etc.
+
+A C<BearMail::Account> can also optionnally carray data such as authentication
+information (password).
+
+Note that although the C<BearMail::Domain> module exists, domains cannot
+be manipulated but only queried. You don't create a domain, you create a
+C<BearMail::Account> with a new domain.
+
+=head2 Security model
+
+The backend must endorse a given identity which is of C<BearMail::Account>
+type. Then every access to data is checked again this current identity
+(see C<su>, C<login> and C<user>).
+
+There are three level of autorization (roles) with specific capabilities:
+
+=item * I<Admin> let you query and modify any information. This is a special
+account whose identity is kept outside of regular accounts; for instance
+as of now its password is stored in the main configuration file and can
+only be modified by a sysadmin with proper server access. This is the only
+role which may create accounts within new domains.
+
+=item * I<Postmaster> let you query and modify whole domains (add, modify and
+remove accounts within existing domains). A postmaster has a postmaster@domain
+address or is an alias target of one or more postmaster@domain addresses. Eg.
+if postmaster@foo.net and postmaster@bar.org have both an alias target of
+chief@quux.com, then chief@quux.com is postmaster for the @foo.net and
+@bar.org domains.
+
+=item * I<User> is the lowest level. A user may query and modify (but not
+create or delete) its own account. Such a end user may thus modify her
+password, change her aliases, (un)configure an answering machine, etc.
 
 
 =head1 METHODS
@@ -66,7 +110,7 @@ content to select a type of backend and optionnally configure it.
 
     my $bb = BearMail::Backend->new(
         config  => BearMail::Config->new->load('mymail.cfg'),
-        backend => BearMail::Backend::Files->new
+        backend => BearMail::Backend::FlatFiles->new
     );
 
 Optionnal parameters are :
@@ -77,9 +121,6 @@ C<BearMail::Backend> will create a C<BearMail::Config> object with no specific
 parameters. If you want to provide a different configuration (eg. load the
 configuration from a different file than the one hardwired in
 C<BearMail::Config>), you may provide your own config object here.
-
-You may also pass an undef value; in this case you will have to explictly
-create other needed ressources for the backend.
 
 =item * backend
 
@@ -94,18 +135,49 @@ this constructor will return C<undef>.
 
 Next step is to C<su> or C<login> to setup an autorization context.
 
-=head2 su
+=head2 su $address
 
-Endorse some identity without authentication (root power !).
+Endorse some identity without authentication. The three levels of autorization
+are specified via $address as (see 'Security Model' below):
 
-=head2 login
+=item I<Admin>: use the 'admin' string
+=item I<Postmaster>: use an email adress whose LHS (left hand side) is postmaster@
+=item I<User>: use any email adress whose LHS is I<not> postmaster@
+
+Except for the 'admin' role, email addresses will be looked up to retrieve the
+corresponding C<BearMail::Account>. If the look up fails, C<su> fails and
+returns undef.
+
+It is I<not> possible to call C<su> multiple time to switch identities, it
+will fail and return undef (although any currently endorsed identity is
+preserved).
+
+Otherwise C<su> returns a C<BearMail::Account>.
+
+Authentications is I<not> checked. Use C<login> for this.
+
+
+=head2 login $address, $password
 
 Endorse some identity with authentication check via the current
-backend.
+backend. C<login> works exactly like C<su>, except that it will
+check authentication information.
+
+Thus for C<login> to succeed, the corresponding account must exist and
+the proper authentication verified. For the special 'admin' account,
+the I<master_password> from the global I<bearmail.cfg> configuration file
+is used.
+
+Currently only (plain) password authentication is supported (although the
+backend might choose to store it hashed, for instance MD5 hashing is the
+default for the 'files' backend).
 
 =head2 user
 
-Retrieve current endorsed identity.
+Retrieve current endorsed identity as a C<BearMail::Account> object.
+
+This method returns undef if no C<su> or C<login> call where issued or
+succeeded.
 
 
 =head1 SUPPORT
@@ -139,5 +211,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 =cut
 
+
+use Carp;
+
+
+sub new {
+    my $class = shift;
+    my (%args) = @_;
+
+    my $cfg = $args{config}  || BearMail::Config->new->load();
+    my $be  = $args{backend} || _get_backend($cfg);
+
+    bless { cfg => $cfg, be => $be }, $class;
+}
+
+sub _get_backend {
+    my $cfg = shift;
+
+    my $be_name = $cfg->{_}->{backend};
+    if ($be_name eq 'FlatFiles') {
+        require BearMail::Backend::FlatFiles;
+        return  BearMail::Backend::FlatFiles->new($cfg->{"backend FlatFiles"});
+    }
+    carp "Unknown backend '$be_name' (missing BearMail::Backend::$be_name module ?)";
+}
 
 1;
