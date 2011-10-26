@@ -28,7 +28,9 @@ if [ "$1" = "configure" ]; then
     BEARMAIL_GID=`id -g bearmail`
 
     # set global conf file for sieve
-    [ -d "/etc/bearmail/dovecot/sieve" ] || mkdir -p /etc/bearmail/dovecot/sieve
+    if [ ! -d "/etc/bearmail/dovecot/sieve" ] ; then
+      mkdir -p /etc/bearmail/dovecot/sieve
+    fi
     touch /etc/bearmail/dovecot/sieve/global.conf
     chown -R bearmail:bearmail /etc/bearmail/dovecot/sieve
 
@@ -40,13 +42,7 @@ if [ "$1" = "configure" ]; then
     done
 
     # Create mailmap and Setting default domain
-    #echo "Warning: setting $HOSTNAME to virtual domains in bearmail. \
-#Please RTFM."
-    # generate random passwd foor root
- #   MY_PASSWD=`perl -e '@c=("A".."Z","a".."z",0..9);\
- #                       print join("",@c[map{rand @c}(1..8)])'`
- #   MY_PLAIN_MD5=`echo -n "$MY_PASSWD" | md5sum | sed -e "s/  -$//"`
-
+    
     cat > /etc/bearmail/mailmap << EOF
 # /etc/bearmail/mailmap - Sample mail account configuration
 #
@@ -70,16 +66,8 @@ if [ "$1" = "configure" ]; then
 
 EOF
 
-    #  echo "Adding $HOSTNAME domain .. done"
-#    echo "Your password for root@$HOSTNAME"
-#    echo "    will be : $MY_PASSWD"
-
-#    echo "$HOSTNAME" > /etc/mailname
     echo "$HOSTNAME REJECT You are not me!" >> /etc/bearmail/postfix/helo_access
   fi
 fi
-
-# a mettre dans le switch off : faire des postmap de client_access helo_access etc
-
 
 #DEBHELPER# 
