@@ -118,9 +118,6 @@ switch_on() {
           $PDIR/ $BMDIR/postfix/
     mv $PDIR $PDIR.bearmail-orig
     ln -s $BMDIR/postfix $PDIR
-    for bearmap in $(ls $PDIR/{virtual_*,*_access} | grep -v ".db"); do
-      postmap $bearmap
-    done
   fi
 
   # update of bearmail dovecot configuration
@@ -134,6 +131,12 @@ switch_on() {
   # update bearmail
   ln -s $BMDIR/mailmap /etc/mailmap
   bearmail-update
+  for bearmap in $(ls $PDIR/virtual_* | grep -v ".db"); do
+    postmap $bearmap
+  done
+  for bearmap in $(ls $PDIR/*_access | grep -v ".db"); do
+      postmap $bearmap
+  done
 
   # restart services
   $POSTFIX_INIT start

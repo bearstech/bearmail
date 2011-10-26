@@ -33,7 +33,8 @@ GetOptions(
 
 usage() if $help;
 
-my $b = Backend::Files->new( debug => $debug, mailmap => $mailmap ); # Parse 'mailmap'
+my $mailmap = "/etc/bearmail/mailmap";
+my $b = BearMail::Backend::Files->new( debug => $debug, mailmap => $mailmap ); # Parse 'mailmap'
 $b->apply();                               # Generate Postfix+Dovecot conf files and reload them
 
 
