@@ -21,9 +21,8 @@
 # on a bearmail configuration.
 
 NAME=${0##*/}
-BMUD="/var/spool/bearmail"
 BMMAILMAP="/etc/bearmail/mailmap"
-BMDIR="/var/spool/bearmail"
+BMUHDIR="/var/spool/bearmail"
 CRON="/etc/cron.d/bearmail-sieve"
 BMUSER="bearmail"
 
@@ -103,8 +102,8 @@ fi
 # define sieve files
 USER_DOMAIN=`echo $user_mail | sed -e "s/.*@//"`
 USER_NAME=`echo $user_mail | sed -e "s/@.*//"`
-SIEVE_FILE="$BMUD/$USER_DOMAIN/$USER_NAME/sieve/dovecot.sieve"
-MY_BMSF="$BMDIR/$USER_DOMAIN/$USER_NAME/.dovecot.sieve"
+SIEVE_FILE="$BMUHDIR/$USER_DOMAIN/$USER_NAME/sieve/bearmail.sieve"
+MY_BMSF="$BMUHDIR/$USER_DOMAIN/$USER_NAME/.dovecot.sieve"
 
 # status function
 status_function() {
@@ -121,11 +120,6 @@ status_function() {
       echo "You should remove this file and create rules with bearmail scripts."
       exit 1
     fi
-    if [ ! "$(grep "^## bearmail sieve configuration$" $SIEVE_FILE)" ] ; then
-      echo "Error: $SIEVE_FILE is not configured by bearmail."
-      echo "You should remove this file and create rules with bearmail scripts."
-      exit 1
-    fi
   fi
 
   if [ "$SIEVEL" -eq "1" ] ; then
@@ -135,7 +129,7 @@ status_function() {
       exit 1
     fi    
     if [ ! -L "$MY_BMSF" ] ; then
-      echo "Error: $MY_BMSF is not configured by bearmail."
+      echo "Error: $MY_BMSF is not correctrly configured."
       echo "You should remove $SIEVE_FILE and $MY_BMSF then create rules with \
 bearmail scripts."
       exit 1
@@ -152,12 +146,20 @@ bearmail scripts."
 # add
 if [ "$add_rules" = "yes" ] ; then
   if [ "$(status_function | grep "is not active")" ] ; then
-    ROOTSD="$BMUD/$USER_DOMAIN/$USER_NAME/sieve"
-    [ -d "$ROOTSD" ] || -m 770 -o $BMUSER -g $BMUSER -d $ROOTSD
+    ROOTSD="$BMUHDIR/$USER_DOMAIN/$USER_NAME/sieve"
+    [ -d "$ROOTSD" ] || install -m 770 -o $BMUSER -g $BMUSER -d $ROOTSD
     echo "creating $SIEVE_FILE"
-    echo -e "## bearmail sieve configuration\n" > $SIEVE_FILE
-    mkdir -p $BMDIR/$USER_DOMAIN/$USER_NAME
-    chown $BMUSER: $BMDIR/$USER_DOMAIN/$USER_NAME
+    cat > $SIEVE_FILE << EOF
+require ["fileinto"];
+
+# rule:[AntiSpam]
+if allof (header :contains "X-DSPAM-Result" "Spam")
+{
+	fileinto "Spam";
+	stop;
+}
+EOF
+    chown $BMUSER: $SIEVE_FILE
     echo "linking $SIEVE_FILE to $MY_BMSF"
     ln -s $SIEVE_FILE $MY_BMSF
   else
