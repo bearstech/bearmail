@@ -48,11 +48,11 @@ smtpd_sasl_path             = private/auth
 # SASL - EOC
 
 # Virtual domains, mailboxes, aliases and transport
-alias_maps              = hash:/etc/aliases hash:/etc/postfix/bearmail-virtual_pipes
+alias_maps              = hash:/etc/aliases hash:/etc/postfix/virtual_pipes
 alias_database          = hash:/etc/aliases
-virtual_mailbox_domains = hash:/etc/postfix/bearmail-virtual_domains
-virtual_mailbox_maps    = hash:/etc/postfix/bearmail-virtual_mailboxes
-virtual_alias_maps      = hash:/etc/postfix/bearmail-virtual_aliases
+virtual_mailbox_domains = hash:/etc/postfix/virtual_domains
+virtual_mailbox_maps    = hash:/etc/postfix/virtual_mailboxes
+virtual_alias_maps      = hash:/etc/postfix/virtual_aliases
 virtual_mailbox_base    = /var/spool/bearmail
 virtual_minimum_uid     = bearmail_uid
 virtual_uid_maps        = static:bearmail_uid
@@ -69,7 +69,7 @@ smtpd_helo_required = yes
 smtpd_helo_restrictions =
   permit_sasl_authenticated
   permit_mynetworks
-  check_helo_access hash:/etc/postfix/bearmail-helo_access
+  check_helo_access hash:/etc/postfix/helo_access
   reject_non_fqdn_hostname
   reject_unknown_hostname
   permit
@@ -86,7 +86,7 @@ smtpd_data_restrictions = reject_unauth_pipelining
 # DNSRBL
 smtpd_client_restrictions =
   permit_sasl_authenticated
-  check_client_access hash:/etc/postfix/bearmail-client_access
+  check_client_access hash:/etc/postfix/client_access
 #  reject_rbl_client my.rbl.server.tld
 # DNSRBL - EOC
 
