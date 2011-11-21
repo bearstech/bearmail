@@ -20,10 +20,7 @@ set -e
 # for details, see /usr/doc/packaging-manual/
 
 purge_section() {
-	deluser clamav bearmail
-        rm -rf $BMCSD
-        rm -rf $BMCRD
-        invoke-rc.d clamav-daemon stop
+	rm -rf /var/spool/postfix/var/run/clamav
 }
 
 

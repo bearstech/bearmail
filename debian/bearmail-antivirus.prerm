@@ -1,7 +1,5 @@
 #!/bin/sh -e
 
-BMPAL="/etc/aliases"
-BMPMAS="/etc/bearmail/postfix/master.cf"
 BMPMAI="/etc/bearmail/postfix/main.cf"
 
 set -e
@@ -13,27 +11,7 @@ remove_section() {
         fi
         
         # configure master.cf :
-        if [ "$(grep "^## bearmail-antivirus - EOC" $BMPMAS)" ]; then
-          sed "/## bearmail-antivirus$/,\
-               /## bearmail-antivirus - EOC/d" \
-              -i $BMPMAS
-          sed -e '\!^## bearmail-antispam$!i\
-\
-## bearmail-antivirus' -i $BMPMAS
-          sed '/./,/^$/!d' -i $BMPMAS
-        fi
-        
-        # configure main.cf
-        sed "/# bearmail-antivirus$/,\
-             /# bearmail-antivirus - EOC/d" \
-            -i $BMPMAI
-        sed -e '\!^# bearmail-antispam$!i\
-\
-# bearmail-antivirus' -i $BMPMAI
-        sed '/./,/^$/!d' -i $BMPMAI
-
-        # configure aliases
-        sed "/bearmail-virus_send/d" -i $BMPAL
+        sed '/unix:\/var\/run\/clamav\/clamav-milter.ctl/d' -i $BMPMAI
 
         # restart bearmail if needed
         if [ "$BEARMAIL_ON" -eq "1" ] ; then
