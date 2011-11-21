@@ -1,3 +1,17 @@
+bearmail (0.3.4) unstable; urgency=low
+
+  * Fixed bugs in bearmail_sieve scripts & make them compatibles with roundcube
+  * Remove bashism in bearmail.postinst
+  * Gave up with the 'bearmail-' prefix for config files, again.
+  * review bearmail-switch
+  * configure bearmail-switch for bearmail-antivirus
+  * review bearmail-switch script
+  * Force mailmap var in bearmail-update
+  * bearmail-antispam and bearmail-web removed
+  * bearmail-antivirus now use clamav-milter
+
+ -- Benjamin LINET <blinet@bearstech.com>  Sat, 19 Nov 2011 23:00:58 +0200
+
 bearmail (0.3.3) unstable; urgency=low
 
   * Fixed bug #17 where non-hosted domains were improperly looped locally
