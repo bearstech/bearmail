@@ -5,7 +5,7 @@ default:
 	@echo "  make deb"
 
 
-install: install-bearmail install-antispam install-antivirus install-web
+install: install-bearmail install-antivirus
 install-bearmail:
 	install -D -m 755 bin/bearmail-update                               $(DESTDIR)/usr/sbin/
 	install -D -m 755 bin/bearmail-switch                               $(DESTDIR)/usr/sbin/
@@ -18,26 +18,10 @@ install-bearmail:
 	install -D -m 644 doc/man/bearmail-switch.8                         $(DESTDIR)/usr/share/man/man8/
 	install -D -m 644 doc/man/bearmail-sieve_*                          $(DESTDIR)/usr/share/man/man8/
 install-antivirus:
-	install -D -m 755 bin/bearmail-virus*                               $(DESTDIR)/usr/lib/bearmail/
-	install -D -m 644 conf/clamsmtpd.conf                               $(DESTDIR)/etc/bearmail/clamsmtp/clamsmtpd.conf
-install-antispam:
-	install -D -m 755 bin/bearmail-dspam_retrain*                       $(DESTDIR)/usr/lib/bearmail/
-	install -D -m 755 bin/bearmail-dspam_cleaner                        $(DESTDIR)/usr/sbin/
-	install -D -m 644 conf/dspam/*.conf                                 $(DESTDIR)/etc/bearmail/dspam/
-	install -D -m 644 conf/dspam/*.prefs                                $(DESTDIR)/etc/bearmail/dspam/
-	install -D -m 644 conf/dspam_incoming                               $(DESTDIR)/etc/bearmail/postfix/
-	install -D -m 644 doc/man/bearmail-dspam_cleaner.8                  $(DESTDIR)/usr/share/man/man8/
-install-web:
-	install -D -m 644 doc/mail-clients/fr/img/*                         $(DESTDIR)/usr/share/bearmail/htdoc/fr/img/
-	install -D -m 644 doc/mail-clients/fr/*html                         $(DESTDIR)/usr/share/bearmail/htdoc/fr/
-	install -D -m 644 public/*                                          $(DESTDIR)/usr/share/bearmail/public/
-	install -D -m 644 template/*                                        $(DESTDIR)/usr/share/bearmail/templates/
-	install -D -m 644 lib/BearMail/Web.pm                               $(DESTDIR)/usr/share/perl5/BearMail/
-	install -D -m 644 lib/BearMail/Web/Address/*                        $(DESTDIR)/usr/share/perl5/BearMail/Web/Address/
-	install -D -m 644 lib/BearMail/Web/Domain/*                         $(DESTDIR)/usr/share/perl5/BearMail/Web/Domain/
-	install -D -m 644 lib/BearMail/Web/*.pm                             $(DESTDIR)/usr/share/perl5/BearMail/Web/
-	install -D -m 755 bin/bearmail.cgi                                  $(DESTDIR)/usr/share/bearmail/
-	install -D -m 644 conf/bearmail.conf                                $(DESTDIR)/etc/bearmail/
+	install -D -m 644 conf/clamav/default                               $(DESTDIR)/etc/bearmail/clamav/default
+	install -D -m 644 conf/clamav/freshclam.conf                        $(DESTDIR)/etc/bearmail/clamav/freshclam.conf
+	install -D -m 644 conf/clamav/clamd.conf                            $(DESTDIR)/etc/bearmail/clamav/clamd.conf
+	install -D -m 644 conf/clamav/clamav-milter.conf                    $(DESTDIR)/etc/bearmail/clamav/clamav-milter.conf
 
 clean:
 	rm -f *-stamp
@@ -45,8 +29,6 @@ clean:
 	rm -f debian/files
 	rm -fr debian/bearmail
 	rm -fr debian/bearmail-antivirus
-	rm -fr debian/bearmail-antispam
-	rm -fr debian/bearmail-web
 
 deb:
 	dpkg-buildpackage -rfakeroot -uc -us -A
