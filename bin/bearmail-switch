@@ -31,11 +31,10 @@ POSTFIX_INIT="/etc/init.d/postfix"
 DDIR="/etc/dovecot"
 DOVECOT_INIT="/etc/init.d/dovecot"
 
-CDIR="/etc"
-CLAMSMTP_INIT="/etc/init.d/clamsmtp"
-
-CVDIR="/etc/clamav/"
-CVSOCK="/var/run/clamav/clamd.ctl"
+CVDIR="/etc/clamav"
+CVDIR_INIT_D="/etc/init.d/clamav-daemon"
+CVDIR_INIT_F="/etc/init.d/clamav-freshclam"
+CVDIR_INIT_M="/etc/init.d/clamav-milter"
 
 DPDIR="/etc/dspam"
 DP_INIT="/etc/init.d/dspam"
@@ -56,77 +55,52 @@ suspend_status() {
 }
 
 switch_on() {
-  is_on && { echo "Bearmail is already on."; exit 0; }
+  # stop if bearmail is already on
+  is_on && { echo "Bearmail is already on."; exit 1; }
 
-  # check if bearmail-antivirus is there and correctly configured
-  if [ "$(grep "^## bearmail-antivirus - EOC" $BMDIR/postfix/master.cf)" ] ; then
-    if [ ! "$(grep "^LocalSocket $CVSOCK" $CVDIR/clamd.conf)" ] ; then
-      echo "Error: clamav is not configured to use socket at $CVSOCK"
-      suspend_mailserver
-      echo "Bearmail could not start."
-      exit 1
-    else
-      # update of bearmail clamsmtpd configuration
-      if [ ! -L "$CDIR/clamsmtpd.conf" ]; then
-        mv $CDIR/clamsmtpd.conf $CDIR/clamsmtpd.conf.bearmail-orig
-        ln -s $BMDIR/clamsmtp/clamsmtpd.conf $CDIR/clamsmtpd.conf
-        $CLAMSMTP_INIT stop
-	$CLAMSMTP_INIT start
+  # check if bearmail-antivirus is installed/configured
+  if [ "$(grep "unix:/var/run/clamav/clamav-milter.ctl" \
+               $BMDIR/postfix/main.cf)" ] ; then
+    if [ -L "$CVDIR" ]; then echo "Error: $CVDIR is a symlink"; exit 1; fi
+    # stop clamav services
+    $CVDIR_INIT_D stop
+    $CVDIR_INIT_F stop
+    $CVDIR_INIT_M stop
+    # make a symlink with beamrail conf
+    mv $CVDIR $CVDIR.bearmail-orig
+    ln -s $BMDIR/clamav $CVDIR
+    # update /etc/defaul/clamav-milter (debian)
+    if [ -f "/etc/default/clamav-milter" ]; then
+      if [ -L "/etc/default/clamav-milter" ]; then
+        echo "Error: /etc/default/clamav-milter is a symlink"; exit 1
       fi
+      mv /etc/default/clamav-milter /etc/default/clamav-milter.bearmail-orig
+      ln -s $BMDIR/clamav/default /etc/default/clamav-milter
     fi
+    # restart clamav services
+    $CVDIR_INIT_D start
+    $CVDIR_INIT_F start
+    $CVDIR_INIT_M start
   fi
 
-  # check if dspam and postgrey are correctly configured
-  if [ "$(grep "^## bearmail-antispam - EOC" $BMDIR/postfix/master.cf)" ] ; then
-    if [ ! "$(grep "^PO" /etc/default/postgrey |grep "127.0.0.1:60000")" ] ; then
-      echo "Error: postgrey is not configured for bearmail."
-      suspend_mailserver
-      echo "Bearmail could not start."
-      exit 1
-    fi
-    # check if dspam is configured to use socket
-    if [ ! "$(grep "^DeliveryPort.*10027" $BMDIR/dspam/dspam.conf)" ] || \
-       [ ! "$(grep "^Se.*/var/run/dspam/dspam.sock" $BMDIR/dspam/dspam.conf)" ];\
-       then
-      echo "Error: dspam is not configured for bearmail."
-      suspend_mailserver
-      echo "Bearmail could not start."
-      exit 1
-    else
-      # update dspam/postgrey configuration
-      if [ ! -L "$DPDIR" ]; then
-        rsync -au --delete --exclude="dspam.conf" --exclude="default.prefs" \
-              $DPDIR/ $BMDIR/dspam/
-        mv $DPDIR $DPDIR.bearmail-orig
-        ln -s $BMDIR/dspam $DPDIR
-        $DP_INIT stop
-	$DP_INIT start
-        $PG_INIT stop
-	$PG_INIT start
-      fi
-    fi
-  fi
-
-  # Stop services
+  # Stop postfix service
   $POSTFIX_INIT stop
-  $DOVECOT_INIT stop
- 
-  # update of bearmail postfix configuration
-  if [ ! -L "$PDIR" ] ; then
-    rsync -au --delete --exclude="virtual_*" --exclude="*_access" \
-          --exclude="main.cf" --exclude="master.cf" \
-          $PDIR/ $BMDIR/postfix/
-    mv $PDIR $PDIR.bearmail-orig
-    ln -s $BMDIR/postfix $PDIR
-  fi
+  # update bearmail postfix configuration
+  if [ -L "$PDIR" ] ; then echo "Error: $PDIR is a symlink"; exit 1; fi
+  rsync -au --delete --exclude="virtual_*" --exclude="*_access" \
+        --exclude="main.cf" --exclude="master.cf" \
+        $PDIR/ $BMDIR/postfix/
+  mv $PDIR $PDIR.bearmail-orig
+  ln -s $BMDIR/postfix $PDIR
 
+  # stop dovecot service
+  $DOVECOT_INIT stop
   # update of bearmail dovecot configuration
-  if [ ! -L "$DDIR" ] ; then
-    rsync -au --delete --exclude="sieve" --exclude="dovecot.conf" \
-          --exclude="passwd" $DDIR/ $BMDIR/dovecot/
-    mv $DDIR $DDIR.bearmail-orig
-    ln -s $BMDIR/dovecot $DDIR
-  fi
+  if [ -L "$DDIR" ] ; then echo "Error: $DDIR is a symlink"; exit 1; fi
+  rsync -au --delete --exclude="sieve" --exclude="dovecot.conf" \
+        --exclude="passwd" $DDIR/ $BMDIR/dovecot/
+  mv $DDIR $DDIR.bearmail-orig
+  ln -s $BMDIR/dovecot $DDIR
 
   # update bearmail
   ln -s $BMDIR/mailmap /etc/mailmap
@@ -138,46 +112,58 @@ switch_on() {
       postmap $bearmap
   done
 
-  # restart services
+  # restart postfix/dovecot services
   $POSTFIX_INIT start
   $DOVECOT_INIT start
   echo "Bearmail is now On."
 }
 
 switch_off() {
+  # stop postfix/dovecot services
+  $POSTFIX_INIT stop
+  $DOVECOT_INIT stop
+
   # update of postfix configuration
-  if [ -d "$PDIR.bearmail-orig" ] ; then
-    rsync -au --delete --exclude="virtual_*" --exclude="*_access" \
-          --exclude="main.cf" --exclude="master.cf" \
-          $BMDIR/postfix/ $PDIR.bearmail-orig/
-    rm $PDIR
-    mv $PDIR.bearmail-orig $PDIR
-    suspend_status $POSTFIX_INIT
+  if [ ! -d "$PDIR.bearmail-orig" ] ; then
+    echo "Error: $PDIR.bearmail-orig does not exist"
+    exit 1
   fi
+  # Stop postfix service
+  rsync -au --delete --exclude="virtual_*" --exclude="*_access" \
+        --exclude="main.cf" --exclude="master.cf" \
+        $BMDIR/postfix/ $PDIR.bearmail-orig/
+  rm $PDIR
+  mv $PDIR.bearmail-orig $PDIR
 
   # update of dovecot configuration
-  if [ -d "$DDIR.bearmail-orig" ]; then
-    rsync -au --delete --exclude="sieve" --exclude="dovecot.conf" \
-          --exclude="passwd" $BMDIR/dovecot/ $DDIR.bearmail-orig/
-    rm $DDIR
-    mv $DDIR.bearmail-orig $DDIR
-    suspend_status $DOVECOT_INIT
+  if [ ! -d "$DDIR.bearmail-orig" ]; then
+    echo "Error: $DDIR.bearmail-orig does not exist"
+    exit 1
   fi
+  rsync -au --delete --exclude="sieve" --exclude="dovecot.conf" \
+        --exclude="passwd" $BMDIR/dovecot/ $DDIR.bearmail-orig/
+  rm $DDIR
+  mv $DDIR.bearmail-orig $DDIR
 
-  # update of bearmail clamsmtpd configuration
-  if [ -f "$CDIR/clamsmtpd.conf.bearmail-orig" ] ; then
-    rm $CDIR/clamsmtpd.conf
-    mv $CDIR/clamsmtpd.conf.bearmail-orig $CDIR/clamsmtpd.conf
-    suspend_status $CLAMSMTP_INIT
-  fi
-
-  if [ -d "$DPDIR.bearmail-orig" ] ; then
-    rsync -au --delete --exclude="dspam.conf" --exclude="default.prefs" \
-          $BMDIR/dspam/ $DPDIR.bearmail-orig/
-    rm $DPDIR
-    mv $DPDIR.bearmail-orig $DPDIR
-    suspend_status $DP_INIT
-    suspend_status $PG_INIT
+  # update of bearmail clamav configuration if installed
+  if [ "$(grep "unix:/var/run/clamav/clamav-milter.ctl" \
+               $BMDIR/postfix/main.cf)" ] ; then
+    if [ ! -d "$CVDIR.bearmail-orig" ] ; then
+      echo "Error: $CVDIR.bearmail-orig does not exist"
+      exit 1
+    fi
+    # stop clamav services
+    $CVDIR_INIT_D stop
+    $CVDIR_INIT_F stop
+    $CVDIR_INIT_M stop
+    # update /etc/defaul/clamav-milter (debian)
+    if [ -L "/etc/default/clamav-milter" ]; then
+      rm /etc/default/clamav-milter
+      mv /etc/default/clamav-milter.bearmail-orig /etc/default/clamav-milter
+    fi
+    rm $CVDIR
+    mv $CVDIR.bearmail-orig $CVDIR
+    CLAMAV_SYS="1"
   fi
 
   # update bearmail status
@@ -187,7 +173,14 @@ switch_off() {
   if [ -n "$SUSPEND" ] ; then
     echo "Mailsystem is now desactivate."
   else
-    echo "Bearmail is Off."
+    $POSTFIX_INIT start
+    $DOVECOT_INIT start
+    if [ "$CLAMAV_SYS" ]; then
+      $CVDIR_INIT_D start
+      $CVDIR_INIT_F start
+      $CVDIR_INIT_M start
+    fi
+    echo "Bearmail is Off and old mail configuration is up."
   fi
 }
 
