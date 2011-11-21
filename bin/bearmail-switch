@@ -88,7 +88,7 @@ switch_on() {
   # update bearmail postfix configuration
   if [ -L "$PDIR" ] ; then echo "Error: $PDIR is a symlink"; exit 1; fi
   rsync -au --delete --exclude="virtual_*" --exclude="*_access" \
-        --exclude="main.cf" --exclude="master.cf" \
+        --exclude="main.cf" --exclude="master.cf"  --exclude=".svn" \
         $PDIR/ $BMDIR/postfix/
   mv $PDIR $PDIR.bearmail-orig
   ln -s $BMDIR/postfix $PDIR
@@ -97,8 +97,8 @@ switch_on() {
   $DOVECOT_INIT stop
   # update of bearmail dovecot configuration
   if [ -L "$DDIR" ] ; then echo "Error: $DDIR is a symlink"; exit 1; fi
-  rsync -au --delete --exclude="sieve" --exclude="dovecot.conf" \
-        --exclude="passwd" $DDIR/ $BMDIR/dovecot/
+  rsync -au --delete --exclude="sieve" --exclude="dovecot.conf"  \
+         --exclude=".svn" --exclude="passwd" $DDIR/ $BMDIR/dovecot/
   mv $DDIR $DDIR.bearmail-orig
   ln -s $BMDIR/dovecot $DDIR
 
@@ -130,7 +130,7 @@ switch_off() {
   fi
   # Stop postfix service
   rsync -au --delete --exclude="virtual_*" --exclude="*_access" \
-        --exclude="main.cf" --exclude="master.cf" \
+        --exclude="main.cf" --exclude="master.cf"  --exclude=".svn" \
         $BMDIR/postfix/ $PDIR.bearmail-orig/
   rm $PDIR
   mv $PDIR.bearmail-orig $PDIR
@@ -141,7 +141,8 @@ switch_off() {
     exit 1
   fi
   rsync -au --delete --exclude="sieve" --exclude="dovecot.conf" \
-        --exclude="passwd" $BMDIR/dovecot/ $DDIR.bearmail-orig/
+        --exclude="passwd"  --exclude=".svn" \
+        $BMDIR/dovecot/ $DDIR.bearmail-orig/
   rm $DDIR
   mv $DDIR.bearmail-orig $DDIR
 
