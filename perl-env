@@ -1,0 +1,13 @@
+# Usage :
+#
+#   $ sudo apt-get install liblocal-lib-perl cpanminus  (if needed)
+#   $ source perl-env
+#   $ cpanm Cool::CPAN::Module  (will install in your local env)
+
+base="$PWD"
+name="$(basename $base)"
+
+case "$PERL5LIB" in
+  *"$base"*) echo "Environment already active" >&2;;
+  *) eval $(perl -Mlocal::lib="$base") && export PS1="($name) $PS1";;
+esac
