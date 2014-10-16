@@ -289,7 +289,7 @@ sub _check_field {
 #
 sub _check_address {
   my ($self, $address) = @_;
-  return $address =~ /^[A-Za-z0-9\-\._]+@[A-Za-z0-9\-\.]+$/;
+  return $address =~ /^[A-Za-z0-9\-\._+]+@[A-Za-z0-9\-\.]+$/;
 }
 
 # Conf generators will have a prettier output if they sord records
